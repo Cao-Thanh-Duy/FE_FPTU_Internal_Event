@@ -1,12 +1,46 @@
-import React from "react"
+import React, { useEffect } from "react"
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import LoginPage from "./pages/LoginPage";
+import HomePage from "./pages/HomePage";
+import AdminDashboard from "./pages/AdminDashBoard";
+import ProtectedRoute from "./components/ProtectedRoute";
+import { setupAxiosInterceptors } from './utils/auth';
 
 function App() {
+  useEffect(() => {
+    setupAxiosInterceptors();
+  }, []);
   
   return (
-    <>
-      <LoginPage/>
-    </>
+    <Router>
+      <ToastContainer 
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
+      />
+      <Routes>
+        <Route path="/" element={<HomePage />} />
+        <Route path="/login" element={<LoginPage />} />
+        
+        <Route 
+          path="/admin/dashboard" 
+          element={
+            <ProtectedRoute allowedRoles={['Admin']}>
+              <AdminDashboard />
+            </ProtectedRoute>
+          } 
+        />
+      </Routes>
+    </Router>
   )
 }
 

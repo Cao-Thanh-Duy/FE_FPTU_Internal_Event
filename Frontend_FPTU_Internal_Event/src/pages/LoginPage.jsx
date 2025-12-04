@@ -1,29 +1,117 @@
-
 import { FcGoogle } from 'react-icons/fc'; 
+import { SiEventstore } from "react-icons/si";
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
+import { toast } from 'react-toastify';
 import "../assets/css/LoginPage.css";
 import fptLogo from '../assets/images/Logo_FPT.svg'; 
 
 
 const LoginPage = () => {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState(''); 
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    setError('');
+    setLoading(true);
+
+    try {
+      const response = await axios.post('https://localhost:7047/api/Auth/login', {
+        email: email,
+        password: password
+      });
+
+      // Xử lý khi đăng nhập thành công
+      console.log('Login successful:', response.data);
+      
+      // Lưu thông tin user vào localStorage
+      localStorage.setItem('token', response.data.token);
+      localStorage.setItem('userId', response.data.userId);
+      localStorage.setItem('userName', response.data.userName);
+      localStorage.setItem('email', response.data.email);
+      localStorage.setItem('roleName', response.data.roleName);
+      localStorage.setItem('expiresAt', response.data.expiresAt);
+      
+      // Cấu hình axios để tự động gửi token trong các request tiếp theo
+      axios.defaults.headers.common['Authorization'] = `Bearer ${response.data.token}`;
+      
+      // Hiển thị thông báo thành công
+      toast.success(`Welcome ${response.data.userName}! Log in successfully.`, {
+        position: "top-right",
+        autoClose: 2000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
+      
+      // Chuyển hướng đến trang chính sau 2 giây
+      setTimeout(() => {
+        navigate('/');
+      }, 2000);
+      
+    } catch (err) {
+      const errorMessage = err.response?.data?.message || 'Login failed. Please check your email and password.';
+      setError(errorMessage);
+      
+      // Hiển thị thông báo lỗi
+      toast.error(errorMessage, {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
+      
+      console.error('Login error:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="container">
       <div className="login-box">
    
         
         <div className="left-col">
-          <div className="header">
-            <img 
+          <div className="header-login"> 
+            <img
+             
               src={fptLogo} 
               alt="FPT Logo" 
               className="logo" 
-            />
-            <h2>Internal Event</h2>
+            /> 
+            <h2> Internal Event</h2>
           </div>
 
-          <form>
-            <input type="text" placeholder="Email (FPTU)" className="input-field" />
-            <input type="password" placeholder="Password" className="input-field" />
-            <button className="btn-orange">Log in</button>
+          <form onSubmit={handleLogin}>
+            <input 
+              type="email" 
+              placeholder="Email" 
+              className="input-field" 
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+            <input 
+              type="password" 
+              placeholder="Password" 
+              className="input-field" 
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+            {error && <p style={{ color: 'red', fontSize: '14px' }}>{error}</p>}
+            <button type="submit" className="btn-orange" disabled={loading}>
+              {loading ? 'Signing in...' : 'Log in'}
+            </button>
           </form>
 
           <a href="#" className="link">Lost password?</a>
@@ -33,8 +121,10 @@ const LoginPage = () => {
         <div className="divider"></div>
 
     
-        <div className="right-col">
+        <div className="right-col" >
 
+        
+    
         <div className="right-title">
              <p>FPTU Internal Event Registration & Ticketing System</p>  
        </div>
@@ -44,7 +134,7 @@ const LoginPage = () => {
         
               <FcGoogle size={24} style={{ marginRight: '10px' }} />
               
-              <span>@fpt.edu.vn (Internal FPTU Only)</span>
+              <span>(Internal FPTU Only)</span>
             </button>
         </div>
 

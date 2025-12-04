@@ -1,0 +1,156 @@
+
+
+
+
+.header {
+  background-color: #ffffff;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); /* Đổ bóng nhẹ */
+  position: sticky; /* Ghim header lên đầu khi cuộn */
+  top: 0;
+  width: 100%;
+  font-family: 'Open Sans', sans-serif;
+
+  /* --- THÊM ĐOẠN NÀY ĐỂ FULL CHIỀU NGANG --- */
+  width: 100vw; /* Chiều rộng bằng 100% màn hình thiết bị */
+  position: relative;
+  left: 50%;
+  right: 50%;
+  margin-left: -50vw; /* Kéo sang trái cực đại */
+  margin-right: -50vw; /* Kéo sang phải cực đại */
+  box-sizing: border-box; 
+}
+
+.header-container {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 24px;
+  height: 70px; /* Chiều cao cố định cho header */
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  
+}
+
+/* --- Logo & Title --- */
+.header-logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+}
+
+.logo-img {
+  height: 40px; /* Kích thước logo */
+  width: auto;
+}
+
+.header-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #00407a; /* Màu xanh đậm FPT */
+  letter-spacing: 0.5px;
+}
+
+/* --- Navigation --- */
+.header-nav {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+}
+
+.nav-link {
+  text-decoration: none;
+  color: #555;
+  font-weight: 600;
+  font-size: 1rem;
+  transition: color 0.3s ease;
+  position: relative;
+}
+
+.nav-link:hover {
+  color: #f37021; /* Màu cam FPT */
+}
+
+/* Hiệu ứng gạch chân khi hover */
+.nav-link::after {
+  content: '';
+  position: absolute;
+  width: 0;
+  height: 2px;
+  bottom: -4px;
+  left: 0;
+  background-color: #f37021;
+  transition: width 0.3s ease;
+}
+
+.nav-link:hover::after {
+  width: 100%;
+}
+
+/* --- User Menu (Khi đã login) --- */
+.user-menu {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding-left: 20px;
+  border-left: 1px solid #e0e0e0; /* Đường gạch ngăn cách menu và user */
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.95rem;
+  color: #333;
+}
+
+.user-icon {
+  color: #00407a;
+  font-size: 1.1rem;
+}
+
+.user-name {
+  font-weight: 600;
+}
+
+.user-role {
+  font-size: 0.85rem;
+  color: #888;
+  font-style: italic;
+}
+
+/* --- Buttons --- */
+.btn-logout {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background-color: transparent;
+  border: 1px solid #e74c3c;
+  color: #e74c3c;
+  padding: 6px 12px;
+  border-radius: 4px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 0.9rem;
+}
+
+.btn-logout:hover {
+  background-color: #e74c3c;
+  color: white;
+}
+
+.btn-login {
+  background-color: #f37021; /* Cam FPT */
+  color: white;
+  text-decoration: none;
+  padding: 8px 20px;
+  border-radius: 4px;
+  font-weight: 600;
+  transition: background-color 0.3s ease;
+}
+
+.btn-login:hover {
+  background-color: #d65d1b; /* Cam đậm hơn khi hover */
+}
