@@ -1,0 +1,186 @@
+/* 1. Thiết lập nền chung cho toàn trang */
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  /* Đổi màu nền sang xám nhẹ để làm nổi bật box login */
+  background-color: #f0f2f5; 
+}
+
+#root {
+  height: 100%;
+}
+
+/* 2. Container bao ngoài - Dùng Fixed để căn giữa tuyệt đối */
+.container {
+  position: fixed; /* Cố định khung hình, không phụ thuộc thanh cuộn */
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center; /* Căn giữa ngang */
+  align-items: center;     /* Căn giữa dọc */
+}
+
+/* 3. Khung Login chính (Cái hộp trắng) */
+.login-box {
+  display: flex;
+  width: 900px;
+  max-width: 90%;          /* Co lại nếu màn hình điện thoại nhỏ */
+  background-color: #fff;  /* Nền trắng cho hộp */
+  padding: 40px;           /* Tăng padding cho thoáng */
+  border-radius: 10px;     /* Bo góc mềm mại */
+  
+  /* Đổ bóng để tạo hiệu ứng nổi 3D, giúp nhìn rõ vị trí giữa màn hình */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); 
+}
+
+/* --- CỘT TRÁI --- */
+.left-col {
+  flex: 1;
+  padding-right: 40px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.left-col a{
+  font-size: 15px;
+  width: 109%;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 25px;
+}
+
+.logo {
+  width: 120px;
+  margin-bottom: 10px;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.header h2 {
+  color: #F36F21;
+  font-size: 24px;
+  font-weight: 800;
+  text-transform: uppercase;
+  margin: 0;
+}
+
+/* Input Fields */
+.input-field {
+  width: 100%;
+  padding: 12px 15px;
+  margin-bottom: 15px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 16px;
+  outline: none;
+  background-color: #fff !important; 
+  color: #333 !important;
+}
+
+.input-field:focus {
+  border-color: #F36F21;
+  box-shadow: 0 0 0 2px rgba(243, 111, 33, 0.1); /* Hiệu ứng focus nhẹ */
+}
+
+/* Nút Login */
+.btn-orange {
+  width: 109%;
+  padding: 12px;
+ 
+  background-color: #F36F21;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 18px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s;
+  margin-top: 10px;
+}
+
+.btn-orange:hover {
+  background-color: #d35400;
+}
+
+.link {
+  display: block;
+  text-align: center;
+  margin-top: 20px;
+  color: #F36F21;
+  text-decoration: none;
+  font-size: 14px;
+}
+
+.link:hover {
+  text-decoration: underline;
+}
+
+/* --- VÁCH NGĂN --- */
+.divider {
+  width: 1px;
+  background-color: #e0e0e0;
+  margin: 0 20px;
+}
+
+/* --- CỘT PHẢI --- */
+.right-col {
+  flex: 1;
+  padding-left: 40px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+
+.right-col p {
+  margin-bottom: 20px;
+  color: #333;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+/* Nút Google */
+.btn-google {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background-color: #fff;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  padding: 10px 20px;
+  font-size: 14px;
+  color: #555;
+  cursor: pointer;
+  width: 100%;
+  max-width: 350px;
+  transition: all 0.2s;
+  font-weight: 500;
+}
+
+.btn-google:hover {
+  background-color: #f8f9fa;
+  border-color: #999;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+
+.right-title p{
+
+  color: #F36F21;
+  font-size: 24px;
+  font-weight: 600;
+  
+  margin: 10px;
+  margin-bottom: 30px;
+    
+}
