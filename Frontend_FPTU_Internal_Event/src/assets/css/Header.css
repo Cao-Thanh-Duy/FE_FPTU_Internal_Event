@@ -46,9 +46,10 @@
 }
 
 .header-title {
+  margin-left: 20px;
   font-size: 1.25rem;
   font-weight: 700;
-  color: #00407a; /* Màu xanh đậm FPT */
+  color: #f37021; /* Màu xanh đậm FPT */
   letter-spacing: 0.5px;
 }
 
@@ -58,6 +59,7 @@
   align-items: center;
   gap: 32px;
 }
+
 
 .nav-link {
   text-decoration: none;

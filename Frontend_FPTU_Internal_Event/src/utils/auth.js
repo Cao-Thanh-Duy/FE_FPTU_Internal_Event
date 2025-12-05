@@ -53,9 +53,12 @@ export const setupAxiosInterceptors = () => {
     (response) => response,
     (error) => {
       if (error.response?.status === 401) {
+    // KHÔNG redirect khi đang ở trang login
+    if (!window.location.pathname.includes('/login')) {
         logout();
         window.location.href = '/login';
-      }
+    }
+}
       return Promise.reject(error);
     }
   );

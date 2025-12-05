@@ -5,8 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import "../assets/css/LoginPage.css";
-import fptLogo from '../assets/images/Logo_FPT.svg'; 
-
+import fptLogo from "../assets/images/Logo_FPT.svg"; 
 
 const LoginPage = () => {
   const [email, setEmail] = useState('');
@@ -26,50 +25,47 @@ const LoginPage = () => {
         password: password
       });
 
-      // Xử lý khi đăng nhập thành công
-      console.log('Login successful:', response.data);
-      
-      // Lưu thông tin user vào localStorage
-      localStorage.setItem('token', response.data.token);
-      localStorage.setItem('userId', response.data.userId);
-      localStorage.setItem('userName', response.data.userName);
-      localStorage.setItem('email', response.data.email);
-      localStorage.setItem('roleName', response.data.roleName);
-      localStorage.setItem('expiresAt', response.data.expiresAt);
-      
-      // Cấu hình axios để tự động gửi token trong các request tiếp theo
-      axios.defaults.headers.common['Authorization'] = `Bearer ${response.data.token}`;
-      
-      // Hiển thị thông báo thành công
-      toast.success(`Welcome ${response.data.userName}! Log in successfully.`, {
+      // response.data format mới:
+      // { success: true/false, message: "", data: { ...user } }
+      if (!response.data.success) {
+        throw new Error(response.data.message || "Login failed");
+      }
+
+      const user = response.data.data;
+
+      // Save data
+      localStorage.setItem('token', user.token);
+      localStorage.setItem('userId', user.userId);
+      localStorage.setItem('userName', user.userName);
+      localStorage.setItem('email', user.email);
+      localStorage.setItem('roleName', user.roleName);
+      localStorage.setItem('expiresAt', user.expiresAt);
+
+      axios.defaults.headers.common['Authorization'] = `Bearer ${user.token}`;
+
+      toast.success(`Welcome ${user.userName}! Login successfully.`, {
         position: "top-right",
-        autoClose: 2000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
+        autoClose: 2000
       });
-      
-      // Chuyển hướng đến trang chính sau 2 giây
-      setTimeout(() => {
-        navigate('/');
-      }, 2000);
-      
+
+      setTimeout(() => navigate('/'), 2000);
+
     } catch (err) {
-      const errorMessage = err.response?.data?.message || 'Login failed. Please check your email and password.';
+      console.log("Error from API:", err);
+      console.log("Error response:", err.response);
+      const errorMessage =
+        err.response?.data?.message ||
+        err.message ||
+        "Login failed. Please check your email and password.";
+
       setError(errorMessage);
-      
-      // Hiển thị thông báo lỗi
+
       toast.error(errorMessage, {
         position: "top-right",
-        autoClose: 3000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
+        autoClose: 3000
       });
-      
-      console.error('Login error:', err);
+
+      console.error("Login error:", err);
     } finally {
       setLoading(false);
     }
@@ -78,17 +74,11 @@ const LoginPage = () => {
   return (
     <div className="container">
       <div className="login-box">
-   
-        
+
         <div className="left-col">
-          <div className="header-login"> 
-            <img
-             
-              src={fptLogo} 
-              alt="FPT Logo" 
-              className="logo" 
-            /> 
-            <h2> Internal Event</h2>
+          <div className="header-login">
+            <img src={fptLogo} alt="FPT Logo" className="logo" />
+            <h2>Internal Event</h2>
           </div>
 
           <form onSubmit={handleLogin}>
@@ -108,7 +98,9 @@ const LoginPage = () => {
               onChange={(e) => setPassword(e.target.value)}
               required
             />
+
             {error && <p style={{ color: 'red', fontSize: '14px' }}>{error}</p>}
+
             <button type="submit" className="btn-orange" disabled={loading}>
               {loading ? 'Signing in...' : 'Log in'}
             </button>
@@ -117,25 +109,17 @@ const LoginPage = () => {
           <a href="#" className="link">Lost password?</a>
         </div>
 
-      
         <div className="divider"></div>
 
-    
-        <div className="right-col" >
+        <div className="right-col">
+          <div className="right-title">
+            <p>FPTU Internal Event Registration & Ticketing System</p>
+          </div>
 
-        
-    
-        <div className="right-title">
-             <p>FPTU Internal Event Registration & Ticketing System</p>  
-       </div>
-         
-
-            <button className="btn-google">
-        
-              <FcGoogle size={24} style={{ marginRight: '10px' }} />
-              
-              <span>(Internal FPTU Only)</span>
-            </button>
+          <button className="btn-google">
+            <FcGoogle size={24} style={{ marginRight: '10px' }} />
+            <span>(Internal FPTU Only)</span>
+          </button>
         </div>
 
       </div>
