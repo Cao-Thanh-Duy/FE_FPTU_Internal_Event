@@ -4,9 +4,11 @@ import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import LoginPage from "./pages/LoginPage";
 import HomePage from "./pages/HomePage";
-import AdminDashboard from "./pages/AdminDashBoard";
+import AdminDashboard from "./pages/AdminDashboardPage";
+import AdminUserPage from "./pages/AdminUserPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { setupAxiosInterceptors } from './utils/auth';
+import AdminVenuePage from "./pages/AdminVenuePage";
 
 function App() {
   useEffect(() => {
@@ -39,8 +41,31 @@ function App() {
             </ProtectedRoute>
           } 
         />
+        
+        <Route 
+          path="/admin/users" 
+          element={
+            <ProtectedRoute allowedRoles={['Admin']}>
+              <AdminUserPage />
+            </ProtectedRoute>
+          } 
+        />
+
+        <Route 
+          path="/admin/venues" 
+          element={
+            <ProtectedRoute allowedRoles={['Admin']}>
+              <AdminVenuePage />
+            </ProtectedRoute>
+          } 
+        />
       </Routes>
     </Router>
+
+    
+    
+    
+    
   )
 }
 

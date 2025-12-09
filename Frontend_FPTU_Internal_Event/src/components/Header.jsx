@@ -13,7 +13,7 @@ const Header = () => {
 
   const handleLogout = () => {
     logout();
-    toast.success('Đăng xuất thành công!', {
+    toast.success('Signed out successfully!', {
       position: "top-right",
       autoClose: 2000,
     });
