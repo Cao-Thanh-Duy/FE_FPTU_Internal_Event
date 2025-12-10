@@ -6,6 +6,7 @@ import LoginPage from "./pages/LoginPage";
 import HomePage from "./pages/HomePage";
 import AdminDashboard from "./pages/AdminDashboardPage";
 import AdminUserPage from "./pages/AdminUserPage";
+import AdminSlotPage from "./pages/AdminSlotPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { setupAxiosInterceptors } from './utils/auth';
 import AdminVenuePage from "./pages/AdminVenuePage";
@@ -56,6 +57,14 @@ function App() {
           element={
             <ProtectedRoute allowedRoles={['Admin']}>
               <AdminVenuePage />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/admin/slots" 
+          element={
+            <ProtectedRoute allowedRoles={['Admin']}>
+              <AdminSlotPage />
             </ProtectedRoute>
           } 
         />

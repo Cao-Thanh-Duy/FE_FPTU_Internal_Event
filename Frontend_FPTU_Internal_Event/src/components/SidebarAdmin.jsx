@@ -60,7 +60,7 @@ const SidebarAdmin = () => {
                         </Link>
                     </li>
                     <li>
-                        <Link to="/admin/tables" className={`menu-item ${location.pathname === '/admin/tables' ? 'active' : ''}`}>
+                        <Link to="/admin/slots" className={`menu-item ${location.pathname === '/admin/slots' ? 'active' : ''}`}>
                             <FaBox className="menu-icon" />
                             <span>Slot</span>
                         </Link>

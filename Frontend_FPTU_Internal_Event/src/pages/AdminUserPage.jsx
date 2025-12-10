@@ -11,7 +11,7 @@ const AdminUserPage = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [showModal, setShowModal] = useState(false);
     const [modalMode, setModalMode] = useState('add'); // 'add' or 'edit'
-    const [selectedUser, setSelectedUser] = useState(null);
+    const [, setSelectedUser] = useState(null);
     const [formData, setFormData] = useState({
         userName: '',
         email: '',
