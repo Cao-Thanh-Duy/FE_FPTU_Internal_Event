@@ -11,7 +11,7 @@ const AdminUserPage = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [showModal, setShowModal] = useState(false);
     const [modalMode, setModalMode] = useState('add'); // 'add' or 'edit'
-    const [, setSelectedUser] = useState(null);
+    const [selectedUser, setSelectedUser] = useState(null);
     const [formData, setFormData] = useState({
         userName: '',
         email: '',
@@ -136,15 +136,28 @@ const AdminUserPage = () => {
                     throw new Error(response.data.message || 'Failed to create user');
                 }
             } else {
-                // TODO: Implement update user API call
-                // const response = await axios.put(`https://localhost:7047/api/User/${selectedUser.userId}`, formData);
+                // Update User API - only userName can be updated
+                const response = await axios.put(
+                    `https://localhost:7047/api/User?userId=${selectedUser.userId}`,
+                    JSON.stringify(formData.userName),
+                    {
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    }
+                );
                 
-                toast.info('Update user API will be implemented', {
-                    position: 'top-right',
-                    autoClose: 2000
-                });
-                
-                await fetchUsers();
+                if (response.data.success || response.status === 200) {
+                    toast.success('User updated successfully!', {
+                        position: 'top-right',
+                        autoClose: 2000
+                    });
+                    
+                    // Refresh user list
+                    await fetchUsers();
+                } else {
+                    throw new Error(response.data.message || 'Failed to update user');
+                }
             }
             
             setShowModal(false);
@@ -305,6 +318,7 @@ const AdminUserPage = () => {
                                     value={formData.email}
                                     onChange={(e) => setFormData({...formData, email: e.target.value})}
                                     required
+                                    disabled={modalMode === 'edit'}
                                 />
                             </div>
                             <div className="form-group">
@@ -314,23 +328,26 @@ const AdminUserPage = () => {
                                     value={formData.password}
                                     onChange={(e) => setFormData({...formData, password: e.target.value})}
                                     required={modalMode === 'add'}
-                                    placeholder={modalMode === 'edit' ? 'Leave blank to keep current password' : ''}
+                                    disabled={modalMode === 'edit'}
+                                    placeholder={modalMode === 'edit' ? 'Cannot be changed' : ''}
                                 />
                             </div>
-                            <div className="form-group">
-                                <label>Role *</label>
-                                <select
-                                    value={formData.roleId}
-                                    onChange={(e) => setFormData({...formData, roleId: e.target.value})}
-                                    required
-                                >
-                                    <option value="">Select Role</option>
-                                    <option value="1">Admin</option>
-                                    <option value="2">Student</option>
-                                    <option value="3">Staff</option>
-                                    <option value="4">Organizer</option>
-                                </select>
-                            </div>
+                            {modalMode === 'add' && (
+                                <div className="form-group">
+                                    <label>Role *</label>
+                                    <select
+                                        value={formData.roleId}
+                                        onChange={(e) => setFormData({...formData, roleId: e.target.value})}
+                                        required
+                                    >
+                                        <option value="">Select Role</option>
+                                        <option value="1">Admin</option>
+                                        <option value="2">Student</option>
+                                        <option value="3">Staff</option>
+                                        <option value="4">Organizer</option>
+                                    </select>
+                                </div>
+                            )}
                             <div className="modal-footer">
                                 <button type="button" className="btn-cancel" onClick={() => setShowModal(false)}>
                                     Cancel

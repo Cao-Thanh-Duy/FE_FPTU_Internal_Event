@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import SidebarAdmin from '../components/SidebarAdmin';
-import { FaSearch, FaPlus, FaFileExport, FaEye, FaTimes } from 'react-icons/fa';
+import { FaSearch, FaPlus, FaFileExport, FaEye, FaTimes, FaTrash } from 'react-icons/fa';
 import { toast } from 'react-toastify';
 import '../assets/css/AdminSlotPage.css';
 
@@ -81,11 +81,19 @@ const AdminSlotPage = () => {
         e.preventDefault();
         try {
             if (modalMode === 'add') {
+                // Convert time format from HH:mm to HH:mm:ss if needed
+                const formatTime = (time) => {
+                    if (!time) return '';
+                    return time.includes(':') && time.split(':').length === 2 ? `${time}:00` : time;
+                };
+
                 const requestData = {
                     slotName: formData.slotName,
-                    startTime: formData.startTime,
-                    endTime: formData.endTime
+                    startTime: formatTime(formData.startTime),
+                    endTime: formatTime(formData.endTime)
                 };
+
+                console.log('Request data:', requestData); // Debug log
 
                 const response = await axios.post('https://localhost:7047/api/Slot', requestData);
                 if (response.data?.success || response.status === 201 || response.status === 200) {
@@ -100,8 +108,36 @@ const AdminSlotPage = () => {
             setFormData({ slotName: '', startTime: '', endTime: '' });
         } catch (error) {
             console.error('Error creating slot:', error);
-            const errorMessage = error.response?.data?.message || error.message || 'Failed to save slot.';
+            console.error('Error response:', error.response?.data); // Debug log
+            const errorMessage = error.response?.data?.message || error.response?.data?.title || error.message || 'Failed to save slot.';
             toast.error(errorMessage, { position: 'top-right', autoClose: 3000 });
+        }
+    };
+
+    const handleDeleteSlot = async (slotId) => {
+        if (window.confirm('Are you sure you want to delete this slot?')) {
+            try {
+                const response = await axios.delete(`https://localhost:7047/api/Slot?slotId=${slotId}`);
+                
+                if (response.data?.success || response.status === 200 || response.status === 204) {
+                    toast.success('Slot deleted successfully!', {
+                        position: 'top-right',
+                        autoClose: 2000
+                    });
+                    
+                    // Refresh slot list
+                    await fetchSlots();
+                } else {
+                    throw new Error(response.data?.message || 'Failed to delete slot');
+                }
+            } catch (error) {
+                console.error('Error deleting slot:', error);
+                const errorMessage = error.response?.data?.message || error.message || 'Failed to delete slot. Please try again.';
+                toast.error(errorMessage, {
+                    position: 'top-right',
+                    autoClose: 3000
+                });
+            }
         }
     };
 
@@ -162,9 +198,14 @@ const AdminSlotPage = () => {
                                                 <td>{slot.startTime}</td>
                                                 <td>{slot.endTime}</td>
                                                 <td>
-                                                    <button className="btn-view" onClick={() => handleViewSlot(slot.slotId ?? slot.id)}>
-                                                        <FaEye /> View
-                                                    </button>
+                                                    <div className="action-buttons">
+                                                        <button className="btn-view" onClick={() => handleViewSlot(slot.slotId ?? slot.id)}>
+                                                            <FaEye /> View
+                                                        </button>
+                                                        <button className="btn-delete" onClick={() => handleDeleteSlot(slot.slotId ?? slot.id)}>
+                                                            <FaTrash /> Delete
+                                                        </button>
+                                                    </div>
                                                 </td>
                                             </tr>
                                         ))
