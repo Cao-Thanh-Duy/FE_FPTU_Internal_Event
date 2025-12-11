@@ -11,6 +11,7 @@ const HomePage = () => {
     const isLoggedIn = isAuthenticated();
     const userInfo = isLoggedIn ? getUserInfo() : null;
     const isStaff = userInfo?.roleName === 'Staff';
+    const isStudent = userInfo?.roleName === 'Student';
 
     return (
         <div className="homepage-container">
@@ -29,6 +30,15 @@ const HomePage = () => {
                                 </button>
                                 <button className="btn-primary" onClick={() => navigate('/staff/dashboard')}>
                                     Dashboard
+                                </button>
+                            </>
+                        ) : isLoggedIn && isStudent ? (
+                            <>
+                                <button className="btn-primary" onClick={() => navigate('/student/events')}>
+                                    Xem sự kiện
+                                </button>
+                                <button className="btn-secondary" onClick={() => navigate('/student/my-tickets')}>
+                                    Vé của tôi
                                 </button>
                             </>
                         ) : (

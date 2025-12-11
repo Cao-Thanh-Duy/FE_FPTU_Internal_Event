@@ -48,7 +48,21 @@ const LoginPage = () => {
         autoClose: 2000
       });
 
-      setTimeout(() => navigate('/'), 2000);
+      // Redirect based on role
+      setTimeout(() => {
+        const role = user.roleName;
+        if (role === 'Admin') {
+          navigate('/admin/dashboard');
+        } else if (role === 'Staff') {
+          navigate('/staff/dashboard');
+        } else if (role === 'Organizer') {
+          navigate('/organizer/events');
+        } else if (role === 'Student') {
+          navigate('/student/events');
+        } else {
+          navigate('/');
+        }
+      }, 2000);
 
     } catch (err) {
       console.log("Error from API:", err);

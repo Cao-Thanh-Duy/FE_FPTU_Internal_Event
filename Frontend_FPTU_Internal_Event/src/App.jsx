@@ -11,6 +11,9 @@ import OrganizerEventPage from "./pages/OrganizerEventPage";
 import StaffDashboardPage from "./pages/StaffDashboardPage";
 import StaffEventPage from "./pages/StaffEventPage";
 import QRScannerPage from "./pages/QRScannerPage";
+import StudentEventPage from "./pages/StudentEventPage";
+import StudentTicketsPage from "./pages/StudentTicketsPage";
+import StudentProfilePage from "./pages/StudentProfilePage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { setupAxiosInterceptors } from './utils/auth';
 import AdminVenuePage from "./pages/AdminVenuePage";
@@ -105,6 +108,33 @@ function App() {
           element={
             <ProtectedRoute allowedRoles={['Staff']}>
               <QRScannerPage />
+            </ProtectedRoute>
+          } 
+        />
+        
+        <Route 
+          path="/student/events" 
+          element={
+            <ProtectedRoute allowedRoles={['Student']}>
+              <StudentEventPage />
+            </ProtectedRoute>
+          } 
+        />
+        
+        <Route 
+          path="/student/my-tickets" 
+          element={
+            <ProtectedRoute allowedRoles={['Student']}>
+              <StudentTicketsPage />
+            </ProtectedRoute>
+          } 
+        />
+        
+        <Route 
+          path="/student/profile" 
+          element={
+            <ProtectedRoute allowedRoles={['Student']}>
+              <StudentProfilePage />
             </ProtectedRoute>
           } 
         />
