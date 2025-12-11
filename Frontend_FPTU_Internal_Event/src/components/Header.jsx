@@ -11,6 +11,7 @@ const Header = () => {
   const userInfo = isLoggedIn ? getUserInfo() : null;
   const isAdmin = userInfo?.roleName === 'Admin';
   const isOrganizer = userInfo?.roleName === 'Organizer';
+  const isStaff = userInfo?.roleName === 'Staff';
 
   const handleLogout = () => {
     logout();
@@ -45,6 +46,13 @@ const Header = () => {
           {isLoggedIn && isOrganizer && (
             <Link to="/organizer/events" className="nav-link organize-link">
             Organize
+            </Link>
+          )}
+          
+          {/* Nếu role = Staff */}
+          {isLoggedIn && isStaff && (
+            <Link to="/staff/dashboard" className="nav-link staff-link">
+            Dashboard
             </Link>
           )}
           

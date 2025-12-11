@@ -2,10 +2,15 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from "../components/Header";
 import Footer from "../components/Footer";
+import { isAuthenticated, getUserInfo } from '../utils/auth';
+import { FaQrcode } from 'react-icons/fa';
 import "../assets/css/HomePage.css";
 
 const HomePage = () => {
     const navigate = useNavigate();
+    const isLoggedIn = isAuthenticated();
+    const userInfo = isLoggedIn ? getUserInfo() : null;
+    const isStaff = userInfo?.roleName === 'Staff';
 
     return (
         <div className="homepage-container">
@@ -17,12 +22,25 @@ const HomePage = () => {
                     <h1>Chào mừng đến với FPTU Internal Event</h1>
                     <p>Hệ thống đăng ký và quản lý sự kiện nội bộ FPT University</p>
                     <div className="hero-buttons">
-                        <button className="btn-primary" onClick={() => navigate('/login')}>
-                            Đăng nhập ngay
-                        </button>
-                        <button className="btn-secondary" onClick={() => document.getElementById('events').scrollIntoView({ behavior: 'smooth' })}>
-                            Xem sự kiện
-                        </button>
+                        {isLoggedIn && isStaff ? (
+                            <>
+                                <button className="btn-qr-scanner" onClick={() => navigate('/staff/qr-scanner')}>
+                                    <FaQrcode className="qr-icon" /> Quét QR Check-in
+                                </button>
+                                <button className="btn-primary" onClick={() => navigate('/staff/dashboard')}>
+                                    Dashboard
+                                </button>
+                            </>
+                        ) : (
+                            <>
+                                <button className="btn-primary" onClick={() => navigate('/login')}>
+                                    Đăng nhập ngay
+                                </button>
+                                <button className="btn-secondary" onClick={() => document.getElementById('events')?.scrollIntoView({ behavior: 'smooth' })}>
+                                    Xem sự kiện
+                                </button>
+                            </>
+                        )}
                     </div>
                 </div>
             </section>

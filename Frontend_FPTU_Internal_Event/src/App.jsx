@@ -8,6 +8,9 @@ import AdminDashboard from "./pages/AdminDashboardPage";
 import AdminUserPage from "./pages/AdminUserPage";
 import AdminSlotPage from "./pages/AdminSlotPage";
 import OrganizerEventPage from "./pages/OrganizerEventPage";
+import StaffDashboardPage from "./pages/StaffDashboardPage";
+import StaffEventPage from "./pages/StaffEventPage";
+import QRScannerPage from "./pages/QRScannerPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { setupAxiosInterceptors } from './utils/auth';
 import AdminVenuePage from "./pages/AdminVenuePage";
@@ -75,6 +78,33 @@ function App() {
           element={
             <ProtectedRoute allowedRoles={['Organizer']}>
               <OrganizerEventPage />
+            </ProtectedRoute>
+          } 
+        />
+        
+        <Route 
+          path="/staff/dashboard" 
+          element={
+            <ProtectedRoute allowedRoles={['Staff']}>
+              <StaffDashboardPage />
+            </ProtectedRoute>
+          } 
+        />
+        
+        <Route 
+          path="/staff/events" 
+          element={
+            <ProtectedRoute allowedRoles={['Staff']}>
+              <StaffEventPage />
+            </ProtectedRoute>
+          } 
+        />
+        
+        <Route 
+          path="/staff/qr-scanner" 
+          element={
+            <ProtectedRoute allowedRoles={['Staff']}>
+              <QRScannerPage />
             </ProtectedRoute>
           } 
         />
