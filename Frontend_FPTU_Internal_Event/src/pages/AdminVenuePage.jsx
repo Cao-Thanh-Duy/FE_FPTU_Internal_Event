@@ -14,25 +14,42 @@ const AdminVenuePage = () => {
     const [selectedVenue, setSelectedVenue] = useState(null);
     const [formData, setFormData] = useState({
         venueName: '',
-        location: '',
-        capacity: '',
-        description: ''
+        locationDetails: '',
+        maxSeat: ''
     });
 
-    // Mock data for initial display
     useEffect(() => {
-        // TODO: Replace with actual API call
-        setVenues([
-            { venueId: 1, venueName: 'Hall A', location: 'Building A - Floor 1', capacity: 200, description: 'Large conference hall with modern equipment' },
-            { venueId: 2, venueName: 'Room B1', location: 'Building B - Floor 1', capacity: 50, description: 'Small meeting room' },
-            { venueId: 3, venueName: 'Auditorium', location: 'Main Building', capacity: 500, description: 'Main auditorium for large events' }
-        ]);
+        fetchVenues();
     }, []);
+
+    const fetchVenues = async () => {
+        try {
+            setLoading(true);
+            const response = await axios.get('https://localhost:7047/api/Venue');
+            const data = response.data?.data ?? response.data;
+            
+            if (Array.isArray(data)) {
+                setVenues(data);
+                toast.success('Venues loaded successfully!', {
+                    position: 'top-right',
+                    autoClose: 1500
+                });
+            }
+        } catch (error) {
+            console.error('Error fetching venues:', error);
+            toast.error('Failed to load venues.', {
+                position: 'top-right',
+                autoClose: 3000
+            });
+        } finally {
+            setLoading(false);
+        }
+    };
 
     // Filter venues based on search
     const filteredVenues = venues.filter(venue =>
         venue.venueName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        venue.location.toLowerCase().includes(searchTerm.toLowerCase())
+        (venue.locationDetails || '').toLowerCase().includes(searchTerm.toLowerCase())
     );
 
     // Handle Add Venue
@@ -40,9 +57,8 @@ const AdminVenuePage = () => {
         setModalMode('add');
         setFormData({
             venueName: '',
-            location: '',
-            capacity: '',
-            description: ''
+            locationDetails: '',
+            maxSeat: ''
         });
         setShowModal(true);
     };
@@ -53,9 +69,8 @@ const AdminVenuePage = () => {
         setSelectedVenue(venue);
         setFormData({
             venueName: venue.venueName,
-            location: venue.location,
-            capacity: venue.capacity,
-            description: venue.description
+            locationDetails: venue.locationDetails,
+            maxSeat: venue.maxSeat
         });
         setShowModal(true);
     };
@@ -64,17 +79,21 @@ const AdminVenuePage = () => {
     const handleDeleteVenue = async (venueId) => {
         if (window.confirm('Are you sure you want to delete this venue?')) {
             try {
-                // TODO: Implement delete API call
-                // await axios.delete(`https://localhost:7047/api/Venue?venueId=${venueId}`);
+                const response = await axios.delete(`https://localhost:7047/api/Venue?venueId=${venueId}`);
                 
-                setVenues(venues.filter(venue => venue.venueId !== venueId));
-                toast.success('Venue deleted successfully!', {
-                    position: 'top-right',
-                    autoClose: 2000
-                });
+                if (response.data?.success || response.status === 200 || response.status === 204) {
+                    toast.success('Venue deleted successfully!', {
+                        position: 'top-right',
+                        autoClose: 2000
+                    });
+                    await fetchVenues();
+                } else {
+                    throw new Error(response.data?.message || 'Failed to delete venue');
+                }
             } catch (error) {
                 console.error('Error deleting venue:', error);
-                toast.error('Failed to delete venue. Please try again.', {
+                const errorMessage = error.response?.data?.message || error.message || 'Failed to delete venue.';
+                toast.error(errorMessage, {
                     position: 'top-right',
                     autoClose: 3000
                 });
@@ -87,47 +106,51 @@ const AdminVenuePage = () => {
         e.preventDefault();
         
         try {
+            const requestData = {
+                venueName: formData.venueName,
+                maxSeat: parseInt(formData.maxSeat),
+                locationDetails: formData.locationDetails
+            };
+
             if (modalMode === 'add') {
-                // TODO: Implement add venue API call
-                // const response = await axios.post('https://localhost:7047/api/Venue', formData);
+                const response = await axios.post('https://localhost:7047/api/Venue', requestData);
                 
-                const newVenue = {
-                    venueId: venues.length + 1,
-                    ...formData,
-                    capacity: parseInt(formData.capacity)
-                };
-                setVenues([...venues, newVenue]);
-                
-                toast.success('Venue created successfully!', {
-                    position: 'top-right',
-                    autoClose: 2000
-                });
+                if (response.data?.success || response.status === 201 || response.status === 200) {
+                    toast.success('Venue created successfully!', {
+                        position: 'top-right',
+                        autoClose: 2000
+                    });
+                    await fetchVenues();
+                } else {
+                    throw new Error(response.data?.message || 'Failed to create venue');
+                }
             } else {
-                // TODO: Implement update venue API call
-                // const response = await axios.put(`https://localhost:7047/api/Venue/${selectedVenue.venueId}`, formData);
+                const response = await axios.put(
+                    `https://localhost:7047/api/Venue?venueId=${selectedVenue.venueId}`,
+                    requestData
+                );
                 
-                setVenues(venues.map(venue => 
-                    venue.venueId === selectedVenue.venueId 
-                        ? { ...venue, ...formData, capacity: parseInt(formData.capacity) }
-                        : venue
-                ));
-                
-                toast.success('Venue updated successfully!', {
-                    position: 'top-right',
-                    autoClose: 2000
-                });
+                if (response.data?.success || response.status === 200) {
+                    toast.success('Venue updated successfully!', {
+                        position: 'top-right',
+                        autoClose: 2000
+                    });
+                    await fetchVenues();
+                } else {
+                    throw new Error(response.data?.message || 'Failed to update venue');
+                }
             }
             
             setShowModal(false);
             setFormData({
                 venueName: '',
-                location: '',
-                capacity: '',
-                description: ''
+                locationDetails: '',
+                maxSeat: ''
             });
         } catch (error) {
             console.error('Error submitting form:', error);
-            toast.error('Failed to save venue. Please try again.', {
+            const errorMessage = error.response?.data?.message || error.message || 'Failed to save venue.';
+            toast.error(errorMessage, {
                 position: 'top-right',
                 autoClose: 3000
             });
@@ -193,13 +216,12 @@ const AdminVenuePage = () => {
                                     <div className="venue-card-body">
                                         <div className="venue-info-item">
                                             <FaMapMarkerAlt className="info-icon" />
-                                            <span>{venue.location}</span>
+                                            <span>{venue.locationDetails}</span>
                                         </div>
                                         <div className="venue-info-item">
                                             <FaUsers className="info-icon" />
-                                            <span>Capacity: {venue.capacity}</span>
+                                            <span>Capacity: {venue.maxSeat}</span>
                                         </div>
-                                        <p className="venue-description">{venue.description}</p>
                                     </div>
                                     
                                     <div className="venue-card-footer">
@@ -245,33 +267,24 @@ const AdminVenuePage = () => {
                                 />
                             </div>
                             <div className="form-group">
-                                <label>Location *</label>
+                                <label>Location Details *</label>
                                 <input
                                     type="text"
-                                    value={formData.location}
-                                    onChange={(e) => setFormData({...formData, location: e.target.value})}
+                                    value={formData.locationDetails}
+                                    onChange={(e) => setFormData({...formData, locationDetails: e.target.value})}
                                     required
                                     placeholder="e.g., Building A - Floor 1"
                                 />
                             </div>
                             <div className="form-group">
-                                <label>Capacity *</label>
+                                <label>Max Seat *</label>
                                 <input
                                     type="number"
-                                    value={formData.capacity}
-                                    onChange={(e) => setFormData({...formData, capacity: e.target.value})}
+                                    value={formData.maxSeat}
+                                    onChange={(e) => setFormData({...formData, maxSeat: e.target.value})}
                                     required
                                     min="1"
-                                    placeholder="Enter capacity"
-                                />
-                            </div>
-                            <div className="form-group">
-                                <label>Description</label>
-                                <textarea
-                                    value={formData.description}
-                                    onChange={(e) => setFormData({...formData, description: e.target.value})}
-                                    rows="4"
-                                    placeholder="Enter venue description"
+                                    placeholder="Enter maximum seats"
                                 />
                             </div>
                             <div className="modal-footer">
