@@ -45,9 +45,14 @@ const Header = () => {
           
           {/* Nếu role = Organizer */}
           {isLoggedIn && isOrganizer && (
-            <Link to="/organizer/events" className="nav-link organize-link">
-            Organize
-            </Link>
+            <>
+              <Link to="/organizer/events" className="nav-link organize-link">
+                Organize
+              </Link>
+              <Link to="/organizer/speakers" className="nav-link speakers-link">
+                Speakers
+              </Link>
+            </>
           )}
           
           {/* Nếu role = Staff */}

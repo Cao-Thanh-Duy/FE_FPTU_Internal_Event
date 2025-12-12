@@ -7,7 +7,9 @@ import HomePage from "./pages/HomePage";
 import AdminDashboard from "./pages/AdminDashboardPage";
 import AdminUserPage from "./pages/AdminUserPage";
 import AdminSlotPage from "./pages/AdminSlotPage";
+import AdminEventPage from "./pages/AdminEventPage";
 import OrganizerEventPage from "./pages/OrganizerEventPage";
+import OrganizerSpeakerPage from "./pages/OrganizerSpeakerPage";
 import StaffDashboardPage from "./pages/StaffDashboardPage";
 import StaffEventPage from "./pages/StaffEventPage";
 import QRScannerPage from "./pages/QRScannerPage";
@@ -75,12 +77,30 @@ function App() {
             </ProtectedRoute>
           } 
         />
+
+        <Route 
+          path="/admin/events" 
+          element={
+            <ProtectedRoute allowedRoles={['Admin']}>
+              <AdminEventPage />
+            </ProtectedRoute>
+          } 
+        />
         
         <Route 
           path="/organizer/events" 
           element={
             <ProtectedRoute allowedRoles={['Organizer']}>
               <OrganizerEventPage />
+            </ProtectedRoute>
+          } 
+        />
+
+        <Route 
+          path="/organizer/speakers" 
+          element={
+            <ProtectedRoute allowedRoles={['Organizer']}>
+              <OrganizerSpeakerPage />
             </ProtectedRoute>
           } 
         />

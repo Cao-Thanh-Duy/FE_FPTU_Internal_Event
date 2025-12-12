@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { FaTachometerAlt, FaTh, FaInbox, FaUsers, FaBox, FaSignInAlt, FaUserPlus, FaCrown, FaBook, FaLightbulb, FaQuestionCircle, FaUser } from 'react-icons/fa';
+import { FaTachometerAlt, FaTh, FaInbox, FaUsers, FaBox, FaSignInAlt, FaUserPlus, FaCrown, FaBook, FaLightbulb, FaQuestionCircle, FaUser, FaCalendarCheck } from 'react-icons/fa';
 import { logout, getUserInfo } from '../utils/auth';
 import { toast } from 'react-toastify';
 import '../assets/css/SidebarAdmin.css';
@@ -42,9 +42,9 @@ const SidebarAdmin = () => {
                         </Link>
                     </li>
                     <li>
-                        <Link to="/admin/calendar" className={`menu-item ${location.pathname === '/admin/calendar' ? 'active' : ''}`}>
-                            <FaTh className="menu-icon" />
-                            <span>Event</span>
+                        <Link to="/admin/events" className={`menu-item ${location.pathname === '/admin/events' ? 'active' : ''}`}>
+                            <FaCalendarCheck className="menu-icon" />
+                            <span>Events</span>
                         </Link>
                     </li>
                     <li>
