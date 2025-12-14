@@ -54,11 +54,11 @@ const LoginPage = () => {
         if (role === 'Admin') {
           navigate('/admin/dashboard');
         } else if (role === 'Staff') {
-          navigate('/staff/dashboard');
+          navigate('/');
         } else if (role === 'Organizer') {
           navigate('/organizer/events');
         } else if (role === 'Student') {
-          navigate('/student/events');
+          navigate('/');
         } else {
           navigate('/');
         }

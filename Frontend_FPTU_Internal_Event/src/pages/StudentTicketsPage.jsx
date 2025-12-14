@@ -1,85 +1,128 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "../assets/css/StudentTicketsPage.css";
 import SidebarStudent from "../components/SidebarStudent";
 import { FaCalendar, FaClock, FaMapMarkerAlt, FaQrcode, FaDownload, FaTimes, FaTicketAlt, FaCheckCircle } from 'react-icons/fa';
 import { toast } from 'react-toastify';
+import axios from 'axios';
 
 const StudentTicketsPage = () => {
     const [selectedTicket, setSelectedTicket] = useState(null);
     const [showQRModal, setShowQRModal] = useState(false);
+    const [myTickets, setMyTickets] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [qrCode, setQrCode] = useState("");
 
-    // Mock data - vé đã đặt
-    const myTickets = [
-        {
-            id: 1,
-            ticketId: "TKT-001-2024",
-            eventName: "Workshop ReactJS 2024",
-            eventDate: "2024-12-15",
-            eventTime: "14:00 - 16:00",
-            venue: "Phòng A101",
-            bookingDate: "2024-12-10 10:30:00",
-            status: "confirmed",
-            qrCode: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==" // Mock QR
-        },
-        {
-            id: 2,
-            ticketId: "TKT-002-2024",
-            eventName: "Hội thảo AI và Machine Learning",
-            eventDate: "2024-12-20",
-            eventTime: "09:00 - 11:30",
-            venue: "Hội trường A",
-            bookingDate: "2024-12-11 14:20:00",
-            status: "confirmed",
-            qrCode: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=="
-        },
-        {
-            id: 3,
-            ticketId: "TKT-003-2024",
-            eventName: "Ngày hội Sinh viên",
-            eventDate: "2024-12-22",
-            eventTime: "08:00 - 17:00",
-            venue: "Sân vận động",
-            bookingDate: "2024-12-09 16:45:00",
-            status: "confirmed",
-            qrCode: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=="
-        },
-        {
-            id: 4,
-            ticketId: "TKT-004-2024",
-            eventName: "Workshop Python cho người mới",
-            eventDate: "2024-12-08",
-            eventTime: "14:00 - 16:00",
-            venue: "Phòng B201",
-            bookingDate: "2024-12-05 09:15:00",
-            status: "used",
-            qrCode: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=="
+    // Fetch tickets from API
+    useEffect(() => {
+        fetchTickets();
+    }, []);
+
+    const fetchTickets = async () => {
+        try {
+            setLoading(true);
+            const userId = localStorage.getItem('userId');
+            const response = await axios.get(`https://localhost:7047/api/Ticket?userId=${userId}`);
+            
+            if (response.data.success) {
+                setMyTickets(response.data.data);
+                console.log('Tickets:', response.data.data);
+            } else {
+                toast.error('Không thể tải danh sách vé');
+            }
+        } catch (error) {
+            console.error('Error fetching tickets:', error);
+            toast.error('Có lỗi xảy ra khi tải danh sách vé');
+        } finally {
+            setLoading(false);
         }
-    ];
-
-    const handleShowQR = (ticket) => {
-        setSelectedTicket(ticket);
-        setShowQRModal(true);
     };
 
-    const handleDownloadTicket = (ticket) => {
-        // Mock download - trong thực tế sẽ download QR code
+    const handleShowQR = async (ticket) => {
+        try {
+            const response = await axios.get(`https://localhost:7047/getQR?ticketId=${ticket.ticketId}`);
+            
+            if (response.data.success) {
+                setQrCode(response.data.qrcode);
+                setSelectedTicket(ticket);
+                setShowQRModal(true);
+            } else {
+                toast.error('Không thể tải mã QR');
+            }
+        } catch (error) {
+            console.error('Error fetching QR code:', error);
+            toast.error('Có lỗi xảy ra khi tải mã QR');
+        }
+    };
+
+    const handleDownloadTicket = async (ticket) => {
+        try {
+            if (!qrCode) {
+                const response = await axios.get(`https://localhost:7047/getQR?ticketId=${ticket.ticketId}`);
+                if (response.data.success) {
+                    downloadQRImage(response.data.qrcode, ticket);
+                } else {
+                    toast.error('Không thể tải mã QR');
+                }
+            } else {
+                downloadQRImage(qrCode, ticket);
+            }
+        } catch (error) {
+            console.error('Error downloading ticket:', error);
+            toast.error('Có lỗi xảy ra khi tải vé');
+        }
+    };
+
+    const downloadQRImage = (qrCodeData, ticket) => {
+        const link = document.createElement('a');
+        link.href = qrCodeData;
+        link.download = `ticket-${ticket.ticketCode || ticket.ticketId}.png`;
+        link.click();
         toast.success('Đã tải xuống vé!', {
             position: "top-right",
             autoClose: 2000,
         });
     };
 
-    const getStatusInfo = (status) => {
-        const statusMap = {
-            confirmed: { text: "Đã xác nhận", class: "status-confirmed", icon: <FaCheckCircle /> },
-            used: { text: "Đã sử dụng", class: "status-used", icon: <FaCheckCircle /> },
-            cancelled: { text: "Đã hủy", class: "status-cancelled", icon: <FaTimes /> }
-        };
-        return statusMap[status] || statusMap.confirmed;
+    const handleCancelTicket = async (ticket) => {
+        if (window.confirm(`Bạn có chắc chắn muốn hủy vé cho sự kiện "${ticket.eventName}"?`)) {
+            try {
+                const response = await axios.put(`https://localhost:7047/Cancelled?ticketId=${ticket.ticketId}`);
+                
+                if (response.data.success) {
+                    toast.success('Đã hủy vé thành công!', {
+                        position: "top-right",
+                        autoClose: 2000,
+                    });
+                    // Refresh tickets list
+                    fetchTickets();
+                } else {
+                    toast.error(response.data.message || 'Không thể hủy vé');
+                }
+            } catch (error) {
+                console.error('Error cancelling ticket:', error);
+                toast.error(error.response?.data?.message || 'Có lỗi xảy ra khi hủy vé');
+            }
+        }
     };
 
-    const upcomingTickets = myTickets.filter(ticket => ticket.status === 'confirmed');
-    const usedTickets = myTickets.filter(ticket => ticket.status === 'used');
+    const getStatusInfo = (status) => {
+        const statusMap = {
+            "Not Used": { text: "Đã xác nhận", class: "status-confirmed", icon: <FaCheckCircle /> },
+            "Used": { text: "Đã sử dụng", class: "status-used", icon: <FaCheckCircle /> },
+            "Cancelled": { text: "Đã hủy", class: "status-cancelled", icon: <FaTimes /> }
+        };
+        return statusMap[status] || statusMap["Not Used"];
+    };
+
+    // Format date
+    const formatDate = (dateString) => {
+        if (!dateString) return 'N/A';
+        const date = new Date(dateString);
+        return date.toLocaleDateString('vi-VN');
+    };
+
+    const upcomingTickets = myTickets.filter(ticket => ticket.status === 'Not Used');
+    const usedTickets = myTickets.filter(ticket => ticket.status === 'Used');
 
     return (
         <div className="student-tickets-page">
@@ -111,12 +154,16 @@ const StudentTicketsPage = () => {
                     </div>
 
                     {/* Upcoming Tickets */}
-                    {upcomingTickets.length > 0 && (
+                    {loading ? (
+                        <div className="loading-message">
+                            <p>Đang tải danh sách vé...</p>
+                        </div>
+                    ) : upcomingTickets.length > 0 ? (
                         <div className="tickets-section">
                             <h2 className="section-title">Vé sắp tới</h2>
                             <div className="tickets-grid">
                                 {upcomingTickets.map(ticket => (
-                                    <div key={ticket.id} className="ticket-card upcoming">
+                                    <div key={ticket.ticketId} className="ticket-card upcoming">
                                         <div className="ticket-header">
                                             <FaTicketAlt className="ticket-icon" />
                                             <span className={`ticket-status ${getStatusInfo(ticket.status).class}`}>
@@ -126,20 +173,13 @@ const StudentTicketsPage = () => {
                                         </div>
                                         
                                         <h3 className="ticket-event-name">{ticket.eventName}</h3>
-                                        <div className="ticket-id">Mã vé: {ticket.ticketId}</div>
+                                        <div className="ticket-id">Mã vé: {ticket.ticketCode || ticket.ticketId}</div>
+                                        <div className="ticket-id">Số ghế: {ticket.seatNumber}</div>
                                         
                                         <div className="ticket-details">
                                             <div className="detail-row">
                                                 <FaCalendar className="detail-icon" />
-                                                <span>{ticket.eventDate}</span>
-                                            </div>
-                                            <div className="detail-row">
-                                                <FaClock className="detail-icon" />
-                                                <span>{ticket.eventTime}</span>
-                                            </div>
-                                            <div className="detail-row">
-                                                <FaMapMarkerAlt className="detail-icon" />
-                                                <span>{ticket.venue}</span>
+                                                <span>{formatDate(ticket.startDay)}</span>
                                             </div>
                                         </div>
 
@@ -156,20 +196,26 @@ const StudentTicketsPage = () => {
                                             >
                                                 <FaDownload />
                                             </button>
+                                            <button 
+                                                className="btn-cancel"
+                                                onClick={() => handleCancelTicket(ticket)}
+                                            >
+                                                <FaTimes /> Hủy vé
+                                            </button>
                                         </div>
                                     </div>
                                 ))}
                             </div>
                         </div>
-                    )}
+                    ) : null}
 
                     {/* Used Tickets */}
-                    {usedTickets.length > 0 && (
+                    {!loading && usedTickets.length > 0 && (
                         <div className="tickets-section">
                             <h2 className="section-title">Đã tham gia</h2>
                             <div className="tickets-grid">
                                 {usedTickets.map(ticket => (
-                                    <div key={ticket.id} className="ticket-card used">
+                                    <div key={ticket.ticketId} className="ticket-card used">
                                         <div className="ticket-header">
                                             <FaTicketAlt className="ticket-icon" />
                                             <span className={`ticket-status ${getStatusInfo(ticket.status).class}`}>
@@ -179,20 +225,13 @@ const StudentTicketsPage = () => {
                                         </div>
                                         
                                         <h3 className="ticket-event-name">{ticket.eventName}</h3>
-                                        <div className="ticket-id">Mã vé: {ticket.ticketId}</div>
+                                        <div className="ticket-id">Mã vé: {ticket.ticketCode || ticket.ticketId}</div>
+                                        <div className="ticket-id">Số ghế: {ticket.seatNumber}</div>
                                         
                                         <div className="ticket-details">
                                             <div className="detail-row">
                                                 <FaCalendar className="detail-icon" />
-                                                <span>{ticket.eventDate}</span>
-                                            </div>
-                                            <div className="detail-row">
-                                                <FaClock className="detail-icon" />
-                                                <span>{ticket.eventTime}</span>
-                                            </div>
-                                            <div className="detail-row">
-                                                <FaMapMarkerAlt className="detail-icon" />
-                                                <span>{ticket.venue}</span>
+                                                <span>{formatDate(ticket.startDay)}</span>
                                             </div>
                                         </div>
                                     </div>
@@ -201,7 +240,7 @@ const StudentTicketsPage = () => {
                         </div>
                     )}
 
-                    {myTickets.length === 0 && (
+                    {!loading && myTickets.length === 0 && (
                         <div className="no-tickets">
                             <FaTicketAlt className="no-tickets-icon" />
                             <p>Bạn chưa có vé nào</p>
@@ -230,16 +269,20 @@ const StudentTicketsPage = () => {
                                 <div className="qr-ticket-info">
                                     <h3>{selectedTicket.eventName}</h3>
                                     <div className="qr-ticket-details">
-                                        <p><strong>Mã vé:</strong> {selectedTicket.ticketId}</p>
-                                        <p><FaCalendar /> <strong>Ngày:</strong> {selectedTicket.eventDate}</p>
-                                        <p><FaClock /> <strong>Giờ:</strong> {selectedTicket.eventTime}</p>
-                                        <p><FaMapMarkerAlt /> <strong>Địa điểm:</strong> {selectedTicket.venue}</p>
+                                        <p><strong>Mã vé:</strong> {selectedTicket.ticketCode || selectedTicket.ticketId}</p>
+                                        <p><strong>Số ghế:</strong> {selectedTicket.seatNumber}</p>
+                                        <p><FaCalendar /> <strong>Ngày:</strong> {formatDate(selectedTicket.startDay)}</p>
+                                        <p><strong>Người đặt:</strong> {selectedTicket.userName}</p>
                                     </div>
                                 </div>
                                 
                                 <div className="qr-code-display">
                                     <div className="qr-code-box">
-                                        <FaQrcode className="qr-placeholder" />
+                                        {qrCode ? (
+                                            <img src={qrCode} alt="QR Code" style={{width: '100%', height: 'auto'}} />
+                                        ) : (
+                                            <FaQrcode className="qr-placeholder" />
+                                        )}
                                     </div>
                                     <p className="qr-instruction">
                                         Vui lòng xuất trình mã QR này khi tham gia sự kiện

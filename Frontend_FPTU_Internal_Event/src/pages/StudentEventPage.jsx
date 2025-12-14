@@ -1,9 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "../assets/css/StudentEventPage.css";
 import SidebarStudent from "../components/SidebarStudent";
 import { FaCalendar, FaClock, FaMapMarkerAlt, FaUsers, FaSearch, FaTicketAlt, FaTimes } from 'react-icons/fa';
 import QRCode from 'qrcode';
 import { toast } from 'react-toastify';
+import axios from 'axios';
 
 const StudentEventPage = () => {
     const [searchTerm, setSearchTerm] = useState("");
@@ -11,72 +12,51 @@ const StudentEventPage = () => {
     const [showTicketModal, setShowTicketModal] = useState(false);
     const [ticketQRCode, setTicketQRCode] = useState("");
     const [bookedEvents, setBookedEvents] = useState([]);
+    const [events, setEvents] = useState([]);
+    const [loading, setLoading] = useState(true);
     
-    // Mock data - sẽ thay bằng API sau
-    const events = [
-        {
-            id: 1,
-            name: "Workshop ReactJS 2024",
-            date: "2024-12-15",
-            time: "14:00 - 16:00",
-            venue: "Phòng A101",
-            availableSeats: 30,
-            totalSeats: 50,
-            status: "upcoming",
-            description: "Workshop về ReactJS cơ bản và nâng cao cho sinh viên",
-            organizer: "CLB Lập trình FPT"
-        },
-        {
-            id: 2,
-            name: "Hội thảo AI và Machine Learning",
-            date: "2024-12-20",
-            time: "09:00 - 11:30",
-            venue: "Hội trường A",
-            availableSeats: 80,
-            totalSeats: 120,
-            status: "upcoming",
-            description: "Hội thảo về xu hướng AI và ML trong năm 2024",
-            organizer: "Khoa CNTT"
-        },
-        {
-            id: 3,
-            name: "Ngày hội Sinh viên",
-            date: "2024-12-22",
-            time: "08:00 - 17:00",
-            venue: "Sân vận động",
-            availableSeats: 200,
-            totalSeats: 300,
-            status: "upcoming",
-            description: "Ngày hội văn hóa sinh viên FPTU với nhiều hoạt động thú vị",
-            organizer: "Đoàn thanh niên"
-        },
-        {
-            id: 4,
-            name: "Hackathon 2024",
-            date: "2024-12-25",
-            time: "08:00 - 20:00",
-            venue: "Toà nhà A",
-            availableSeats: 40,
-            totalSeats: 60,
-            status: "upcoming",
-            description: "Cuộc thi lập trình 12 tiếng cho sinh viên FPTU",
-            organizer: "CLB Lập trình"
+    // Fetch events from API
+    useEffect(() => {
+        fetchEvents();
+    }, []);
+
+    const fetchEvents = async () => {
+        try {
+            setLoading(true);
+            const response = await axios.get('https://localhost:7047/api/Event');
+            
+            if (response.data.success) {
+                // Chỉ lấy các event có Status = "Approve"
+                const approvedEvents = response.data.data.filter(
+                    event => event.status === "Approve"
+                );
+                console.log('Approved events from API:', approvedEvents);
+                setEvents(approvedEvents);
+            } else {
+                toast.error('Không thể tải danh sách sự kiện');
+            }
+        } catch (error) {
+            console.error('Error fetching events:', error);
+            toast.error('Có lỗi xảy ra khi tải sự kiện');
+        } finally {
+            setLoading(false);
         }
-    ];
+    };
 
     const filteredEvents = events.filter(event =>
-        event.name.toLowerCase().includes(searchTerm.toLowerCase())
+        event.eventName?.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
-    const generateTicketQR = async (event) => {
+    const generateTicketQR = async (event, ticketId) => {
         try {
             // Tạo mã QR với thông tin vé
+            const userId = localStorage.getItem('userId');
             const ticketData = {
-                eventId: event.id,
-                eventName: event.name,
-                studentId: "SV001", // Sẽ lấy từ user info
+                eventId: event.eventId,
+                eventName: event.eventName,
+                studentId: userId,
                 bookingDate: new Date().toISOString(),
-                ticketId: `TKT-${event.id}-${Date.now()}`
+                ticketId: ticketId
             };
             
             const qrCodeDataUrl = await QRCode.toDataURL(JSON.stringify(ticketData), {
@@ -93,8 +73,8 @@ const StudentEventPage = () => {
             setShowTicketModal(true);
             
             // Thêm vào danh sách đã đặt
-            if (!bookedEvents.includes(event.id)) {
-                setBookedEvents([...bookedEvents, event.id]);
+            if (!bookedEvents.includes(event.eventId)) {
+                setBookedEvents([...bookedEvents, event.eventId]);
             }
             
             toast.success('Đặt vé thành công!', {
@@ -107,9 +87,30 @@ const StudentEventPage = () => {
         }
     };
 
-    const handleBookTicket = (event) => {
-        if (event.availableSeats > 0) {
-            generateTicketQR(event);
+    const handleBookTicket = async (event) => {
+        const availableSeats = getAvailableSeats(event);
+        if (availableSeats > 0) {
+            try {
+                const userId = parseInt(localStorage.getItem('userId'));
+                const response = await axios.post('https://localhost:7047/api/Ticket', {
+                    userId: userId,
+                    eventId: event.eventId
+                });
+
+                if (response.data.success) {
+                    // Lấy ticket ID từ response
+                    const ticketId = response.data.data?.ticketId || `TKT-${event.eventId}-${Date.now()}`;
+                    await generateTicketQR(event, ticketId);
+                    
+                    // Cập nhật lại danh sách events để giảm availableSeats
+                    fetchEvents();
+                } else {
+                    toast.error(response.data.message || 'Không thể đặt vé');
+                }
+            } catch (error) {
+                console.error('Error booking ticket:', error);
+                toast.error(error.response?.data?.message || 'Có lỗi xảy ra khi đặt vé!');
+            }
         } else {
             toast.warning('Sự kiện đã hết chỗ!');
         }
@@ -118,18 +119,43 @@ const StudentEventPage = () => {
     const downloadTicket = () => {
         const link = document.createElement('a');
         link.href = ticketQRCode;
-        link.download = `ticket-${selectedEvent.name.replace(/\s+/g, '-')}.png`;
+        link.download = `ticket-${selectedEvent.eventName.replace(/\s+/g, '-')}.png`;
         link.click();
         toast.success('Đã tải xuống vé!');
     };
 
     const getStatusBadge = (status) => {
         const statusMap = {
-            upcoming: { text: "Sắp diễn ra", class: "badge-upcoming" },
-            ongoing: { text: "Đang diễn ra", class: "badge-ongoing" },
-            completed: { text: "Đã hoàn thành", class: "badge-completed" }
+            "Approve": { text: "Sắp diễn ra", class: "badge-upcoming" },
+            "Pending": { text: "Đang chờ", class: "badge-ongoing" },
+            "Reject": { text: "Đã từ chối", class: "badge-completed" }
         };
-        return statusMap[status] || statusMap.upcoming;
+        return statusMap[status] || { text: "Sắp diễn ra", class: "badge-upcoming" };
+    };
+
+    // Format date để hiển thị
+    const formatDate = (dateString) => {
+        if (!dateString) return '';
+        const date = new Date(dateString);
+        return date.toLocaleDateString('vi-VN');
+    };
+
+    // Format time range từ slotEvent array
+    const formatTimeRange = (slotEvent) => {
+        if (!slotEvent || slotEvent.length === 0) return 'Chưa xác định';
+        const slot = slotEvent[0]; // Lấy slot đầu tiên
+        return `${slot.startTime} - ${slot.endTime}`;
+    };
+
+    // Lấy slot name
+    const getSlotName = (slotEvent) => {
+        if (!slotEvent || slotEvent.length === 0) return '';
+        return slotEvent[0].slotName;
+    };
+
+    // Tính số chỗ còn trống
+    const getAvailableSeats = (event) => {
+        return event.maxTickerCount - event.currentTickerCount;
     };
 
     return (
@@ -161,64 +187,78 @@ const StudentEventPage = () => {
 
                     {/* Events List */}
                     <div className="events-grid">
-                        {filteredEvents.map(event => (
-                            <div key={event.id} className="event-card">
-                                <div className="event-card-header">
-                                    <h3>{event.name}</h3>
-                                    <span className={`status-badge ${getStatusBadge(event.status).class}`}>
-                                        {getStatusBadge(event.status).text}
-                                    </span>
-                                </div>
-                                
-                                <p className="event-description">{event.description}</p>
-                                <p className="event-organizer">Tổ chức bởi: <strong>{event.organizer}</strong></p>
-                                
-                                <div className="event-details">
-                                    <div className="detail-item">
-                                        <FaCalendar className="detail-icon" />
-                                        <span>{event.date}</span>
-                                    </div>
-                                    <div className="detail-item">
-                                        <FaClock className="detail-icon" />
-                                        <span>{event.time}</span>
-                                    </div>
-                                    <div className="detail-item">
-                                        <FaMapMarkerAlt className="detail-icon" />
-                                        <span>{event.venue}</span>
-                                    </div>
-                                    <div className="detail-item">
-                                        <FaUsers className="detail-icon" />
-                                        <span>{event.availableSeats}/{event.totalSeats} chỗ trống</span>
-                                    </div>
-                                </div>
-
-                                <div className="event-actions">
-                                    {bookedEvents.includes(event.id) ? (
-                                        <button 
-                                            className="btn-booked"
-                                            disabled
-                                        >
-                                            <FaTicketAlt /> Đã đặt vé
-                                        </button>
-                                    ) : (
-                                        <button 
-                                            className="btn-book"
-                                            onClick={() => handleBookTicket(event)}
-                                            disabled={event.availableSeats === 0}
-                                        >
-                                            <FaTicketAlt /> {event.availableSeats > 0 ? 'Đặt vé ngay' : 'Hết chỗ'}
-                                        </button>
-                                    )}
-                                </div>
+                        {loading ? (
+                            <div className="loading-message">
+                                <p>Đang tải danh sách sự kiện...</p>
                             </div>
-                        ))}
-                    </div>
+                        ) : filteredEvents.length > 0 ? (
+                            filteredEvents.map(event => {
+                                const availableSeats = getAvailableSeats(event);
+                                return (
+                                    <div key={event.eventId} className="event-card">
+                                        <div className="event-card-header">
+                                            <h3>{event.eventName}</h3>
+                                            <span className={`status-badge ${getStatusBadge(event.status).class}`}>
+                                                {getStatusBadge(event.status).text}
+                                            </span>
+                                        </div>
+                                        
+                                        <p className="event-description">{event.eventDescription}</p>
+                                        {event.speakerEvent && event.speakerEvent.length > 0 && (
+                                            <p className="event-organizer">
+                                                Diễn giả: <strong>{event.speakerEvent.map(s => s.speakerName).join(', ')}</strong>
+                                            </p>
+                                        )}
+                                        
+                                        <div className="event-details">
+                                            <div className="detail-item">
+                                                <FaCalendar className="detail-icon" />
+                                                <span>{formatDate(event.eventDay)}</span>
+                                            </div>
+                                            <div className="detail-item">
+                                                <FaClock className="detail-icon" />
+                                                <span>{getSlotName(event.slotEvent)} ({formatTimeRange(event.slotEvent)})</span>
+                                            </div>
+                                            <div className="detail-item">
+                                                <FaMapMarkerAlt className="detail-icon" />
+                                                <span>{event.venueName || 'Chưa xác định'} - {event.locationDetails || ''}</span>
+                                            </div>
+                                            <div className="detail-item">
+                                                <FaUsers className="detail-icon" />
+                                                <span>{availableSeats}/{event.maxTickerCount} chỗ trống</span>
+                                            </div>
+                                        </div>
 
-                    {filteredEvents.length === 0 && (
-                        <div className="no-events">
-                            <p>Không tìm thấy sự kiện nào phù hợp</p>
-                        </div>
-                    )}
+                                        <div className="event-actions">
+                                            {bookedEvents.includes(event.eventId) ? (
+                                                <button 
+                                                    className="btn-booked"
+                                                    disabled
+                                                >
+                                                    <FaTicketAlt /> Đã đặt vé
+                                                </button>
+                                            ) : (
+                                                <button 
+                                                    className="btn-book"
+                                                    onClick={() => {
+                                                        console.log('Booking ticket for event:', event);
+                                                        handleBookTicket(event);
+                                                    }}
+                                                    disabled={availableSeats <= 0}
+                                                >
+                                                    <FaTicketAlt /> {availableSeats > 0 ? 'Đặt vé ngay' : 'Hết chỗ'}
+                                                </button>
+                                            )}
+                                        </div>
+                                    </div>
+                                );
+                            })
+                        ) : (
+                            <div className="no-events">
+                                <p>Không tìm thấy sự kiện nào phù hợp</p>
+                            </div>
+                        )}
+                    </div>
                 </div>
             </div>
 
@@ -239,11 +279,11 @@ const StudentEventPage = () => {
                         <div className="modal-body">
                             <div className="ticket-container">
                                 <div className="ticket-info">
-                                    <h3>{selectedEvent.name}</h3>
+                                    <h3>{selectedEvent?.eventName}</h3>
                                     <div className="ticket-details">
-                                        <p><FaCalendar /> <strong>Ngày:</strong> {selectedEvent.date}</p>
-                                        <p><FaClock /> <strong>Thời gian:</strong> {selectedEvent.time}</p>
-                                        <p><FaMapMarkerAlt /> <strong>Địa điểm:</strong> {selectedEvent.venue}</p>
+                                        <p><FaCalendar /> <strong>Ngày:</strong> {formatDate(selectedEvent?.eventDay)}</p>
+                                        <p><FaClock /> <strong>Thời gian:</strong> {formatTimeRange(selectedEvent?.slotEvent)}</p>
+                                        <p><FaMapMarkerAlt /> <strong>Địa điểm:</strong> {selectedEvent?.venueName} - {selectedEvent?.locationDetails}</p>
                                     </div>
                                 </div>
                                 
