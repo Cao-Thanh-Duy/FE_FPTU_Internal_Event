@@ -1,9 +1,10 @@
 import React, { useState, useRef, useEffect } from "react";
 import "../assets/css/QRScannerPage.css";
 import SidebarStaff from "../components/SidebarStaff";
-import { FaQrcode, FaCamera, FaCheckCircle, FaTimesCircle, FaUpload, FaKeyboard } from 'react-icons/fa';
+import { FaQrcode, FaCamera, FaCheckCircle, FaTimesCircle, FaUpload, FaKeyboard, FaBan } from 'react-icons/fa';
 import { toast } from 'react-toastify';
 import { Html5Qrcode } from 'html5-qrcode';
+import axios from 'axios';
 
 const QRScannerPage = () => {
     const [isScanning, setIsScanning] = useState(false);
@@ -11,44 +12,54 @@ const QRScannerPage = () => {
     const [scanHistory, setScanHistory] = useState([]);
     const [manualCode, setManualCode] = useState("");
     const [showManualInput, setShowManualInput] = useState(false);
+    const [isProcessing, setIsProcessing] = useState(false);
     const html5QrCodeRef = useRef(null);
     const qrCodeRegionId = "qr-reader";
-
     // Hàm xử lý kết quả quét QR
-    const handleScanSuccess = (decodedText) => {
-        // Parse QR code data
+    const handleScanSuccess = async (decodedText) => {
+        // Kiểm tra xem đã có scannedData rồi thì không xử lý nữa
+        if (scannedData && scannedData.ticketCode === decodedText) {
+            return;
+        }
+        
         try {
-            // Giả sử QR code chứa JSON hoặc format đơn giản
-            let qrData;
-            try {
-                qrData = JSON.parse(decodedText);
-            } catch {
-                // Nếu không phải JSON, coi như là userId/code đơn giản
-                qrData = {
-                    userId: decodedText,
-                    userName: "User " + decodedText.substring(0, 8),
-                    eventId: "EVENT001",
-                    timestamp: new Date().toISOString()
+            // Dừng quét ngay khi có kết quả
+            await stopCamera();
+            
+            toast.info('Đang lấy thông tin ticket...');
+            
+            // Gọi API để lấy thông tin ticket từ ticketCode
+            const response = await axios.get(`https://localhost:7047/infoticket?ticketCode=${decodedText}`);
+            
+            if (response.data.success) {
+                const ticketData = response.data.data;
+                setScannedData(ticketData);
+                
+                // Thêm vào lịch sử
+                const newScan = {
+                    ...ticketData,
+                    scanTime: new Date().toLocaleString('vi-VN'),
+                    status: 'success'
                 };
+                
+                setScanHistory(prev => [newScan, ...prev].slice(0, 10));
+                toast.success('Đã lấy thông tin ticket thành công!');
+            } else {
+                throw new Error(response.data.message || 'Failed to get ticket info');
             }
-
-            setScannedData(qrData);
-            
-            // Thêm vào lịch sử
-            const newScan = {
-                ...qrData,
-                scanTime: new Date().toLocaleString('vi-VN'),
-                status: 'success'
-            };
-            
-            setScanHistory(prev => [newScan, ...prev].slice(0, 10));
-            toast.success(`Check-in thành công: ${qrData.userName || qrData.userId}`);
-            
-            // Dừng quét sau khi thành công
-            stopCamera();
         } catch (error) {
             console.error("Error processing QR code:", error);
-            toast.error('Lỗi khi xử lý mã QR');
+            const errorMessage = error.response?.data?.message || error.message || 'Lỗi khi xử lý mã QR';
+            toast.error(errorMessage);
+            
+            // Thêm vào lịch sử với status error
+            const errorScan = {
+                ticketCode: decodedText,
+                scanTime: new Date().toLocaleString('vi-VN'),
+                status: 'error',
+                errorMessage: errorMessage
+            };
+            setScanHistory(prev => [errorScan, ...prev].slice(0, 10));
         }
     };
 
@@ -74,7 +85,10 @@ const QRScannerPage = () => {
             await html5QrCodeRef.current.start(
                 { facingMode: "environment" },
                 config,
-                handleScanSuccess,
+                (decodedText, decodedResult) => {
+                    // Gọi handleScanSuccess và dừng quét ngay
+                    handleScanSuccess(decodedText);
+                },
                 (errorMessage) => {
                     // Lỗi quét - không cần hiển thị mỗi lần
                     console.log("Scanning...", errorMessage);
@@ -85,6 +99,7 @@ const QRScannerPage = () => {
         } catch (err) {
             console.error("Error accessing camera:", err);
             setIsScanning(false);
+            
             toast.error('Không thể truy cập camera. Vui lòng cấp quyền camera hoặc sử dụng HTTPS/localhost.');
         }
     };
@@ -92,34 +107,48 @@ const QRScannerPage = () => {
     // Hàm tắt camera
     const stopCamera = async () => {
         try {
-            if (html5QrCodeRef.current && isScanning) {
+            if (html5QrCodeRef.current && html5QrCodeRef.current.isScanning) {
                 await html5QrCodeRef.current.stop();
                 setIsScanning(false);
-                toast.info('Camera đã được tắt');
             }
         } catch (err) {
             console.error("Error stopping camera:", err);
+            setIsScanning(false);
         }
     };
 
-    // Hàm xử lý upload ảnh QR
-    const handleImageUpload = async (event) => {
+    // Hàm quét QR từ ảnh upload
+    const handleFileScan = async (event) => {
         const file = event.target.files[0];
-        if (file) {
-            try {
-                toast.info('Đang xử lý ảnh QR...');
-                
-                if (!html5QrCodeRef.current) {
-                    html5QrCodeRef.current = new Html5Qrcode(qrCodeRegionId);
-                }
+        if (!file) return;
 
-                const result = await html5QrCodeRef.current.scanFile(file, true);
-                handleScanSuccess(result);
-            } catch (err) {
-                console.error("Error scanning file:", err);
-                toast.error('Không thể đọc mã QR từ ảnh này');
+        let tempContainer = null;
+        const tempId = `${qrCodeRegionId}-file`;
+
+        try {
+            tempContainer = document.createElement('div');
+            tempContainer.id = tempId;
+            tempContainer.style.display = 'none';
+            document.body.appendChild(tempContainer);
+
+            const html5QrCode = new Html5Qrcode(tempId);
+            const result = await html5QrCode.scanFile(file, true);
+            await html5QrCode.stop();
+            handleScanSuccess(result);
+        } catch (err) {
+            console.error("Error scanning file:", err);
+            toast.error('Không thể đọc mã QR từ ảnh này');
+        } finally {
+            if (tempContainer) {
+                tempContainer.remove();
             }
+            event.target.value = '';
         }
+    };
+
+    // Reset input value and trigger file scan
+    const handleImageUpload = (event) => {
+        handleFileScan(event);
     };
 
     // Hàm xử lý nhập code thủ công
@@ -131,6 +160,75 @@ const QRScannerPage = () => {
             setShowManualInput(false);
         } else {
             toast.warning('Vui lòng nhập mã check-in');
+        }
+    };
+
+    // Hàm Check In
+    const handleCheckIn = async (ticketId) => {
+        if (!ticketId) return;
+        
+        setIsProcessing(true);
+        try {
+            const response = await axios.put(`https://localhost:7047/CheckIn?ticketId=${ticketId}`);
+            
+            if (response.data.success) {
+                toast.success('Check-in thành công!');
+                
+                // Cập nhật scannedData với status mới
+                setScannedData(prev => ({
+                    ...prev,
+                    status: 'Checked',
+                    checkInTime: new Date().toISOString()
+                }));
+                
+                // Cập nhật lịch sử
+                setScanHistory(prev => prev.map((item, idx) => 
+                    idx === 0 ? { ...item, status: 'Checked' } : item
+                ));
+            } else {
+                toast.error(response.data.message || 'Check-in thất bại');
+            }
+        } catch (error) {
+            console.error('Error checking in:', error);
+            const errorMessage = error.response?.data?.message || 'Không thể check-in. Vui lòng thử lại.';
+            toast.error(errorMessage);
+        } finally {
+            setIsProcessing(false);
+        }
+    };
+
+    // Hàm Cancel Ticket
+    const handleCancelTicket = async (ticketId) => {
+        if (!ticketId) return;
+        
+        if (!window.confirm('Bạn có chắc chắn muốn hủy ticket này?')) return;
+        
+        setIsProcessing(true);
+        try {
+            const response = await axios.put(`https://localhost:7047/Cancelled?ticketId=${ticketId}`);
+            
+            if (response.data.success) {
+                toast.success('Hủy ticket thành công!');
+                
+                // Cập nhật scannedData với status mới
+                setScannedData(prev => ({
+                    ...prev,
+                    status: 'Cancelled'
+                }));
+                
+                // Cập nhật lịch sử
+                setScanHistory(prev => prev.map((item, idx) => 
+                    idx === 0 ? { ...item, status: 'Cancelled' } : item
+                ));
+            } else {
+                toast.error(response.data.message || 'Hủy ticket thất bại');
+            }
+        } catch (error) {
+            console.error('Error cancelling ticket:', error);
+            const errorMessage = error.response?.data?.message || 'Không thể hủy ticket. Vui lòng thử lại.';
+            toast.error(errorMessage);
+        } finally {
+            setIsProcessing(false);
         }
     };
 
@@ -227,11 +325,32 @@ const QRScannerPage = () => {
 
                             {scannedData && (
                                 <div className="scanned-result">
-                                    <h3>Kết quả quét:</h3>
+                                    <h3>Thông tin Ticket:</h3>
                                     <div className="result-details">
-                                        <p><strong>User ID:</strong> {scannedData.userId}</p>
-                                        <p><strong>Tên:</strong> {scannedData.userName}</p>
-                                        <p><strong>Event ID:</strong> {scannedData.eventId}</p>
+                                        <p><strong>Ticket ID:</strong> {scannedData.ticketId}</p>
+                                        <p><strong>Ticket Code:</strong> {scannedData.ticketCode}</p>
+                                        <p><strong>User:</strong> {scannedData.userName}</p>
+                                        <p><strong>Event:</strong> {scannedData.eventName}</p>
+                                        <p><strong>Status:</strong> <span className={`status-badge ${scannedData.status?.toLowerCase()}`}>{scannedData.status}</span></p>
+                                        {scannedData.checkInTime && (
+                                            <p><strong>Check-in Time:</strong> {new Date(scannedData.checkInTime).toLocaleString('vi-VN')}</p>
+                                        )}
+                                    </div>
+                                    <div className="action-buttons">
+                                        <button 
+                                            className="btn-checkin"
+                                            onClick={() => handleCheckIn(scannedData.ticketId)}
+                                            disabled={isProcessing || scannedData.status === 'Checked' || scannedData.status === 'Cancelled'}
+                                        >
+                                            <FaCheckCircle /> Check In
+                                        </button>
+                                        <button 
+                                            className="btn-cancel-ticket"
+                                            onClick={() => handleCancelTicket(scannedData.ticketId)}
+                                            disabled={isProcessing || scannedData.status === 'Cancelled'}
+                                        >
+                                            <FaBan /> Cancel Ticket
+                                        </button>
                                     </div>
                                 </div>
                             )}

@@ -293,7 +293,7 @@
 
 .scanned-result h3 {
   color: #c2410c;
-  margin-bottom: 12px;
+  margin-bottom: 16px;
   font-weight: 600;
 }
 
@@ -305,6 +305,79 @@
 
 .result-details strong {
   color: #7c2d12;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.status-badge.registered {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.status-badge.checked {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.status-badge.cancelled {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.btn-checkin,
+.btn-cancel-ticket {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 20px;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-checkin {
+  background: #10b981;
+  color: white;
+}
+
+.btn-checkin:hover:not(:disabled) {
+  background: #059669;
+  transform: translateY(-2px);
+}
+
+.btn-cancel-ticket {
+  background: #ef4444;
+  color: white;
+}
+
+.btn-cancel-ticket:hover:not(:disabled) {
+  background: #dc2626;
+  transform: translateY(-2px);
+}
+
+.btn-checkin:disabled,
+.btn-cancel-ticket:disabled {
+  background: #d1d5db;
+  color: #9ca3af;
+  cursor: not-allowed;
+  transform: none;
 }
 
 /* History Section */
