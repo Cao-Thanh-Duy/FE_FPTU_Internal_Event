@@ -1,44 +1,87 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
 import "../assets/css/StaffEventPage.css";
 import SidebarStaff from "../components/SidebarStaff";
 import { FaCalendar, FaClock, FaMapMarkerAlt, FaUsers, FaSearch } from 'react-icons/fa';
+import { getUserInfo } from "../utils/auth";
 
 const StaffEventPage = () => {
     const [searchTerm, setSearchTerm] = useState("");
+    const [events, setEvents] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
     
-    // Mock data - sẽ thay bằng API sau
-    const events = [
-        {
-            id: 1,
-            name: "Workshop ReactJS 2024",
-            date: "2024-12-15",
-            time: "14:00 - 16:00",
-            venue: "Phòng A101",
-            participants: 45,
-            status: "upcoming",
-            description: "Workshop về ReactJS cơ bản và nâng cao"
-        },
-        {
-            id: 2,
-            name: "Hội thảo AI và Machine Learning",
-            date: "2024-12-20",
-            time: "09:00 - 11:30",
-            venue: "Hội trường A",
-            participants: 120,
-            status: "upcoming",
-            description: "Hội thảo về xu hướng AI và ML trong năm 2024"
-        },
-        {
-            id: 3,
-            name: "Ngày hội Sinh viên",
-            date: "2024-12-10",
-            time: "08:00 - 17:00",
-            venue: "Sân vận động",
-            participants: 300,
-            status: "completed",
-            description: "Ngày hội văn hóa sinh viên FPTU"
+    // Lấy events từ API
+    useEffect(() => {
+        fetchStaffEvents();
+    }, []);
+
+    const fetchStaffEvents = async () => {
+        try {
+            setLoading(true);
+            setError(null);
+            
+            const { userId, token } = getUserInfo();
+            
+            if (!userId || !token) {
+                setError("Không tìm thấy thông tin đăng nhập");
+                setLoading(false);
+                return;
+            }
+
+            const response = await axios.get(
+                `https://localhost:7047/api/Event/staff-events?userId=${userId}`,
+                {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'accept': '*/*'
+                    }
+                }
+            );
+
+            if (response.data.success && response.data.data) {
+                // Lọc và map dữ liệu từ API sang format của component
+                // Chỉ hiển thị events có status = "Approve"
+                const mappedEvents = response.data.data
+                    .filter(event => event.status === "Approve")
+                    .map(event => {
+                    // Lấy thông tin slot để hiển thị thời gian
+                    const timeSlots = event.slotEvent.map(slot => 
+                        `${slot.startTime.substring(0, 5)} - ${slot.endTime.substring(0, 5)}`
+                    ).join(', ');
+
+                    // Map status
+                    let status = 'upcoming';
+                    if (event.status === 'Completed') {
+                        status = 'completed';
+                    } else if (event.status === 'Ongoing') {
+                        status = 'ongoing';
+                    }
+
+                    return {
+                        id: event.eventId,
+                        name: event.eventName,
+                        date: event.eventDay,
+                        time: timeSlots || "Chưa có thời gian",
+                        venue: `${event.venueName} - ${event.locationDetails}`,
+                        participants: event.currentTickerCount,
+                        maxParticipants: event.maxTickerCount,
+                        status: status,
+                        description: event.eventDescription,
+                        slotEvent: event.slotEvent,
+                        speakerEvent: event.speakerEvent
+                    };
+                });
+
+                setEvents(mappedEvents);
+            }
+        } catch (err) {
+            console.error("Error fetching staff events:", err);
+            setError(err.response?.data?.message || "Không thể tải danh sách sự kiện");
+        } finally {
+            setLoading(false);
         }
-    ];
+    };
 
     const filteredEvents = events.filter(event =>
         event.name.toLowerCase().includes(searchTerm.toLowerCase())
@@ -80,47 +123,66 @@ const StaffEventPage = () => {
                         </div>
                     </div>
 
-                    {/* Events List */}
-                    <div className="events-grid">
-                        {filteredEvents.map(event => (
-                            <div key={event.id} className="event-card">
-                                <div className="event-card-header">
-                                    <h3>{event.name}</h3>
-                                    <span className={`status-badge ${getStatusBadge(event.status).class}`}>
-                                        {getStatusBadge(event.status).text}
-                                    </span>
-                                </div>
-                                
-                                <p className="event-description">{event.description}</p>
-                                
-                                <div className="event-details">
-                                    <div className="detail-item">
-                                        <FaCalendar className="detail-icon" />
-                                        <span>{event.date}</span>
-                                    </div>
-                                    <div className="detail-item">
-                                        <FaClock className="detail-icon" />
-                                        <span>{event.time}</span>
-                                    </div>
-                                    <div className="detail-item">
-                                        <FaMapMarkerAlt className="detail-icon" />
-                                        <span>{event.venue}</span>
-                                    </div>
-                                    <div className="detail-item">
-                                        <FaUsers className="detail-icon" />
-                                        <span>{event.participants} người tham gia</span>
-                                    </div>
-                                </div>
-                                
-                                <div className="event-actions">
-                                    <button className="btn-view">Xem chi tiết</button>
-                                    <button className="btn-checkin">Check-in</button>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
+                    {/* Loading State */}
+                    {loading && (
+                        <div className="loading-message">
+                            <p>Đang tải danh sách sự kiện...</p>
+                        </div>
+                    )}
 
-                    {filteredEvents.length === 0 && (
+                    {/* Error State */}
+                    {error && (
+                        <div className="error-message">
+                            <p>❌ {error}</p>
+                            <button onClick={fetchStaffEvents} className="btn-retry">
+                                Thử lại
+                            </button>
+                        </div>
+                    )}
+
+                    {/* Events List */}
+                    {!loading && !error && (
+                        <div className="events-grid">
+                            {filteredEvents.map(event => (
+                                <div key={event.id} className="event-card">
+                                    <div className="event-card-header">
+                                        <h3>{event.name}</h3>
+                                        <span className={`status-badge ${getStatusBadge(event.status).class}`}>
+                                            {getStatusBadge(event.status).text}
+                                        </span>
+                                    </div>
+                                    
+                                    <p className="event-description">{event.description}</p>
+                                    
+                                    <div className="event-details">
+                                        <div className="detail-item">
+                                            <FaCalendar className="detail-icon" />
+                                            <span>{event.date}</span>
+                                        </div>
+                                        <div className="detail-item">
+                                            <FaClock className="detail-icon" />
+                                            <span>{event.time}</span>
+                                        </div>
+                                        <div className="detail-item">
+                                            <FaMapMarkerAlt className="detail-icon" />
+                                            <span>{event.venue}</span>
+                                        </div>
+                                        <div className="detail-item">
+                                            <FaUsers className="detail-icon" />
+                                            <span>{event.participants}/{event.maxParticipants} người tham gia</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="event-actions">
+                                        <button className="btn-view">Xem chi tiết</button>
+                                        <button className="btn-checkin">Check-in</button>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+
+                    {!loading && !error && filteredEvents.length === 0 && (
                         <div className="no-results">
                             <p>Không tìm thấy sự kiện nào</p>
                         </div>

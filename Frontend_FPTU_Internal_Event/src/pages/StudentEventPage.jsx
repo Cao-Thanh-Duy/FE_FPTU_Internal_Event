@@ -153,9 +153,9 @@ const StudentEventPage = () => {
         return slotEvent[0].slotName;
     };
 
-    // Tính số chỗ còn trống
+    // Lấy số vé còn lại (currentTickerCount là số vé còn lại, giảm dần khi có người đặt)
     const getAvailableSeats = (event) => {
-        return event.maxTickerCount - event.currentTickerCount;
+        return event.currentTickerCount;
     };
 
     return (
@@ -225,7 +225,7 @@ const StudentEventPage = () => {
                                             </div>
                                             <div className="detail-item">
                                                 <FaUsers className="detail-icon" />
-                                                <span>{availableSeats}/{event.maxTickerCount} chỗ trống</span>
+                                                <span>{event.currentTickerCount}/{event.maxTickerCount} vé còn lại</span>
                                             </div>
                                         </div>
 
