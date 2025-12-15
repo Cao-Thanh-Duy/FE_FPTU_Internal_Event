@@ -55,6 +55,12 @@ const QRScannerPage = () => {
     // Hàm bật camera với html5-qrcode
     const startCamera = async () => {
         try {
+            // Set scanning state first để render DOM element
+            setIsScanning(true);
+            
+            // Đợi DOM render
+            await new Promise(resolve => setTimeout(resolve, 100));
+            
             if (!html5QrCodeRef.current) {
                 html5QrCodeRef.current = new Html5Qrcode(qrCodeRegionId);
             }
@@ -75,10 +81,10 @@ const QRScannerPage = () => {
                 }
             );
 
-            setIsScanning(true);
             toast.success('Camera đã được bật');
         } catch (err) {
             console.error("Error accessing camera:", err);
+            setIsScanning(false);
             toast.error('Không thể truy cập camera. Vui lòng cấp quyền camera hoặc sử dụng HTTPS/localhost.');
         }
     };
