@@ -143,6 +143,17 @@
   color: #f55b01;
 }
 
+.speaker-name-link {
+  cursor: pointer;
+  text-decoration: underline;
+  transition: all 0.2s;
+}
+
+.speaker-name-link:hover {
+  color: #dc2626;
+  text-decoration: underline;
+}
+
 .event-details {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -397,6 +408,51 @@
   .ticket-qr img {
     max-width: 250px;
   }
+}
+
+/* Speaker Modal */
+.speaker-modal {
+  max-width: 600px;
+  width: 90%;
+}
+
+.speaker-details {
+  text-align: center;
+  padding: 20px;
+}
+
+.speaker-details .speaker-name {
+  font-size: 1.75rem;
+  color: #1f2937;
+  margin-bottom: 20px;
+  font-weight: 700;
+}
+
+.speaker-description {
+  background: #f9fafb;
+  padding: 20px;
+  border-radius: 8px;
+  border-left: 4px solid #f55b01;
+  margin-top: 20px;
+}
+
+.speaker-description p {
+  font-size: 1rem;
+  color: #4b5563;
+  line-height: 1.6;
+  margin: 0;
+  text-align: left;
+}
+
+.loading-speaker {
+  text-align: center;
+  padding: 40px 20px;
+  color: #6b7280;
+}
+
+.loading-speaker p {
+  font-size: 1rem;
+  margin: 0;
 }
 
 @media (max-width: 480px) {

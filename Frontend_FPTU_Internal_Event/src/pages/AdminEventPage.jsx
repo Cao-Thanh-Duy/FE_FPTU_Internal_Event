@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import SidebarAdmin from '../components/SidebarAdmin';
-import { FaSearch, FaCheck, FaTimes, FaCalendarAlt, FaMapMarkerAlt, FaUsers, FaClock } from 'react-icons/fa';
+import { FaSearch, FaCheck, FaTimes, FaCalendarAlt, FaMapMarkerAlt, FaUsers, FaClock, FaMicrophone, FaSortAmountDown, FaSortAmountUp } from 'react-icons/fa';
 import { toast } from 'react-toastify';
 import '../assets/css/AdminEventPage.css';
 
@@ -10,6 +10,7 @@ const AdminEventPage = () => {
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const [filterStatus, setFilterStatus] = useState('all'); // all, pending, approved, rejected
+    const [sortOrder, setSortOrder] = useState('nearest'); // nearest, farthest
 
     useEffect(() => {
         fetchEvents();
@@ -98,17 +99,23 @@ const AdminEventPage = () => {
         const matchesFilter = 
             filterStatus === 'all' ||
             (filterStatus === 'pending' && event.status === 'Pending') ||
-            (filterStatus === 'approved' && event.status === 'Approved') ||
-            (filterStatus === 'rejected' && event.status === 'Rejected');
+            (filterStatus === 'approved' && (event.status === 'Approved' || event.status === 'Approve')) ||
+            (filterStatus === 'rejected' && (event.status === 'Rejected' || event.status === 'Reject'));
         
         return matchesSearch && matchesFilter;
+    }).sort((a, b) => {
+        const dateA = new Date(a.eventDay);
+        const dateB = new Date(b.eventDay);
+        return sortOrder === 'nearest' ? dateA - dateB : dateB - dateA;
     });
 
     const getStatusBadge = (status) => {
         const statusClasses = {
             'Pending': 'status-pending',
             'Approved': 'status-approved',
-            'Rejected': 'status-rejected'
+            'Approve': 'status-approved',
+            'Rejected': 'status-rejected',
+            'Reject': 'status-rejected'
         };
         return statusClasses[status] || 'status-pending';
     };
@@ -133,6 +140,14 @@ const AdminEventPage = () => {
                                 onChange={(e) => setSearchTerm(e.target.value)}
                             />
                         </div>
+                        <button 
+                            className="sort-btn"
+                            onClick={() => setSortOrder(sortOrder === 'nearest' ? 'farthest' : 'nearest')}
+                            title={sortOrder === 'nearest' ? 'Sắp xếp: Gần nhất → Xa nhất' : 'Sắp xếp: Xa nhất → Gần nhất'}
+                        >
+                            {sortOrder === 'nearest' ? <FaSortAmountDown /> : <FaSortAmountUp />}
+                            {sortOrder === 'nearest' ? 'Gần nhất' : 'Xa nhất'}
+                        </button>
                         <div className="filter-buttons">
                             <button 
                                 className={`filter-btn ${filterStatus === 'all' ? 'active' : ''}`}
@@ -206,6 +221,23 @@ const AdminEventPage = () => {
                                                     <div className="slot-tags">
                                                         {event.slotEvent.map((slot, idx) => (
                                                             <span key={idx} className="slot-tag">{slot.slotName} ({slot.startTime}-{slot.endTime})</span>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            )}
+
+                                            {event.speakerEvent && event.speakerEvent.length > 0 && (
+                                                <div className="event-speakers">
+                                                    <FaMicrophone className="detail-icon" />
+                                                    <span className="speakers-label">Speakers:</span>
+                                                    <div className="speaker-list">
+                                                        {event.speakerEvent.map((speaker, idx) => (
+                                                            <div key={idx} className="speaker-item">
+                                                                <span className="speaker-name">{speaker.speakerName}</span>
+                                                                {speaker.speakerDescription && (
+                                                                    <span className="speaker-description">- {speaker.speakerDescription}</span>
+                                                                )}
+                                                            </div>
                                                         ))}
                                                     </div>
                                                 </div>

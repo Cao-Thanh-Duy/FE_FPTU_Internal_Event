@@ -14,6 +14,9 @@ const StudentEventPage = () => {
     const [bookedEvents, setBookedEvents] = useState([]);
     const [events, setEvents] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [showSpeakerModal, setShowSpeakerModal] = useState(false);
+    const [selectedSpeaker, setSelectedSpeaker] = useState(null);
+    const [loadingSpeaker, setLoadingSpeaker] = useState(false);
     
     // Fetch events from API
     useEffect(() => {
@@ -158,6 +161,28 @@ const StudentEventPage = () => {
         return event.currentTickerCount;
     };
 
+    const handleViewSpeaker = async (speakerId) => {
+        try {
+            setLoadingSpeaker(true);
+            setShowSpeakerModal(true);
+            
+            const response = await axios.get(`https://localhost:7047/api/Speaker/${speakerId}`);
+            
+            if (response.data.success) {
+                setSelectedSpeaker(response.data.data);
+            } else {
+                toast.error('Không thể tải thông tin diễn giả');
+                setShowSpeakerModal(false);
+            }
+        } catch (error) {
+            console.error('Error fetching speaker details:', error);
+            toast.error('Có lỗi xảy ra khi tải thông tin diễn giả');
+            setShowSpeakerModal(false);
+        } finally {
+            setLoadingSpeaker(false);
+        }
+    };
+
     return (
         <div className="student-event-page">
             <SidebarStudent />
@@ -206,7 +231,30 @@ const StudentEventPage = () => {
                                         <p className="event-description">{event.eventDescription}</p>
                                         {event.speakerEvent && event.speakerEvent.length > 0 && (
                                             <p className="event-organizer">
-                                                Diễn giả: <strong>{event.speakerEvent.map(s => s.speakerName).join(', ')}</strong>
+                                                Diễn giả: 
+                                                {event.speakerEvent.map((speaker, index) => {
+                                                    console.log('Speaker object:', speaker);
+                                                    return (
+                                                        <span key={speaker.speakerId || speaker.id || index}>
+                                                            {index > 0 && ', '}
+                                                            <strong 
+                                                                className="speaker-name-link"
+                                                                onClick={() => {
+                                                                    const speakerId = speaker.speakerId || speaker.id;
+                                                                    console.log('Clicking speaker ID:', speakerId);
+                                                                    if (speakerId) {
+                                                                        handleViewSpeaker(speakerId);
+                                                                    } else {
+                                                                        toast.error('Không tìm thấy ID của diễn giả');
+                                                                    }
+                                                                }}
+                                                                title="Click để xem thông tin diễn giả"
+                                                            >
+                                                                {speaker.speakerName}
+                                                            </strong>
+                                                        </span>
+                                                    );
+                                                })}
                                             </p>
                                         )}
                                         
@@ -261,6 +309,60 @@ const StudentEventPage = () => {
                     </div>
                 </div>
             </div>
+
+            {/* Speaker Modal */}
+            {showSpeakerModal && (
+                <div className="modal-overlay" onClick={() => {
+                    setShowSpeakerModal(false);
+                    setSelectedSpeaker(null);
+                }}>
+                    <div className="modal-content speaker-modal" onClick={(e) => e.stopPropagation()}>
+                        <div className="modal-header">
+                            <h2>Thông tin diễn giả</h2>
+                            <button 
+                                className="modal-close"
+                                onClick={() => {
+                                    setShowSpeakerModal(false);
+                                    setSelectedSpeaker(null);
+                                }}
+                            >
+                                <FaTimes />
+                            </button>
+                        </div>
+                        
+                        <div className="modal-body">
+                            {loadingSpeaker ? (
+                                <div className="loading-speaker">
+                                    <p>Đang tải thông tin...</p>
+                                </div>
+                            ) : selectedSpeaker ? (
+                                <div className="speaker-details">
+                                    <h3 className="speaker-name">{selectedSpeaker.speakerName}</h3>
+                                    <div className="speaker-description">
+                                        <p>{selectedSpeaker.speakerDecription || selectedSpeaker.speakerDescription || 'Không có thông tin mô tả'}</p>
+                                    </div>
+                                </div>
+                            ) : (
+                                <div className="no-data">
+                                    <p>Không có thông tin</p>
+                                </div>
+                            )}
+                        </div>
+                        
+                        <div className="modal-footer">
+                            <button 
+                                className="btn-close" 
+                                onClick={() => {
+                                    setShowSpeakerModal(false);
+                                    setSelectedSpeaker(null);
+                                }}
+                            >
+                                Đóng
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* Ticket Modal */}
             {showTicketModal && (
