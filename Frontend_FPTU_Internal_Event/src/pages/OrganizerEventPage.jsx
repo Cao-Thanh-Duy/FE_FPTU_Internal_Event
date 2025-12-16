@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import Header from '../components/Header';
-import { FaPlus, FaTimes, FaCalendarAlt } from 'react-icons/fa';
+import { FaPlus, FaTimes, FaCalendarAlt, FaMapMarkerAlt, FaTicketAlt, FaUsers, FaClock, FaMicrophone, FaInfoCircle } from 'react-icons/fa';
 import { toast } from 'react-toastify';
+import { getUserInfo } from '../utils/auth';
 import '../assets/css/OrganizerEventPage.css';
 
 const OrganizerEventPage = () => {
@@ -11,6 +12,8 @@ const OrganizerEventPage = () => {
     const [slots, setSlots] = useState([]);
     const [users, setUsers] = useState([]);
     const [speakers, setSpeakers] = useState([]);
+    const [myEvents, setMyEvents] = useState([]);
+    const [loading, setLoading] = useState(true);
     const [formData, setFormData] = useState({
         eventName: '',
         eventDescription: '',
@@ -23,11 +26,41 @@ const OrganizerEventPage = () => {
     });
 
     useEffect(() => {
+        fetchMyEvents();
         fetchVenues();
         fetchSlots();
         fetchUsers();
         fetchSpeakers();
     }, []);
+
+    const fetchMyEvents = async () => {
+        setLoading(true);
+        try {
+            const userInfo = getUserInfo();
+            const response = await axios.get('https://localhost:7047/api/Event/my-events', {
+                params: {
+                    organizerId: userInfo.userId
+                }
+            });
+            const data = response.data?.data ?? response.data;
+            if (Array.isArray(data)) {
+                // Sort events by eventDay (earliest first)
+                const sortedEvents = data.sort((a, b) => new Date(a.eventDay) - new Date(b.eventDay));
+                setMyEvents(sortedEvents);
+            } else {
+                setMyEvents([]);
+            }
+        } catch (error) {
+            console.error('Error fetching my events:', error);
+            toast.error('Failed to fetch your events', {
+                position: 'top-right',
+                autoClose: 2000
+            });
+            setMyEvents([]);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const fetchVenues = async () => {
         try {
@@ -130,6 +163,9 @@ const OrganizerEventPage = () => {
                     slotIds: [],
                     staffIds: []
                 });
+                
+                // Refresh the events list
+                fetchMyEvents();
             } else {
                 throw new Error(response.data?.message || 'Failed to create event');
             }
@@ -159,11 +195,91 @@ const OrganizerEventPage = () => {
                         </button>
                     </div>
 
-                    <div className="welcome-card">
-                        <FaCalendarAlt className="welcome-icon" />
-                        <h2>Welcome to Event Management</h2>
-                        <p>Create and manage your events here. Click "Create New Event" to get started.</p>
-                    </div>
+                    {loading ? (
+                        <div className="loading-state">
+                            <p>Loading your events...</p>
+                        </div>
+                    ) : myEvents.length === 0 ? (
+                        <div className="welcome-card">
+                            <FaCalendarAlt className="welcome-icon" />
+                            <h2>Welcome to Event Management</h2>
+                            <p>You haven't created any events yet. Click "Create New Event" to get started.</p>
+                        </div>
+                    ) : (
+                        <div className="events-grid">
+                            {myEvents.map(event => (
+                                <div key={event.eventId} className="event-card">
+                                    <div className="event-card-header">
+                                        <h3>{event.eventName}</h3>
+                                        <span className={`event-status ${event.status === 'Approve' ? 'active' : 'inactive'}`}>
+                                            {event.status || 'Pending'}
+                                        </span>
+                                    </div>
+                                    <div className="event-card-body">
+                                        <p className="event-description">{event.eventDescription}</p>
+                                        
+                                        <div className="event-info">
+                                            <div className="info-item">
+                                                <FaCalendarAlt className="info-icon" />
+                                                <span>{new Date(event.eventDay).toLocaleDateString('vi-VN')}</span>
+                                            </div>
+                                            
+                                            <div className="info-item">
+                                                <FaMapMarkerAlt className="info-icon" />
+                                                <div className="info-details">
+                                                    <span className="info-main">{event.venueName || 'N/A'}</span>
+                                                    {event.locationDetails && (
+                                                        <span className="info-sub">{event.locationDetails}</span>
+                                                    )}
+                                                </div>
+                                            </div>
+                                            
+                                            <div className="info-item">
+                                                <FaTicketAlt className="info-icon" />
+                                                <span>{event.currentTickerCount || 0} / {event.maxTickerCount} tickets</span>
+                                            </div>
+                                            
+                                            {event.slotEvent && event.slotEvent.length > 0 && (
+                                                <div className="info-section">
+                                                    <div className="section-header">
+                                                        <FaClock className="info-icon" />
+                                                        <span className="section-title">Time Slots:</span>
+                                                    </div>
+                                                    <div className="section-content">
+                                                        {event.slotEvent.map((slot, index) => (
+                                                            <div key={index} className="slot-item">
+                                                                <span className="slot-name">{slot.slotName}:</span>
+                                                                <span className="slot-time">{slot.startTime} - {slot.endTime}</span>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            )}
+                                            
+                                            {event.speakerEvent && event.speakerEvent.length > 0 && (
+                                                <div className="info-section">
+                                                    <div className="section-header">
+                                                        <FaMicrophone className="info-icon" />
+                                                        <span className="section-title">Speakers:</span>
+                                                    </div>
+                                                    <div className="section-content">
+                                                        {event.speakerEvent.map((speaker, index) => (
+                                                            <div key={index} className="speaker-item">
+                                                                <span className="speaker-name">{speaker.speakerName}</span>
+                                                                {speaker.speakerDescription && (
+                                                                    <span className="speaker-desc">{speaker.speakerDescription}</span>
+                                                                )}
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
                 </div>
             </div>
 
