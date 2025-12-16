@@ -1,15 +1,20 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 import "../assets/css/StaffEventPage.css";
 import SidebarStaff from "../components/SidebarStaff";
-import { FaCalendar, FaClock, FaMapMarkerAlt, FaUsers, FaSearch } from 'react-icons/fa';
+import { FaCalendar, FaClock, FaMapMarkerAlt, FaUsers, FaSearch, FaTimes, FaUserFriends } from 'react-icons/fa';
 import { getUserInfo } from "../utils/auth";
 
 const StaffEventPage = () => {
+    const navigate = useNavigate();
     const [searchTerm, setSearchTerm] = useState("");
     const [events, setEvents] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [showAttendeesModal, setShowAttendeesModal] = useState(false);
+    const [attendeesData, setAttendeesData] = useState(null);
+    const [loadingAttendees, setLoadingAttendees] = useState(false);
     
     // Lấy events từ API
     useEffect(() => {
@@ -96,6 +101,24 @@ const StaffEventPage = () => {
         return statusMap[status] || statusMap.upcoming;
     };
 
+    const handleViewAttendees = async (eventId) => {
+        try {
+            setLoadingAttendees(true);
+            setShowAttendeesModal(true);
+            
+            const response = await axios.get(`https://localhost:7047/api/Ticket/event/${eventId}/attendees`);
+            const data = response.data?.data ?? response.data;
+            
+            setAttendeesData(data);
+        } catch (error) {
+            console.error('Error fetching attendees:', error);
+            alert('Không thể tải danh sách người tham gia');
+            setShowAttendeesModal(false);
+        } finally {
+            setLoadingAttendees(false);
+        }
+    };
+
     return (
         <div className="staff-event-page">
             <SidebarStaff />
@@ -174,8 +197,8 @@ const StaffEventPage = () => {
                                     </div>
                                     
                                     <div className="event-actions">
-                                        <button className="btn-view">Xem chi tiết</button>
-                                        <button className="btn-checkin">Check-in</button>
+                                        <button className="btn-view" onClick={() => handleViewAttendees(event.id)}>Xem người tham gia</button>
+                                        <button className="btn-checkin" onClick={() => navigate('/staff/qr-scanner')}>Check-in</button>
                                     </div>
                                 </div>
                             ))}
@@ -189,6 +212,65 @@ const StaffEventPage = () => {
                     )}
                 </div>
             </div>
+
+            {/* Attendees Modal */}
+            {showAttendeesModal && (
+                <div className="modal-overlay" onClick={() => {
+                    setShowAttendeesModal(false);
+                    setAttendeesData(null);
+                }}>
+                    <div className="modal-content attendees-modal" onClick={(e) => e.stopPropagation()}>
+                        <div className="modal-header">
+                            <h2>
+                                <FaUserFriends /> Danh sách người tham gia
+                            </h2>
+                            <button className="btn-close-modal" onClick={() => {
+                                setShowAttendeesModal(false);
+                                setAttendeesData(null);
+                            }}>
+                                <FaTimes />
+                            </button>
+                        </div>
+                        <div className="modal-body">
+                            {loadingAttendees ? (
+                                <div className="loading-attendees">
+                                    <p>Đang tải danh sách...</p>
+                                </div>
+                            ) : attendeesData ? (
+                                <>
+                                    <div className="attendees-summary">
+                                        <h3>{attendeesData.eventName}</h3>
+                                        <p className="total-count">
+                                            Tổng số người tham gia: <strong>{attendeesData.totalAttendees}</strong>
+                                        </p>
+                                    </div>
+                                    {attendeesData.attendees && attendeesData.attendees.length > 0 ? (
+                                        <div className="attendees-list">
+                                            {attendeesData.attendees.map((attendee, index) => (
+                                                <div key={attendee.ticketId || index} className="attendee-item">
+                                                    <div className="attendee-number">{index + 1}</div>
+                                                    <div className="attendee-info">
+                                                        <div className="attendee-name">{attendee.userName}</div>
+                                                        <div className="attendee-email">{attendee.email}</div>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    ) : (
+                                        <div className="no-attendees">
+                                            <p>Chưa có người tham gia</p>
+                                        </div>
+                                    )}
+                                </>
+                            ) : (
+                                <div className="no-data">
+                                    <p>Không có dữ liệu</p>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

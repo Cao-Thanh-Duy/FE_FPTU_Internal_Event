@@ -28,8 +28,8 @@ const HomePage = () => {
                                 <button className="btn-qr-scanner" onClick={() => navigate('/staff/qr-scanner')}>
                                     <FaQrcode className="qr-icon" /> Quét QR Check-in
                                 </button>
-                                <button className="btn-primary" onClick={() => navigate('/staff/dashboard')}>
-                                    Dashboard
+                                <button className="btn-primary" onClick={() => navigate('/staff/events')}>
+                                    Events
                                 </button>
                             </>
                         ) : isLoggedIn && isStudent ? (
