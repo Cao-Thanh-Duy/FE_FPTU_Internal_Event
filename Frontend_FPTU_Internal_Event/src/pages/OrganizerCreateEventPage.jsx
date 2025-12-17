@@ -26,7 +26,6 @@ const OrganizerCreateEventPage = () => {
         venueId: '',
         speakerIds: [],
         staffIds: [],
-        // Date and Slot are handled separately by the calendar
     });
 
     // Calendar states
@@ -47,6 +46,7 @@ const OrganizerCreateEventPage = () => {
 
     const fetchInitialData = async () => {
         try {
+            setLoading(true);
             const [venuesRes, slotsRes, usersRes, speakersRes] = await Promise.all([
                 axios.get('https://localhost:7047/api/Venue'),
                 axios.get('https://localhost:7047/api/Slot'),
@@ -54,27 +54,37 @@ const OrganizerCreateEventPage = () => {
                 axios.get('https://localhost:7047/api/Speaker')
             ]);
 
-            setVenues(venuesRes.data?.data ?? venuesRes.data ?? []);
-            setSlots(slotsRes.data?.data ?? slotsRes.data ?? []);
-            setUsers(usersRes.data?.data ?? usersRes.data ?? []);
-            setSpeakers(speakersRes.data?.data ?? speakersRes.data ?? []);
+            const venuesData = venuesRes.data?. data ??  venuesRes.data ??  [];
+            const slotsData = slotsRes.data?. data ?? slotsRes.data ?? [];
+            const usersData = usersRes.data?.data ?? usersRes.data ?? [];
+            const speakersData = speakersRes.data?.data ?? speakersRes.data ??  [];
+
+            setVenues(venuesData);
+            setSlots(slotsData);
+            setUsers(usersData);
+            setSpeakers(speakersData);
+
+            toast.success('Form data loaded successfully!', {
+                position: 'top-right',
+                autoClose:  1500
+            });
         } catch (error) {
             console.error('Error fetching initial data:', error);
-            toast.error('Failed to load form data');
+            toast.error('Failed to load form data. Please refresh the page.', {
+                position: 'top-right',
+                autoClose: 3000
+            });
+        } finally {
+            setLoading(false);
         }
     };
 
     const fetchEventsForAvailability = async () => {
         try {
-            // Fetch all events to check for conflicts
-            // In a real app, you might want to filter by date range (start/end of current month)
             const response = await axios.get('https://localhost:7047/api/Event');
             const events = response.data?.data ?? response.data ?? [];
             
-            // Filter only Approved events as they block the slots
-            // Assuming status 1 is Approved (adjust based on your API)
-            // Or if the requirement is to show all booked slots regardless of status, remove filter
-            const approvedEvents = events.filter(e => e.status === 1 || e.status === 'Approved'); 
+            const approvedEvents = events.filter(e => e.status === 'Approve' || e.status === 'Approved' || e.status === 1); 
             setExistingEvents(approvedEvents);
         } catch (error) {
             console.error('Error fetching events:', error);
@@ -115,7 +125,7 @@ const OrganizerCreateEventPage = () => {
     const changeMonth = (offset) => {
         const newDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + offset, 1);
         setCurrentDate(newDate);
-        setSelectedDate(null); // Reset selection when changing month
+        setSelectedDate(null);
         setSelectedSlotIds([]);
     };
 
@@ -126,10 +136,6 @@ const OrganizerCreateEventPage = () => {
         
         return existingEvents.some(event => {
             const eventDate = new Date(event.eventDay).toISOString().split('T')[0];
-            // Check if date matches, venue matches, and slot matches
-            // Note: event.slotId might be a single ID or array depending on backend. 
-            // Assuming event has a single slotId based on typical structure, or check your API response.
-            // If event spans multiple slots, logic needs adjustment.
             return eventDate === dateString && 
                    event.venueId == formData.venueId && 
                    event.slotId == slotId;
@@ -143,12 +149,15 @@ const OrganizerCreateEventPage = () => {
         today.setHours(0, 0, 0, 0);
         
         if (newDate < today) {
-            toast.warning("Cannot select past dates");
+            toast.warning("Cannot select past dates", {
+                position: 'top-right',
+                autoClose: 2000
+            });
             return;
         }
 
         setSelectedDate(newDate);
-        setSelectedSlotIds([]); // Reset slots when picking a new date
+        setSelectedSlotIds([]);
     };
 
     const toggleSlot = (slotId) => {
@@ -169,41 +178,89 @@ const OrganizerCreateEventPage = () => {
         e.preventDefault();
         
         if (!selectedDate || selectedSlotIds.length === 0) {
-            toast.error("Please select a date and at least one slot");
+            toast.error("Please select a date and at least one slot", {
+                position: 'top-right',
+                autoClose: 3000
+            });
             return;
         }
 
         if (!formData.venueId) {
-            toast.error("Please select a venue");
+            toast.error("Please select a venue", {
+                position: 'top-right',
+                autoClose: 3000
+            });
+            return;
+        }
+
+        if (! formData.eventName. trim()) {
+            toast.error("Please enter event name", {
+                position: 'top-right',
+                autoClose: 3000
+            });
+            return;
+        }
+
+        if (!formData.eventDescription.trim()) {
+            toast. error("Please enter event description", {
+                position: 'top-right',
+                autoClose: 3000
+            });
+            return;
+        }
+
+        if (! formData.maxTicketCount || formData.maxTicketCount < 1) {
+            toast.error("Please enter valid max ticket count", {
+                position:  'top-right',
+                autoClose: 3000
+            });
             return;
         }
 
         setLoading(true);
         try {
-            const userInfo = getUserInfo();
-            
-            // Construct payload
-            // Note: Adjust payload structure to match your API exactly
             const payload = {
-                eventName: formData.eventName,
-                eventDescription: formData.eventDescription,
-                eventDay: selectedDate.toISOString(), // Send ISO string
-                maxTicketCount: parseInt(formData.maxTicketCount),
-                organizerId: userInfo.userId,
+                eventName: formData.eventName. trim(),
+                eventDescription: formData.eventDescription.trim(),
+                eventDay: selectedDate.toISOString(),
+                maxTicketCount: parseInt(formData. maxTicketCount),
                 venueId: parseInt(formData.venueId),
-                slotId: parseInt(selectedSlotIds[0]), // Assuming single slot for now
+                slotId: parseInt(selectedSlotIds[0]), // Backend chỉ nhận 1 slot
                 speakerIds: formData.speakerIds.map(id => parseInt(id)),
-                staffIds: formData.staffIds.map(id => parseInt(id)),
-                status: 0 // Pending
+                staffIds: formData.staffIds.map(id => parseInt(id))
             };
 
-            await axios.post('https://localhost:7047/api/Event', payload);
+            console.log('Creating event with payload:', payload);
+
+            const response = await axios.post('https://localhost:7047/api/Event', payload);
             
-            toast.success('Event created successfully!');
-            navigate('/organizer/events');
+            if (response.data.success) {
+                toast. success('Event created successfully!', {
+                    position: 'top-right',
+                    autoClose: 2000
+                });
+                
+                // Navigate after short delay to show success message
+                setTimeout(() => {
+                    navigate('/organizer/events');
+                }, 2000);
+            } else {
+                throw new Error(response.data.message || 'Failed to create event');
+            }
         } catch (error) {
             console.error('Error creating event:', error);
-            toast.error(error.response?.data?.message || 'Failed to create event');
+            console.error('Error response:', error. response?.data);
+            
+            const errorMessage = 
+                error.response?.data?.message || 
+                error.response?.data?.title ||
+                error.message || 
+                'Failed to create event.  Please try again.';
+            
+            toast.error(errorMessage, {
+                position: 'top-right',
+                autoClose:  4000
+            });
         } finally {
             setLoading(false);
         }
@@ -224,7 +281,8 @@ const OrganizerCreateEventPage = () => {
             const date = new Date(currentDate.getFullYear(), currentDate.getMonth(), day);
             const isSelected = selectedDate && 
                              date.getDate() === selectedDate.getDate() && 
-                             date.getMonth() === selectedDate.getMonth();
+                             date.getMonth() === selectedDate.getMonth()&&
+                             date.getFullYear() === selectedDate.getFullYear();
             const isToday = new Date().toDateString() === date.toDateString();
             
             // Check availability summary for dots
@@ -279,7 +337,7 @@ const OrganizerCreateEventPage = () => {
                         <h3 className="section-title"><FaInfoCircle /> Basic Information</h3>
                         
                         <div className="form-group">
-                            <label>Event Name</label>
+                            <label>Event Name *</label>
                             <input
                                 type="text"
                                 name="eventName"
@@ -292,7 +350,7 @@ const OrganizerCreateEventPage = () => {
                         </div>
 
                         <div className="form-group">
-                            <label>Description</label>
+                            <label>Description *</label>
                             <textarea
                                 name="eventDescription"
                                 className="form-control"
@@ -300,11 +358,12 @@ const OrganizerCreateEventPage = () => {
                                 onChange={handleInputChange}
                                 required
                                 placeholder="Describe your event..."
+                                rows="4"
                             />
                         </div>
 
                         <div className="form-group">
-                            <label>Max Tickets</label>
+                            <label>Max Tickets *</label>
                             <input
                                 type="number"
                                 name="maxTicketCount"
@@ -313,6 +372,7 @@ const OrganizerCreateEventPage = () => {
                                 onChange={handleInputChange}
                                 required
                                 min="1"
+                                placeholder="Enter maximum number of tickets"
                             />
                         </div>
                     </div>
@@ -322,7 +382,7 @@ const OrganizerCreateEventPage = () => {
                         <h3 className="section-title"><FaMapMarkerAlt /> Venue & Participants</h3>
                         
                         <div className="form-group">
-                            <label>Venue</label>
+                            <label>Venue *</label>
                             <select
                                 name="venueId"
                                 className="form-control"
@@ -333,11 +393,11 @@ const OrganizerCreateEventPage = () => {
                                 <option value="">Select a Venue</option>
                                 {venues.map(venue => (
                                     <option key={venue.venueId} value={venue.venueId}>
-                                        {venue.venueName} (Cap: {venue.capacity})
+                                        {venue.venueName} (Capacity: {venue.maxSeat || 0})
                                     </option>
                                 ))}
                             </select>
-                            {!formData.venueId && <small className="text-gray-500">Select a venue to see availability calendar</small>}
+                            {!formData.venueId && (<small className="text-gray-500">Select a venue to see availability calendar</small>)}
                         </div>
 
                         <div className="form-group">
@@ -346,13 +406,21 @@ const OrganizerCreateEventPage = () => {
                                 multiple
                                 className="form-control h-32"
                                 onChange={(e) => handleMultiSelectChange(e, 'speakerIds')}
+                                value={formData.speakerIds}
                             >
-                                {speakers.map(speaker => (
-                                    <option key={speaker.speakerId} value={speaker.speakerId}>
-                                        {speaker.speakerName}
-                                    </option>
-                                ))}
+                                {speakers.length === 0 ? (
+                                    <option disabled>No speakers available</option>
+                                ) : (
+                                    speakers.map(speaker => (
+                                        <option key={speaker.speakerId} value={speaker.speakerId}>
+                                            {speaker.speakerName}
+                                        </option>
+                                    ))
+                                )}
                             </select>
+                            <small className="text-gray-500">
+                                {formData.speakerIds.length} speaker(s) selected
+                            </small>
                         </div>
 
                         <div className="form-group">
@@ -361,13 +429,21 @@ const OrganizerCreateEventPage = () => {
                                 multiple
                                 className="form-control h-32"
                                 onChange={(e) => handleMultiSelectChange(e, 'staffIds')}
+                                value={formData.staffIds}
                             >
-                                {users.filter(u => u.roleName === 'Staff').map(user => (
-                                    <option key={user.userId} value={user.userId}>
-                                        {user.userName}
-                                    </option>
-                                ))}
+                                {users.filter(u => u.roleName === 'Staff').length === 0 ? (
+                                    <option disabled>No staff available</option>
+                                ) : (
+                                    users.filter(u => u.roleName === 'Staff').map(user => (
+                                        <option key={user.userId} value={user.userId}>
+                                            {user.userName} - {user.email}
+                                        </option>
+                                    ))
+                                )}
                             </select>
+                            <small className="text-gray-500">
+                                {formData.staffIds.length} staff member(s) selected
+                            </small>
                         </div>
                     </div>
 
@@ -402,26 +478,36 @@ const OrganizerCreateEventPage = () => {
                                         <div className="selected-date-info">
                                             Available Slots for {selectedDate.toLocaleDateString()}
                                         </div>
-                                        <div className="slots-grid">
-                                            {slots.map(slot => {
-                                                const booked = isSlotBooked(selectedDate, slot.slotId);
-                                                const selected = selectedSlotIds.includes(slot.slotId);
-                                                
-                                                return (
-                                                    <div 
-                                                        key={slot.slotId}
-                                                        className={`slot-card ${booked ? 'disabled' : ''} ${selected ? 'selected' : ''}`}
-                                                        onClick={() => !booked && toggleSlot(slot.slotId)}
-                                                    >
-                                                        <strong>Slot {slot.slotId}</strong>
-                                                        <span className="slot-time">
-                                                            {slot.startTime} - {slot.endTime}
-                                                        </span>
-                                                        {booked && <span className="text-xs text-red-500 block mt-1">Booked</span>}
-                                                    </div>
-                                                );
-                                            })}
-                                        </div>
+                                        {slots.length === 0 ? (
+                                            <div className="text-center py-4 text-gray-500">
+                                                No slots available
+                                            </div>
+                                        ) : (
+                                            <div className="slots-grid">
+                                                {slots.map(slot => {
+                                                    const booked = isSlotBooked(selectedDate, slot.slotId);
+                                                    const selected = selectedSlotIds.includes(slot. slotId);
+                                                    
+                                                    return (
+                                                        <div 
+                                                            key={slot.slotId}
+                                                            className={`slot-card ${booked ? 'disabled' : ''} ${selected ? 'selected' : ''}`}
+                                                            onClick={() => !booked && toggleSlot(slot.slotId)}
+                                                        >
+                                                            <strong>{slot.slotName || `Slot ${slot.slotId}`}</strong>
+                                                            <span className="slot-time">
+                                                                {slot.startTime} - {slot.endTime}
+                                                            </span>
+                                                            {booked && (
+                                                                <span className="text-xs text-red-500 block mt-1">
+                                                                    Already Booked
+                                                                </span>
+                                                            )}
+                                                        </div>
+                                                    );
+                                                })}
+                                            </div>
+                                        )}
                                     </div>
                                 )}
                             </div>
@@ -433,11 +519,11 @@ const OrganizerCreateEventPage = () => {
                     </div>
 
                     <div className="form-actions">
-                        <button type="button" className="btn-cancel" onClick={() => navigate('/organizer/events')}>
+                        <button type="button" className="btn-cancel" onClick={() => navigate('/organizer/events')} disabled={loading}>
                             Cancel
                         </button>
                         <button type="submit" className="btn-submit" disabled={loading}>
-                            <FaSave /> {loading ? 'Creating...' : 'Create Event'}
+                            <FaSave /> {loading ? 'Creating Event...' : 'Create Event'}
                         </button>
                     </div>
                 </form>
