@@ -8,10 +8,13 @@ import AdminDashboard from "./pages/AdminDashboardPage";
 import AdminUserPage from "./pages/AdminUserPage";
 import AdminSlotPage from "./pages/AdminSlotPage";
 import AdminEventPage from "./pages/AdminEventPage";
+import AdminProfilePage from "./pages/AdminProfilePage";
 import OrganizerEventPage from "./pages/OrganizerEventPage";
 import OrganizerSpeakerPage from "./pages/OrganizerSpeakerPage";
+import OrganizerProfilePage from "./pages/OrganizerProfilePage";
 import StaffDashboardPage from "./pages/StaffDashboardPage";
 import StaffEventPage from "./pages/StaffEventPage";
+import StaffProfilePage from "./pages/StaffProfilePage";
 import QRScannerPage from "./pages/QRScannerPage";
 import StudentEventPage from "./pages/StudentEventPage";
 import StudentTicketsPage from "./pages/StudentTicketsPage";
@@ -88,6 +91,15 @@ function App() {
         />
         
         <Route 
+          path="/admin/profile" 
+          element={
+            <ProtectedRoute allowedRoles={['Admin']}>
+              <AdminProfilePage />
+            </ProtectedRoute>
+          } 
+        />
+        
+        <Route 
           path="/organizer/events" 
           element={
             <ProtectedRoute allowedRoles={['Organizer']}>
@@ -101,6 +113,15 @@ function App() {
           element={
             <ProtectedRoute allowedRoles={['Organizer']}>
               <OrganizerSpeakerPage />
+            </ProtectedRoute>
+          } 
+        />
+        
+        <Route 
+          path="/organizer/profile" 
+          element={
+            <ProtectedRoute allowedRoles={['Organizer']}>
+              <OrganizerProfilePage />
             </ProtectedRoute>
           } 
         />
@@ -128,6 +149,15 @@ function App() {
           element={
             <ProtectedRoute allowedRoles={['Staff']}>
               <QRScannerPage />
+            </ProtectedRoute>
+          } 
+        />
+        
+        <Route 
+          path="/staff/profile" 
+          element={
+            <ProtectedRoute allowedRoles={['Staff']}>
+              <StaffProfilePage />
             </ProtectedRoute>
           } 
         />

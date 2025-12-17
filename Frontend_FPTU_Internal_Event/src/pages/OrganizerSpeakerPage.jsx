@@ -29,7 +29,12 @@ const OrganizerSpeakerPage = () => {
             const data = response.data?.data ?? response.data;
             
             if (Array.isArray(data)) {
-                setSpeakers(data);
+                // Normalize API typo: speakerDecription -> speakerDescription
+                const normalizedData = data.map(speaker => ({
+                    ...speaker,
+                    speakerDescription: speaker.speakerDescription || speaker.speakerDecription || ''
+                }));
+                setSpeakers(normalizedData);
             }
         } catch (error) {
             console.error('Error fetching speakers:', error);
@@ -63,14 +68,14 @@ const OrganizerSpeakerPage = () => {
             
             setFormData({
                 speakerName: speakerData.speakerName || speaker.speakerName,
-                speakerDecription: speakerData.speakerDescription || speaker.speakerDescription || ''
+                speakerDecription: speakerData.speakerDescription || speakerData.speakerDecription || speaker.speakerDescription || ''
             });
         // eslint-disable-next-line no-unused-vars
         } catch (error) {
             // Nếu API get by id không hoạt động, dùng dữ liệu từ list
             setFormData({
                 speakerName: speaker.speakerName,
-                speakerDecription: speaker.speakerDescription || ''
+                speakerDecription: speaker.speakerDescription || speaker.speakerDecription || ''
             });
         }
         

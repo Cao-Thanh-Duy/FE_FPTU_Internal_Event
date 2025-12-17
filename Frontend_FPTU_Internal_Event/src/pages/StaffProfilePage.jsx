@@ -1,12 +1,12 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import "../assets/css/StudentProfilePage.css";
-import SidebarStudent from "../components/SidebarStudent";
+import SidebarStaff from '../components/SidebarStaff';
 import { FaUser, FaEnvelope, FaUserTag, FaIdCard } from 'react-icons/fa';
-import { getUserInfo } from '../utils/auth';
 import { toast } from 'react-toastify';
+import { getUserInfo } from '../utils/auth';
+import '../assets/css/StaffProfilePage.css';
 
-const StudentProfilePage = () => {
+const StaffProfilePage = () => {
     const [profile, setProfile] = useState(null);
     const [loading, setLoading] = useState(true);
     const userInfo = getUserInfo();
@@ -38,8 +38,8 @@ const StudentProfilePage = () => {
     };
 
     return (
-        <div className="student-profile-page">
-            <SidebarStudent />
+        <div className="staff-profile-page">
+            <SidebarStaff />
             
             <div className="profile-main">
                 <div className="profile-content">
@@ -122,4 +122,4 @@ const StudentProfilePage = () => {
     );
 };
 
-export default StudentProfilePage;
+export default StaffProfilePage;

@@ -53,6 +53,12 @@ const SidebarStaff = () => {
                                 <span className="menu-label">Quét QR Check-in</span>
                             </Link>
                         </li>
+                        <li>
+                            <Link to="/staff/profile" className={`menu-item ${location.pathname === '/staff/profile' ? 'active' : ''}`}>
+                                <FaUser className="menu-icon" />
+                                <span className="menu-label">Profile</span>
+                            </Link>
+                        </li>
                     </ul>
 
                     <div className="menu-divider"></div>

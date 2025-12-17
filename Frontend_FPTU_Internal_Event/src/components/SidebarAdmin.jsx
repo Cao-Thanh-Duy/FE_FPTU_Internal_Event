@@ -65,6 +65,12 @@ const SidebarAdmin = () => {
                             <span>Slot</span>
                         </Link>
                     </li>
+                    <li>
+                        <Link to="/admin/profile" className={`menu-item ${location.pathname === '/admin/profile' ? 'active' : ''}`}>
+                            <FaUser className="menu-icon" />
+                            <span>Profile</span>
+                        </Link>
+                    </li>
                    
                 </ul>
 

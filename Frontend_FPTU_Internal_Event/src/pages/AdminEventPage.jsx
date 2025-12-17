@@ -11,6 +11,7 @@ const AdminEventPage = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [filterStatus, setFilterStatus] = useState('all'); // all, pending, approved, rejected
     const [sortOrder, setSortOrder] = useState('nearest'); // nearest, farthest
+    const [expandedSpeakers, setExpandedSpeakers] = useState({}); // Track expanded speakers by eventId-speakerName
 
     useEffect(() => {
         fetchEvents();
@@ -88,6 +89,14 @@ const AdminEventPage = () => {
                 });
             }
         }
+    };
+
+    const toggleSpeakerDescription = (eventId, speakerName) => {
+        const key = `${eventId}-${speakerName}`;
+        setExpandedSpeakers(prev => ({
+            ...prev,
+            [key]: !prev[key]
+        }));
     };
 
     const filteredEvents = events.filter(event => {
@@ -231,14 +240,26 @@ const AdminEventPage = () => {
                                                     <FaMicrophone className="detail-icon" />
                                                     <span className="speakers-label">Speakers:</span>
                                                     <div className="speaker-list">
-                                                        {event.speakerEvent.map((speaker, idx) => (
+                                                        {event.speakerEvent.map((speaker, idx) => {
+                                                            const speakerKey = `${event.eventId}-${speaker.speakerName}`;
+                                                            const isExpanded = expandedSpeakers[speakerKey];
+                                                            return (
                                                             <div key={idx} className="speaker-item">
-                                                                <span className="speaker-name">{speaker.speakerName}</span>
-                                                                {speaker.speakerDescription && (
-                                                                    <span className="speaker-description">- {speaker.speakerDescription}</span>
+                                                                <span 
+                                                                    className="speaker-name clickable" 
+                                                                    onClick={() => toggleSpeakerDescription(event.eventId, speaker.speakerName)}
+                                                                    style={{ cursor: 'pointer', textDecoration: 'underline', color: '#007bff' }}
+                                                                >
+                                                                    {speaker.speakerName}
+                                                                </span>
+                                                                {isExpanded && speaker.speakerDescription && (
+                                                                    <span className="speaker-description">
+                                                                        - {speaker.speakerDescription}
+                                                                    </span>
                                                                 )}
                                                             </div>
-                                                        ))}
+                                                        );
+                                                        })}
                                                     </div>
                                                 </div>
                                             )}

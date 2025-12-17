@@ -34,7 +34,11 @@ const Header = () => {
         <nav className="header-nav">
           <Link to="/" className="nav-link">Home</Link>
           <Link to={isStudent ? "/student/events" : "/events"} className="nav-link">Events</Link>
-          <Link to="/about" className="nav-link">About</Link>
+          {isOrganizer ? (
+            <Link to="/organizer/profile" className="nav-link">Profile</Link>
+          ) : (
+            <Link to="/about" className="nav-link">About</Link>
+          )}
           
           {/* Nếu role = Admin */}
           {isLoggedIn && isAdmin && (
