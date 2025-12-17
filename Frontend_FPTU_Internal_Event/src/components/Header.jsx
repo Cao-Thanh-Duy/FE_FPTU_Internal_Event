@@ -1,4 +1,4 @@
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { FaUser, FaSignOutAlt, FaTachometerAlt } from 'react-icons/fa';
 import { isAuthenticated, getUserInfo, logout } from '../utils/auth';
 import { toast } from 'react-toastify';
@@ -7,6 +7,7 @@ import fptLogo from '../assets/images/Logo_FPT.svg';
 
 const Header = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const isLoggedIn = isAuthenticated();
   const userInfo = isLoggedIn ? getUserInfo() : null;
   const isAdmin = userInfo?.roleName === 'Admin';
@@ -23,6 +24,15 @@ const Header = () => {
     navigate('/login');
   };
 
+  const isActive = (path) => {
+    if (path === '/') {
+      return location.pathname === '/';
+    }
+    return location.pathname.startsWith(path);
+  };
+
+  const eventsPath = isOrganizer ? "/organizer/events" : isStudent ? "/student/events" : "/events";
+
   return (
     <header className="header">
       <div className="header-container">
@@ -32,13 +42,13 @@ const Header = () => {
         </Link>
         
         <nav className="header-nav">
-          <Link to="/" className="nav-link">Home</Link>
-          <Link to={isOrganizer ? "/organizer/events" : isStudent ? "/student/events" : "/events"} className="nav-link">Events</Link>
-          <Link to="/about" className="nav-link">About</Link>
+          <Link to="/" className={`nav-link ${isActive('/') && location.pathname === '/' ? 'active' : ''}`}>Home</Link>
+          <Link to={eventsPath} className={`nav-link ${isActive(eventsPath) ? 'active' : ''}`}>Events</Link>
+          <Link to="/about" className={`nav-link ${isActive('/about') ? 'active' : ''}`}>About</Link>
           
           {/* Nếu role = Admin */}
           {isLoggedIn && isAdmin && (
-            <Link to="/admin/dashboard" className="nav-link dashboard-link">
+            <Link to="/admin/dashboard" className={`nav-link dashboard-link ${isActive('/admin/dashboard') ? 'active' : ''}`}>
             Dashboard
             </Link>
           )}
@@ -46,7 +56,7 @@ const Header = () => {
           {/* Nếu role = Organizer */}
           {isLoggedIn && isOrganizer && (
             <>
-              <Link to="/organizer/speakers" className="nav-link speakers-link">
+              <Link to="/organizer/speakers" className={`nav-link speakers-link ${isActive('/organizer/speakers') ? 'active' : ''}`}>
                 Speakers
               </Link>
             </>
@@ -54,7 +64,7 @@ const Header = () => {
           
           {/* Nếu role = Staff */}
           {isLoggedIn && isStaff && (
-            <Link to="/staff/dashboard" className="nav-link staff-link">
+            <Link to="/staff/dashboard" className={`nav-link staff-link ${isActive('/staff/dashboard') ? 'active' : ''}`}>
             Dashboard
             </Link>
           )}
