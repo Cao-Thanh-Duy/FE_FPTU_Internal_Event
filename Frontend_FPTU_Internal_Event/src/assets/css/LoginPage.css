@@ -6,14 +6,13 @@
 
 /* 2. Container bao ngoài - Dùng Fixed để căn giữa tuyệt đối */
 .container {
-  position: fixed; /* Cố định khung hình, không phụ thuộc thanh cuộn */
-  top: 0;
-  left: 0;
+  min-height: 100vh; /* Chiều cao tối thiểu bằng màn hình */
   width: 100%;
-  height: 100%;
   display: flex;
   justify-content: center; /* Căn giữa ngang */
   align-items: center;     /* Căn giữa dọc */
+  padding: 20px;
+  box-sizing: border-box;
 }
 
 /* 3. Khung Login chính (Cái hộp trắng) */
@@ -40,7 +39,7 @@
 
 .left-col a{
   font-size: 15px;
-  width: 109%;
+  width: 100%;
 }
 
 .header-login {
@@ -84,7 +83,7 @@
 
 /* Nút Login */
 .btn-orange {
-  width: 109%;
+  width: 100%;
   padding: 12px;
  
   background-color: #F36F21;

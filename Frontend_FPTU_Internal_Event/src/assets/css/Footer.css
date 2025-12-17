@@ -11,12 +11,12 @@ body {
   margin-top: auto;
 
   /* --- THÊM ĐOẠN NÀY ĐỂ FULL CHIỀU NGANG --- */
-  width: 100vw; /* Chiều rộng bằng 100% màn hình thiết bị */
+  width: 100%; /* Chiều rộng bằng 100% màn hình thiết bị */
   position: relative;
-  left: 50%;
+  /* left: 50%;
   right: 50%;
-  margin-left: -50vw; /* Kéo sang trái cực đại */
-  margin-right: -50vw; /* Kéo sang phải cực đại */
+  margin-left: -50vw; 
+  margin-right: -50vw; */
   box-sizing: border-box; 
 } 
 

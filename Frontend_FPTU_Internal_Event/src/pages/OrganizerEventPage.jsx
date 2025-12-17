@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import Header from '../components/Header';
 import { FaPlus, FaTimes, FaCalendarAlt, FaMapMarkerAlt, FaTicketAlt, FaUsers, FaClock, FaMicrophone, FaInfoCircle, FaEdit, FaUserFriends } from 'react-icons/fa';
@@ -7,6 +8,7 @@ import { getUserInfo } from '../utils/auth';
 import '../assets/css/OrganizerEventPage.css';
 
 const OrganizerEventPage = () => {
+    const navigate = useNavigate();
     const [showModal, setShowModal] = useState(false);
     const [modalMode, setModalMode] = useState('create'); // 'create' or 'edit'
     const [selectedEventId, setSelectedEventId] = useState(null);
@@ -290,7 +292,7 @@ const OrganizerEventPage = () => {
                 <div className="organizer-container">
                     <div className="organizer-header">
                         <h1>Event Management</h1>
-                        <button className="btn-create-event" onClick={() => setShowModal(true)}>
+                        <button className="btn-create-event" onClick={() => navigate('/organizer/create-event')}>
                             <FaPlus /> Create New Event
                         </button>
                     </div>

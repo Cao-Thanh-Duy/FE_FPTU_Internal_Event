@@ -8,8 +8,9 @@
   justify-content: center;
   flex: 1;
   padding: 40px;
-  
-  
+  margin-left: 250px; /* Add margin to account for fixed sidebar */
+  width: calc(100% - 250px); /* Ensure content doesn't overflow */
+  box-sizing: border-box;
 }
 
 .dashboard-content {

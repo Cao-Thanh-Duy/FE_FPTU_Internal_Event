@@ -10,6 +10,7 @@ import AdminSlotPage from "./pages/AdminSlotPage";
 import AdminEventPage from "./pages/AdminEventPage";
 import AdminProfilePage from "./pages/AdminProfilePage";
 import OrganizerEventPage from "./pages/OrganizerEventPage";
+import OrganizerCreateEventPage from "./pages/OrganizerCreateEventPage";
 import OrganizerSpeakerPage from "./pages/OrganizerSpeakerPage";
 import OrganizerProfilePage from "./pages/OrganizerProfilePage";
 import StaffDashboardPage from "./pages/StaffDashboardPage";
@@ -104,6 +105,15 @@ function App() {
           element={
             <ProtectedRoute allowedRoles={['Organizer']}>
               <OrganizerEventPage />
+            </ProtectedRoute>
+          } 
+        />
+
+        <Route 
+          path="/organizer/create-event" 
+          element={
+            <ProtectedRoute allowedRoles={['Organizer']}>
+              <OrganizerCreateEventPage />
             </ProtectedRoute>
           } 
         />
