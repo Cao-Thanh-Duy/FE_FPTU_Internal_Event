@@ -14,7 +14,7 @@ const OrganizerCreateEventPage = () => {
     // Data states
     const [venues, setVenues] = useState([]);
     const [slots, setSlots] = useState([]);
-    const [users, setUsers] = useState([]); // For staff
+    const [users, setUsers] = useState([]);
     const [speakers, setSpeakers] = useState([]);
     const [existingEvents, setExistingEvents] = useState([]);
 
@@ -33,11 +33,27 @@ const OrganizerCreateEventPage = () => {
     const [selectedDate, setSelectedDate] = useState(null);
     const [selectedSlotIds, setSelectedSlotIds] = useState([]);
 
+    // Modal states
+    const [showSpeakerModal, setShowSpeakerModal] = useState(false);
+    const [selectedSpeaker, setSelectedSpeaker] = useState(null);
+
+    useEffect(() => {
+        const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+        if (token) {
+            axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+        } else {
+            toast.error('Authentication required.  Please login. ', {
+                position: 'top-right',
+                autoClose: 3000
+            });
+            navigate('/login');
+        }
+    }, [navigate]);
+
     useEffect(() => {
         fetchInitialData();
     }, []);
 
-    // Fetch events when month changes or venue changes to update availability
     useEffect(() => {
         if (formData.venueId) {
             fetchEventsForAvailability();
@@ -66,10 +82,10 @@ const OrganizerCreateEventPage = () => {
 
             toast.success('Form data loaded successfully!', {
                 position: 'top-right',
-                autoClose:  1500
+                autoClose: 1500
             });
         } catch (error) {
-            console.error('Error fetching initial data:', error);
+            console. error('Error fetching initial data:', error);
             toast.error('Failed to load form data. Please refresh the page.', {
                 position: 'top-right',
                 autoClose: 3000
@@ -81,8 +97,8 @@ const OrganizerCreateEventPage = () => {
 
     const fetchEventsForAvailability = async () => {
         try {
-            const response = await axios.get('https://localhost:7047/api/Event');
-            const events = response.data?.data ?? response.data ?? [];
+            const response = await axios. get('https://localhost:7047/api/Event');
+            const events = response.data?. data ?? response.data ?? [];
             
             const approvedEvents = events.filter(e => e.status === 'Approve' || e.status === 'Approved' || e.status === 1); 
             setExistingEvents(approvedEvents);
@@ -94,7 +110,7 @@ const OrganizerCreateEventPage = () => {
     const handleInputChange = (e) => {
         const { name, value } = e.target;
         setFormData(prev => ({
-            ...prev,
+            ... prev,
             [name]: value
         }));
     };
@@ -113,7 +129,23 @@ const OrganizerCreateEventPage = () => {
         }));
     };
 
-    // Calendar Logic
+    const toggleSelection = (field, id) => {
+        setFormData(prev => {
+            const currentValues = prev[field];
+            const numId = parseInt(id);
+            if (currentValues.includes(numId)) {
+                return { ...prev, [field]: currentValues.filter(val => val !== numId) };
+            } else {
+                return { ...prev, [field]: [...currentValues, numId] };
+            }
+        });
+    };
+
+    const handleShowSpeakerInfo = (speaker) => {
+        setSelectedSpeaker(speaker);
+        setShowSpeakerModal(true);
+    };
+
     const getDaysInMonth = (date) => {
         const year = date.getFullYear();
         const month = date.getMonth();
@@ -123,7 +155,7 @@ const OrganizerCreateEventPage = () => {
     };
 
     const changeMonth = (offset) => {
-        const newDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + offset, 1);
+        const newDate = new Date(currentDate. getFullYear(), currentDate.getMonth() + offset, 1);
         setCurrentDate(newDate);
         setSelectedDate(null);
         setSelectedSlotIds([]);
@@ -144,12 +176,11 @@ const OrganizerCreateEventPage = () => {
 
     const handleDateClick = (day) => {
         const newDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), day);
-        // Prevent selecting past dates
         const today = new Date();
         today.setHours(0, 0, 0, 0);
         
         if (newDate < today) {
-            toast.warning("Cannot select past dates", {
+            toast. warning("Cannot select past dates", {
                 position: 'top-right',
                 autoClose: 2000
             });
@@ -161,17 +192,14 @@ const OrganizerCreateEventPage = () => {
     };
 
     const toggleSlot = (slotId) => {
-        if (!selectedDate) return;
+        if (! selectedDate) return;
         
-        // If single slot selection is required:
-        setSelectedSlotIds([slotId]);
-        
-        // If multiple slots allowed per event (uncomment below and comment above):
-        // if (selectedSlotIds.includes(slotId)) {
-        //     setSelectedSlotIds(prev => prev.filter(id => id !== slotId));
-        // } else {
-        //     setSelectedSlotIds(prev => [...prev, slotId]);
-        // }
+        // Multiple slots selection
+        if (selectedSlotIds.includes(slotId)) {
+            setSelectedSlotIds(prev => prev.filter(id => id !== slotId));
+        } else {
+            setSelectedSlotIds(prev => [...prev, slotId]);
+        }
     };
 
     const handleSubmit = async (e) => {
@@ -185,8 +213,8 @@ const OrganizerCreateEventPage = () => {
             return;
         }
 
-        if (!formData.venueId) {
-            toast.error("Please select a venue", {
+        if (! formData.venueId) {
+            toast. error("Please select a venue", {
                 position: 'top-right',
                 autoClose: 3000
             });
@@ -202,8 +230,8 @@ const OrganizerCreateEventPage = () => {
         }
 
         if (!formData.eventDescription.trim()) {
-            toast. error("Please enter event description", {
-                position: 'top-right',
+            toast.error("Please enter event description", {
+                position:  'top-right',
                 autoClose: 3000
             });
             return;
@@ -219,28 +247,39 @@ const OrganizerCreateEventPage = () => {
 
         setLoading(true);
         try {
+            const formatDateOnly = (date) => {
+                const year = date.getFullYear();
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const day = String(date.getDate()).padStart(2, '0');
+                return `${year}-${month}-${day}`;
+            };
+
             const payload = {
                 eventName: formData.eventName. trim(),
                 eventDescription: formData.eventDescription.trim(),
-                eventDay: selectedDate.toISOString(),
-                maxTicketCount: parseInt(formData. maxTicketCount),
+                eventDate: formatDateOnly(selectedDate),
+                maxTicketCount: parseInt(formData.maxTicketCount),
                 venueId: parseInt(formData.venueId),
-                slotId: parseInt(selectedSlotIds[0]), // Backend chỉ nhận 1 slot
+                slotIds: selectedSlotIds. map(id => parseInt(id)),
                 speakerIds: formData.speakerIds.map(id => parseInt(id)),
                 staffIds: formData.staffIds.map(id => parseInt(id))
             };
 
             console.log('Creating event with payload:', payload);
 
-            const response = await axios.post('https://localhost:7047/api/Event', payload);
+            const response = await axios.post('https://localhost:7047/api/Event', payload, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token') || sessionStorage.getItem('token')}`
+                }
+            });
             
             if (response.data.success) {
-                toast. success('Event created successfully!', {
+                toast.success('Event created successfully!', {
                     position: 'top-right',
                     autoClose: 2000
                 });
                 
-                // Navigate after short delay to show success message
                 setTimeout(() => {
                     navigate('/organizer/events');
                 }, 2000);
@@ -251,41 +290,51 @@ const OrganizerCreateEventPage = () => {
             console.error('Error creating event:', error);
             console.error('Error response:', error. response?.data);
             
-            const errorMessage = 
-                error.response?.data?.message || 
-                error.response?.data?.title ||
-                error.message || 
-                'Failed to create event.  Please try again.';
+            let errorMessage = 'Failed to create event.  Please try again.';
+            
+            if (error.response?.status === 401) {
+                errorMessage = 'Authentication failed. Please login again.';
+                setTimeout(() => navigate('/login'), 2000);
+            } else if (error.response?.status === 400) {
+                errorMessage = error.response?. data?.message || 
+                             error.response?.data?.title ||
+                             'Invalid data provided. Please check all fields.';
+            } else if (error.response?.data?.message) {
+                errorMessage = error.response. data.message;
+            } else if (error.message) {
+                errorMessage = error.message;
+            }
             
             toast.error(errorMessage, {
                 position: 'top-right',
-                autoClose:  4000
+                autoClose: 4000
             });
         } finally {
             setLoading(false);
         }
     };
 
-    // Render Calendar
     const renderCalendar = () => {
         const { days, firstDay } = getDaysInMonth(currentDate);
         const calendarDays = [];
         
-        // Empty cells for days before start of month
         for (let i = 0; i < firstDay; i++) {
             calendarDays.push(<div key={`empty-${i}`} className="calendar-day empty"></div>);
         }
 
-        // Days of month
         for (let day = 1; day <= days; day++) {
             const date = new Date(currentDate.getFullYear(), currentDate.getMonth(), day);
             const isSelected = selectedDate && 
                              date.getDate() === selectedDate.getDate() && 
-                             date.getMonth() === selectedDate.getMonth()&&
+                             date.getMonth() === selectedDate.getMonth() &&
                              date.getFullYear() === selectedDate.getFullYear();
             const isToday = new Date().toDateString() === date.toDateString();
             
-            // Check availability summary for dots
+            // Check if past date
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const isPast = date < today;
+            
             let hasBooked = false;
             let hasAvailable = false;
             
@@ -299,11 +348,15 @@ const OrganizerCreateEventPage = () => {
                 });
             }
 
+            let dayClasses = `calendar-day ${isSelected ? 'selected' : ''} ${isToday ? 'today' : ''}`;
+            if (isPast) dayClasses += ' past-date';
+            if (formData.venueId && !hasAvailable && hasBooked) dayClasses += ' fully-booked';
+
             calendarDays.push(
                 <div 
                     key={day} 
-                    className={`calendar-day ${isSelected ? 'selected' : ''} ${isToday ? 'today' : ''}`}
-                    onClick={() => handleDateClick(day)}
+                    className={dayClasses}
+                    onClick={() => !isPast && handleDateClick(day)}
                 >
                     <span className="day-number">{day}</span>
                     <div className="day-status-dots">
@@ -332,7 +385,6 @@ const OrganizerCreateEventPage = () => {
                 </div>
 
                 <form onSubmit={handleSubmit} className="event-form-grid">
-                    {/* Left Column: Basic Info */}
                     <div className="form-section">
                         <h3 className="section-title"><FaInfoCircle /> Basic Information</h3>
                         
@@ -377,7 +429,6 @@ const OrganizerCreateEventPage = () => {
                         </div>
                     </div>
 
-                    {/* Right Column: People & Venue */}
                     <div className="form-section">
                         <h3 className="section-title"><FaMapMarkerAlt /> Venue & Participants</h3>
                         
@@ -397,67 +448,64 @@ const OrganizerCreateEventPage = () => {
                                     </option>
                                 ))}
                             </select>
-                            {!formData.venueId && (<small className="text-gray-500">Select a venue to see availability calendar</small>)}
+                            {! formData.venueId && (<small className="text-gray-500">Select a venue to see availability calendar</small>)}
                         </div>
 
                         <div className="form-group">
-                            <label>Speakers (Hold Ctrl to select multiple)</label>
-                            <select
-                                multiple
-                                className="form-control h-32"
-                                onChange={(e) => handleMultiSelectChange(e, 'speakerIds')}
-                                value={formData.speakerIds}
-                            >
-                                {speakers.length === 0 ? (
-                                    <option disabled>No speakers available</option>
-                                ) : (
-                                    speakers.map(speaker => (
-                                        <option key={speaker.speakerId} value={speaker.speakerId}>
-                                            {speaker.speakerName}
-                                        </option>
-                                    ))
-                                )}
-                            </select>
-                            <small className="text-gray-500">
-                                {formData.speakerIds.length} speaker(s) selected
-                            </small>
+                            <label>Speakers</label>
+                            <div className="selection-grid">
+                                {speakers.map(speaker => (
+                                    <div 
+                                        key={speaker.speakerId} 
+                                        className={`selection-card ${formData.speakerIds.includes(speaker.speakerId) ? 'selected' : ''}`}
+                                        onClick={() => toggleSelection('speakerIds', speaker.speakerId)}
+                                    >
+                                        <div className="card-content">
+                                            <span className="card-name">{speaker.speakerName}</span>
+                                            <button 
+                                                type="button"
+                                                className="info-btn" 
+                                                onClick={(e) => { e.stopPropagation(); handleShowSpeakerInfo(speaker); }}
+                                                title="View Details"
+                                            >
+                                                <FaInfoCircle />
+                                            </button>
+                                        </div>
+                                    </div>
+                                ))}
+                                {speakers.length === 0 && <div className="text-gray-500 text-sm">No speakers available</div>}
+                            </div>
                         </div>
 
                         <div className="form-group">
-                            <label>Staff (Hold Ctrl to select multiple)</label>
-                            <select
-                                multiple
-                                className="form-control h-32"
-                                onChange={(e) => handleMultiSelectChange(e, 'staffIds')}
-                                value={formData.staffIds}
-                            >
-                                {users.filter(u => u.roleName === 'Staff').length === 0 ? (
-                                    <option disabled>No staff available</option>
-                                ) : (
-                                    users.filter(u => u.roleName === 'Staff').map(user => (
-                                        <option key={user.userId} value={user.userId}>
-                                            {user.userName} - {user.email}
-                                        </option>
-                                    ))
-                                )}
-                            </select>
-                            <small className="text-gray-500">
-                                {formData.staffIds.length} staff member(s) selected
-                            </small>
+                            <label>Staff</label>
+                            <div className="selection-grid">
+                                {users.filter(u => u.roleName === 'Staff').map(user => (
+                                    <div 
+                                        key={user.userId} 
+                                        className={`selection-card ${formData.staffIds.includes(user.userId) ? 'selected' : ''}`}
+                                        onClick={() => toggleSelection('staffIds', user.userId)}
+                                    >
+                                        <div className="card-content">
+                                            <span className="card-name">{user.userName}</span>
+                                        </div>
+                                    </div>
+                                ))}
+                                {users.filter(u => u.roleName === 'Staff').length === 0 && <div className="text-gray-500 text-sm">No staff available</div>}
+                            </div>
                         </div>
                     </div>
 
-                    {/* Full Width: Calendar & Slot Selection */}
                     <div className="form-section full-width">
                         <h3 className="section-title"><FaClock /> Date & Time Selection</h3>
                         
-                        {formData.venueId ? (
+                        {formData.venueId ?  (
                             <div className="calendar-wrapper">
                                 <div className="calendar-container">
                                     <div className="calendar-header">
                                         <button type="button" className="month-nav-btn" onClick={() => changeMonth(-1)}>&lt;</button>
                                         <span className="current-month">
-                                            {currentDate.toLocaleString('default', { month: 'long', year: 'numeric' })}
+                                            {currentDate. toLocaleString('default', { month: 'long', year: 'numeric' })}
                                         </span>
                                         <button type="button" className="month-nav-btn" onClick={() => changeMonth(1)}>&gt;</button>
                                     </div>
@@ -486,17 +534,17 @@ const OrganizerCreateEventPage = () => {
                                             <div className="slots-grid">
                                                 {slots.map(slot => {
                                                     const booked = isSlotBooked(selectedDate, slot.slotId);
-                                                    const selected = selectedSlotIds.includes(slot. slotId);
+                                                    const selected = selectedSlotIds.includes(slot.slotId);
                                                     
                                                     return (
                                                         <div 
                                                             key={slot.slotId}
-                                                            className={`slot-card ${booked ? 'disabled' : ''} ${selected ? 'selected' : ''}`}
+                                                            className={`slot-card ${booked ? 'disabled' : ''} ${selected ? 'selected' :  ''}`}
                                                             onClick={() => !booked && toggleSlot(slot.slotId)}
                                                         >
                                                             <strong>{slot.slotName || `Slot ${slot.slotId}`}</strong>
                                                             <span className="slot-time">
-                                                                {slot.startTime} - {slot.endTime}
+                                                                {slot.startTime} - {slot. endTime}
                                                             </span>
                                                             {booked && (
                                                                 <span className="text-xs text-red-500 block mt-1">
@@ -513,7 +561,7 @@ const OrganizerCreateEventPage = () => {
                             </div>
                         ) : (
                             <div className="text-center py-8 text-gray-500 bg-gray-50 rounded-lg border border-dashed border-gray-300">
-                                Please select a Venue above to view the availability calendar.
+                                Please select a Venue above to view the availability calendar. 
                             </div>
                         )}
                     </div>
@@ -528,7 +576,35 @@ const OrganizerCreateEventPage = () => {
                     </div>
                 </form>
             </div>
-        </div>
+            {/* Speaker Detail Modal */}
+            {showSpeakerModal && selectedSpeaker && (
+                <div className="modal-overlay" onClick={() => setShowSpeakerModal(false)}>
+                    <div className="modal-content" onClick={e => e.stopPropagation()}>
+                        <div className="modal-header">
+                            <h3>Speaker Details</h3>
+                            <button className="close-modal-btn" onClick={() => setShowSpeakerModal(false)}>&times;</button>
+                        </div>
+                        <div className="modal-body">
+                            <div className="speaker-detail-row">
+                                <span className="speaker-detail-label">Name</span>
+                                <span className="speaker-detail-value">{selectedSpeaker.speakerName}</span>
+                            </div>
+                            <div className="speaker-detail-row">
+                                <span className="speaker-detail-label">Email</span>
+                                <span className="speaker-detail-value">{selectedSpeaker.email || 'N/A'}</span>
+                            </div>
+                            <div className="speaker-detail-row">
+                                <span className="speaker-detail-label">Phone</span>
+                                <span className="speaker-detail-value">{selectedSpeaker.phoneNumber || 'N/A'}</span>
+                            </div>
+                            <div className="speaker-detail-row">
+                                <span className="speaker-detail-label">Bio</span>
+                                <span className="speaker-detail-value">{selectedSpeaker.bio || 'No biography available.'}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}        </div>
     );
 };
 
