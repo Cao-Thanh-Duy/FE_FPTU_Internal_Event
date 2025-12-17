@@ -12,6 +12,8 @@ const HomePage = () => {
     const userInfo = isLoggedIn ? getUserInfo() : null;
     const isStaff = userInfo?.roleName === 'Staff';
     const isStudent = userInfo?.roleName === 'Student';
+    const isOrganizer = userInfo?.roleName === 'Organizer';
+    const isAdmin = userInfo?.roleName === 'Admin';
 
     return (
         <div className="homepage-container">
@@ -41,6 +43,14 @@ const HomePage = () => {
                                     Vé của tôi
                                 </button>
                             </>
+                        ) : isLoggedIn && isOrganizer ? (
+                            <button className="btn-primary" onClick={() => navigate('/organizer/events')}>
+                                Quản lý sự kiện
+                            </button>
+                        ) : isLoggedIn && isAdmin ? (
+                            <button className="btn-primary" onClick={() => navigate('/admin/dashboard')}>
+                                Vào trang quản trị
+                            </button>
                         ) : (
                             <>
                                 <button className="btn-primary" onClick={() => navigate('/login')}>

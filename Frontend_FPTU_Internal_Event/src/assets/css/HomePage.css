@@ -1,13 +1,23 @@
 
-body {
+html, body {
   margin: 0;
   padding: 0;
   height: 100%;
+  width: 100%;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   /* Đổi màu nền sang xám nhẹ để làm nổi bật box login */
   background-color: #f0f2f5; 
-  justify-content: center;
-  align-items: start;
+}
+
+#root {
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+body {
+  display: block;
 }
 
 
@@ -16,12 +26,12 @@ body {
   display: flex;
   flex-direction: column;
   /* --- THÊM ĐOẠN NÀY ĐỂ FULL CHIỀU NGANG --- */
-  width: 100vw; /* Chiều rộng bằng 100% màn hình thiết bị */
+  width: 100%; /* Chiều rộng bằng 100% màn hình thiết bị */
   position: relative;
-  left: 50%;    
+  /* left: 50%;    
   right: 50%;
-  margin-left: -50vw; /* Kéo sang trái cực đại */
-  margin-right: -50vw; /* Kéo sang phải cực đại */
+  margin-left: -50vw; 
+  margin-right: -50vw; */
   box-sizing: border-box; 
 }
 

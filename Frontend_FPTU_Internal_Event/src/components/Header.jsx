@@ -33,7 +33,7 @@ const Header = () => {
         
         <nav className="header-nav">
           <Link to="/" className="nav-link">Home</Link>
-          <Link to={isStudent ? "/student/events" : "/events"} className="nav-link">Events</Link>
+          <Link to={isOrganizer ? "/organizer/events" : isStudent ? "/student/events" : "/events"} className="nav-link">Events</Link>
           <Link to="/about" className="nav-link">About</Link>
           
           {/* Nếu role = Admin */}
@@ -46,9 +46,6 @@ const Header = () => {
           {/* Nếu role = Organizer */}
           {isLoggedIn && isOrganizer && (
             <>
-              <Link to="/organizer/events" className="nav-link organize-link">
-                Organize
-              </Link>
               <Link to="/organizer/speakers" className="nav-link speakers-link">
                 Speakers
               </Link>
