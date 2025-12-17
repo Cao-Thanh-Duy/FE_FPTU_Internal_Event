@@ -37,6 +37,26 @@ const OrganizerCreateEventPage = () => {
     const [showSpeakerModal, setShowSpeakerModal] = useState(false);
     const [selectedSpeaker, setSelectedSpeaker] = useState(null);
 
+    const formatLocalDate = (date) => {
+        const year = date.getFullYear();
+        const month = String(date. getMonth() + 1).padStart(2, '0');
+        const day = String(date. getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    };
+
+    const parseBackendDate = (dateValue) => {
+        if (!dateValue) return null;
+        
+        if (typeof dateValue === 'string') {
+            return dateValue.split('T')[0];
+        } else if (dateValue instanceof Date) {
+            return formatLocalDate(dateValue);
+        } else {
+            const d = new Date(dateValue);
+            return formatLocalDate(d);
+        }
+    };
+
     useEffect(() => {
         const token = localStorage.getItem('token') || sessionStorage.getItem('token');
         if (token) {
@@ -71,22 +91,25 @@ const OrganizerCreateEventPage = () => {
             ]);
 
             const venuesData = venuesRes.data?. data ??  venuesRes.data ??  [];
-            const slotsData = slotsRes.data?. data ?? slotsRes.data ?? [];
-            const usersData = usersRes.data?.data ?? usersRes.data ?? [];
-            const speakersData = speakersRes.data?.data ?? speakersRes.data ??  [];
+            const slotsData = slotsRes.data?.data ?? slotsRes.data ?? [];
+            const usersData = usersRes. data?.data ?? usersRes. data ?? [];
+            const speakersData = speakersRes. data?.data ?? speakersRes.data ?? [];
 
             setVenues(venuesData);
             setSlots(slotsData);
             setUsers(usersData);
             setSpeakers(speakersData);
 
-            toast.success('Form data loaded successfully!', {
+            console.log('Loaded venues:', venuesData);
+            console.log('Loaded slots:', slotsData);
+
+            toast.success('Form data loaded successfully! ', {
                 position: 'top-right',
                 autoClose: 1500
             });
         } catch (error) {
-            console. error('Error fetching initial data:', error);
-            toast.error('Failed to load form data. Please refresh the page.', {
+            console.error('Error fetching initial data:', error);
+            toast. error('Failed to load form data. Please refresh the page.', {
                 position: 'top-right',
                 autoClose: 3000
             });
@@ -97,13 +120,42 @@ const OrganizerCreateEventPage = () => {
 
     const fetchEventsForAvailability = async () => {
         try {
-            const response = await axios. get('https://localhost:7047/api/Event');
+            const response = await axios.get('https://localhost:7047/api/Event');
             const events = response.data?. data ?? response.data ?? [];
             
-            const approvedEvents = events.filter(e => e.status === 'Approve' || e.status === 'Approved' || e.status === 1); 
-            setExistingEvents(approvedEvents);
+            console.log('📅 Raw events from API:', events);
+            
+            const approvedEvents = events.filter(e => 
+                e.status === 'Approve' || 
+                e.status === 'Approved' || 
+                e.status === 'approve' ||
+                e.status === 1
+            );
+            
+            const mappedEvents = approvedEvents.map(event => {
+                const venue = venues.find(v => v.venueName === event.venueName);
+                
+                return {
+                    ... event,
+                    venueId: venue?.venueId || null,
+                    slotIds: event.slotEvent?.map(slot => {
+                        const foundSlot = slots.find(s => 
+                            s.slotName === slot.slotName && 
+                            s.startTime === slot.startTime
+                        );
+                        return foundSlot?. slotId;
+                    }).filter(id => id !== undefined) || []
+                };
+            });
+            
+            console.log('Mapped events with venueId and slotIds:', mappedEvents);
+            setExistingEvents(mappedEvents);
         } catch (error) {
             console.error('Error fetching events:', error);
+            toast.error('Failed to load event availability', {
+                position: 'top-right',
+                autoClose:  2000
+            });
         }
     };
 
@@ -112,20 +164,6 @@ const OrganizerCreateEventPage = () => {
         setFormData(prev => ({
             ... prev,
             [name]: value
-        }));
-    };
-
-    const handleMultiSelectChange = (e, field) => {
-        const options = e.target.options;
-        const values = [];
-        for (let i = 0, l = options.length; i < l; i++) {
-            if (options[i].selected) {
-                values.push(options[i].value);
-            }
-        }
-        setFormData(prev => ({
-            ...prev,
-            [field]: values
         }));
     };
 
@@ -164,23 +202,39 @@ const OrganizerCreateEventPage = () => {
     const isSlotBooked = (date, slotId) => {
         if (!formData.venueId) return false;
         
-        const dateString = date.toISOString().split('T')[0];
+        const dateString = formatLocalDate(date);
         
-        return existingEvents.some(event => {
-            const eventDate = new Date(event.eventDay).toISOString().split('T')[0];
-            return eventDate === dateString && 
-                   event.venueId == formData.venueId && 
-                   event.slotId == slotId;
+        const isBooked = existingEvents.some(event => {
+            if (!event. venueId || !event.slotIds) return false;
+            
+            const eventDateString = parseBackendDate(event.eventDay);
+            
+            const sameDate = eventDateString === dateString;
+            const sameVenue = event.venueId == formData.venueId;
+            const hasSlot = event.slotIds.includes(parseInt(slotId));
+            
+            if (sameDate && sameVenue && hasSlot) {
+                console.log('🔴 Slot booked:', { 
+                    date: dateString, 
+                    venue:  formData.venueId, 
+                    slot: slotId,
+                    eventName: event.eventName 
+                });
+            }
+            
+            return sameDate && sameVenue && hasSlot;
         });
+        
+        return isBooked;
     };
 
     const handleDateClick = (day) => {
-        const newDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), day);
+        const newDate = new Date(currentDate. getFullYear(), currentDate.getMonth(), day, 12, 0, 0);
         const today = new Date();
         today.setHours(0, 0, 0, 0);
         
         if (newDate < today) {
-            toast. warning("Cannot select past dates", {
+            toast.warning("Cannot select past dates", {
                 position: 'top-right',
                 autoClose: 2000
             });
@@ -189,12 +243,13 @@ const OrganizerCreateEventPage = () => {
 
         setSelectedDate(newDate);
         setSelectedSlotIds([]);
+        
+        console.log('📅 Selected date:', formatLocalDate(newDate));
     };
 
     const toggleSlot = (slotId) => {
         if (! selectedDate) return;
         
-        // Multiple slots selection
         if (selectedSlotIds.includes(slotId)) {
             setSelectedSlotIds(prev => prev.filter(id => id !== slotId));
         } else {
@@ -221,7 +276,7 @@ const OrganizerCreateEventPage = () => {
             return;
         }
 
-        if (! formData.eventName. trim()) {
+        if (! formData.eventName.trim()) {
             toast.error("Please enter event name", {
                 position: 'top-right',
                 autoClose: 3000
@@ -231,14 +286,14 @@ const OrganizerCreateEventPage = () => {
 
         if (!formData.eventDescription.trim()) {
             toast.error("Please enter event description", {
-                position:  'top-right',
-                autoClose: 3000
+                position: 'top-right',
+                autoClose:  3000
             });
             return;
         }
 
-        if (! formData.maxTicketCount || formData.maxTicketCount < 1) {
-            toast.error("Please enter valid max ticket count", {
+        if (!formData.maxTicketCount || formData.maxTicketCount < 1) {
+            toast. error("Please enter valid max ticket count", {
                 position:  'top-right',
                 autoClose: 3000
             });
@@ -247,17 +302,10 @@ const OrganizerCreateEventPage = () => {
 
         setLoading(true);
         try {
-            const formatDateOnly = (date) => {
-                const year = date.getFullYear();
-                const month = String(date.getMonth() + 1).padStart(2, '0');
-                const day = String(date.getDate()).padStart(2, '0');
-                return `${year}-${month}-${day}`;
-            };
-
             const payload = {
                 eventName: formData.eventName. trim(),
                 eventDescription: formData.eventDescription.trim(),
-                eventDate: formatDateOnly(selectedDate),
+                eventDate: formatLocalDate(selectedDate),
                 maxTicketCount: parseInt(formData.maxTicketCount),
                 venueId: parseInt(formData.venueId),
                 slotIds: selectedSlotIds. map(id => parseInt(id)),
@@ -265,7 +313,7 @@ const OrganizerCreateEventPage = () => {
                 staffIds: formData.staffIds.map(id => parseInt(id))
             };
 
-            console.log('Creating event with payload:', payload);
+            console.log('📤 Creating event with payload:', payload);
 
             const response = await axios.post('https://localhost:7047/api/Event', payload, {
                 headers: {
@@ -273,6 +321,8 @@ const OrganizerCreateEventPage = () => {
                     'Authorization': `Bearer ${localStorage.getItem('token') || sessionStorage.getItem('token')}`
                 }
             });
+            
+            console.log('Create response:', response.data);
             
             if (response.data.success) {
                 toast.success('Event created successfully!', {
@@ -288,7 +338,7 @@ const OrganizerCreateEventPage = () => {
             }
         } catch (error) {
             console.error('Error creating event:', error);
-            console.error('Error response:', error. response?.data);
+            console.error('Error response:', error.response?.data);
             
             let errorMessage = 'Failed to create event.  Please try again.';
             
@@ -296,9 +346,9 @@ const OrganizerCreateEventPage = () => {
                 errorMessage = 'Authentication failed. Please login again.';
                 setTimeout(() => navigate('/login'), 2000);
             } else if (error.response?.status === 400) {
-                errorMessage = error.response?. data?.message || 
+                errorMessage = error.response?.data?.message || 
                              error.response?.data?.title ||
-                             'Invalid data provided. Please check all fields.';
+                             'Invalid data provided.  Please check all fields.';
             } else if (error.response?.data?.message) {
                 errorMessage = error.response. data.message;
             } else if (error.message) {
@@ -322,46 +372,66 @@ const OrganizerCreateEventPage = () => {
             calendarDays.push(<div key={`empty-${i}`} className="calendar-day empty"></div>);
         }
 
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
         for (let day = 1; day <= days; day++) {
-            const date = new Date(currentDate.getFullYear(), currentDate.getMonth(), day);
+            const date = new Date(currentDate.getFullYear(), currentDate.getMonth(), day, 12, 0, 0);
+            
             const isSelected = selectedDate && 
                              date.getDate() === selectedDate.getDate() && 
                              date.getMonth() === selectedDate.getMonth() &&
                              date.getFullYear() === selectedDate.getFullYear();
-            const isToday = new Date().toDateString() === date.toDateString();
+            const isToday = date.toDateString() === today.toDateString();
             
-            // Check if past date
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
-            const isPast = date < today;
+            const todayMidnight = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+            const dateMidnight = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+            const isPast = dateMidnight < todayMidnight;
             
-            let hasBooked = false;
-            let hasAvailable = false;
+            let bookedSlots = [];
+            let availableSlots = [];
             
-            if (formData.venueId) {
+            if (formData.venueId && slots.length > 0) {
                 slots.forEach(slot => {
                     if (isSlotBooked(date, slot.slotId)) {
-                        hasBooked = true;
+                        bookedSlots. push(slot. slotId);
                     } else {
-                        hasAvailable = true;
+                        availableSlots.push(slot.slotId);
                     }
                 });
             }
 
-            let dayClasses = `calendar-day ${isSelected ? 'selected' : ''} ${isToday ? 'today' : ''}`;
+            const hasBooked = bookedSlots.length > 0;
+            const hasAvailable = availableSlots. length > 0;
+            const isFullyBooked = formData.venueId && slots.length > 0 && ! hasAvailable && hasBooked;
+            const isPartiallyBooked = hasBooked && hasAvailable;
+
+            let dayClasses = 'calendar-day';
+            if (isSelected) dayClasses += ' selected';
+            if (isToday) dayClasses += ' today';
             if (isPast) dayClasses += ' past-date';
-            if (formData.venueId && !hasAvailable && hasBooked) dayClasses += ' fully-booked';
+            else if (isFullyBooked) dayClasses += ' fully-booked';
+            else if (isPartiallyBooked) dayClasses += ' partially-booked';
+
+            const isClickable = !isPast && !isFullyBooked;
 
             calendarDays.push(
                 <div 
                     key={day} 
                     className={dayClasses}
-                    onClick={() => !isPast && handleDateClick(day)}
+                    onClick={() => isClickable && handleDateClick(day)}
+                    title={
+                        isPast ? 'Past date' : 
+                        isFullyBooked ? 'All slots booked' : 
+                        isPartiallyBooked ?  `${availableSlots.length} slot(s) available` :
+                        hasAvailable ? `${availableSlots.length} slot(s) available` : 
+                        'Select date'
+                    }
                 >
                     <span className="day-number">{day}</span>
                     <div className="day-status-dots">
-                        {hasBooked && <span className="status-dot booked" title="Has booked slots"></span>}
-                        {hasAvailable && <span className="status-dot available" title="Has available slots"></span>}
+                        {hasBooked && <span className="status-dot booked" title={`${bookedSlots.length} booked`}></span>}
+                        {hasAvailable && <span className="status-dot available" title={`${availableSlots.length} available`}></span>}
                     </div>
                 </div>
             );
@@ -369,6 +439,27 @@ const OrganizerCreateEventPage = () => {
 
         return calendarDays;
     };
+
+    const CalendarLegend = () => (
+        <div className="calendar-legend">
+            <div className="legend-item">
+                <div className="legend-box available"></div>
+                <span>Available</span>
+            </div>
+            <div className="legend-item">
+                <div className="legend-box partially-booked"></div>
+                <span>Partially Booked</span>
+            </div>
+            <div className="legend-item">
+                <div className="legend-box fully-booked"></div>
+                <span>Fully Booked</span>
+            </div>
+            <div className="legend-item">
+                <div className="legend-box past"></div>
+                <span>Past Date</span>
+            </div>
+        </div>
+    );
 
     return (
         <div className="create-event-container">
@@ -443,7 +534,7 @@ const OrganizerCreateEventPage = () => {
                             >
                                 <option value="">Select a Venue</option>
                                 {venues.map(venue => (
-                                    <option key={venue.venueId} value={venue.venueId}>
+                                    <option key={venue. venueId} value={venue.venueId}>
                                         {venue.venueName} (Capacity: {venue.maxSeat || 0})
                                     </option>
                                 ))}
@@ -456,7 +547,7 @@ const OrganizerCreateEventPage = () => {
                             <div className="selection-grid">
                                 {speakers.map(speaker => (
                                     <div 
-                                        key={speaker.speakerId} 
+                                        key={speaker. speakerId} 
                                         className={`selection-card ${formData.speakerIds.includes(speaker.speakerId) ? 'selected' : ''}`}
                                         onClick={() => toggleSelection('speakerIds', speaker.speakerId)}
                                     >
@@ -505,7 +596,7 @@ const OrganizerCreateEventPage = () => {
                                     <div className="calendar-header">
                                         <button type="button" className="month-nav-btn" onClick={() => changeMonth(-1)}>&lt;</button>
                                         <span className="current-month">
-                                            {currentDate. toLocaleString('default', { month: 'long', year: 'numeric' })}
+                                            {currentDate.toLocaleString('default', { month: 'long', year: 'numeric' })}
                                         </span>
                                         <button type="button" className="month-nav-btn" onClick={() => changeMonth(1)}>&gt;</button>
                                     </div>
@@ -520,13 +611,15 @@ const OrganizerCreateEventPage = () => {
                                         {renderCalendar()}
                                     </div>
                                 </div>
+                                
+                                <CalendarLegend />
 
                                 {selectedDate && (
                                     <div className="slot-selection-area">
                                         <div className="selected-date-info">
                                             Available Slots for {selectedDate.toLocaleDateString()}
                                         </div>
-                                        {slots.length === 0 ? (
+                                        {slots.length === 0 ?  (
                                             <div className="text-center py-4 text-gray-500">
                                                 No slots available
                                             </div>
@@ -576,7 +669,7 @@ const OrganizerCreateEventPage = () => {
                     </div>
                 </form>
             </div>
-            {/* Speaker Detail Modal */}
+
             {showSpeakerModal && selectedSpeaker && (
                 <div className="modal-overlay" onClick={() => setShowSpeakerModal(false)}>
                     <div className="modal-content" onClick={e => e.stopPropagation()}>
@@ -595,7 +688,7 @@ const OrganizerCreateEventPage = () => {
                             </div>
                             <div className="speaker-detail-row">
                                 <span className="speaker-detail-label">Phone</span>
-                                <span className="speaker-detail-value">{selectedSpeaker.phoneNumber || 'N/A'}</span>
+                                <span className="speaker-detail-value">{selectedSpeaker. phoneNumber || 'N/A'}</span>
                             </div>
                             <div className="speaker-detail-row">
                                 <span className="speaker-detail-label">Bio</span>
@@ -604,7 +697,8 @@ const OrganizerCreateEventPage = () => {
                         </div>
                     </div>
                 </div>
-            )}        </div>
+            )}
+        </div>
     );
 };
 

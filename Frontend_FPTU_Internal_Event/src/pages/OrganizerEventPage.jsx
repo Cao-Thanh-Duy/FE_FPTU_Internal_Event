@@ -146,7 +146,6 @@ const OrganizerEventPage = () => {
         }
     };
 
-    // ✅ FIXED: Handle single slot selection
     const handleSlotSelect = (slotId) => {
         setFormData({
             ...formData,
