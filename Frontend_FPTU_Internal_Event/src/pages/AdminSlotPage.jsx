@@ -57,26 +57,6 @@ const AdminSlotPage = () => {
         setShowModal(true);
     };
 
-    const handleViewSlot = async (slotId) => {
-        try {
-            setLoading(true);
-            const response = await axios.get(`https://localhost:7047/api/Slot/${slotId}`);
-            const data = response.data?.data ?? response.data;
-            setSelectedSlot(data);
-            setFormData({
-                slotName: data.slotName ?? '',
-                startTime: data.startTime ?? '',
-                endTime: data.endTime ?? ''
-            });
-            setModalMode('view');
-            setShowModal(true);
-        } catch (error) {
-            console.error('Error fetching slot details:', error);
-            toast.error('Failed to load slot details.', { position: 'top-right', autoClose: 3000 });
-        } finally {
-            setLoading(false);
-        }
-    };
 
     const handleEditSlot = async (slotId) => {
         try {
@@ -231,9 +211,6 @@ const AdminSlotPage = () => {
                                                 <td>{slot.endTime}</td>
                                                 <td>
                                                     <div className="action-buttons">
-                                                        <button className="btn-view" onClick={() => handleViewSlot(slot.slotId ?? slot.id)}>
-                                                            <FaEye /> View
-                                                        </button>
                                                         <button className="btn-edit" onClick={() => handleEditSlot(slot.slotId ?? slot.id)}>
                                                             <FaEdit /> Edit
                                                         </button>
