@@ -69,7 +69,7 @@ const StaffEventPage = () => {
                         date: event.eventDay,
                         time: timeSlots || "Chưa có thời gian",
                         venue: `${event.venueName} - ${event.locationDetails}`,
-                        participants: event.currentTickerCount,
+                        participants: event.maxTickerCount - event.currentTickerCount,
                         maxParticipants: event.maxTickerCount,
                         status: status,
                         description: event.eventDescription,
@@ -241,35 +241,155 @@ const StaffEventPage = () => {
                                     <div className="attendees-summary">
                                         <h3>{attendeesData.eventName}</h3>
                                         <p className="total-count">
-                                            Tổng số người tham gia: <strong>{attendeesData.totalAttendees}</strong>
+                                            Tổng số người tham gia: <strong>
+                                                {attendeesData.attendees ? 
+                                                    attendeesData.attendees.filter(a => a.status === 'Checked' || a.status === 'Not Used').length 
+                                                    : 0}
+                                            </strong>
                                         </p>
                                     </div>
                                     {attendeesData.attendees && attendeesData.attendees.length > 0 ? (
-                                        <div className="attendees-list">
-                                            {attendeesData.attendees.map((attendee, index) => (
-                                                <div key={attendee.ticketId || index} className="attendee-item">
-                                                    <div className="attendee-number">{index + 1}</div>
-                                                    <div className="attendee-info">
-                                                        <div className="attendee-name">
-                                                            {attendee.userName}
-                                                            {attendee.seatNumber && (
-                                                                <span className="seat-number-badge">
-                                                                    Ghế {attendee.seatNumber}
-                                                                </span>
-                                                            )}
-                                                        </div>
-                                                        <div className="attendee-email">{attendee.email}</div>
-                                                        {attendee.status && (
-                                                            <div className="attendee-status">
-                                                                <span className={`ticket-status-badge ${attendee.status === 'Used' ? 'status-used' : attendee.status === 'Not Used' ? 'status-not-used' : 'status-cancelled'}`}>
-                                                                    {attendee.status === 'Used' ? '✓ Đã sử dụng' : attendee.status === 'Not Used' ? '○ Chưa sử dụng' : '✕ Đã hủy'}
-                                                                </span>
-                                                            </div>
-                                                        )}
+                                        <>
+                                            {/* Not Used Tickets */}
+                                            {attendeesData.attendees.filter(a => a.status === 'Not Used').length > 0 && (
+                                                <div className="attendees-section">
+                                                    <h4 className="section-title not-used-title">
+                                                        <span className="section-icon">○</span>
+                                                        Chưa sử dụng ({attendeesData.attendees.filter(a => a.status === 'Not Used').length})
+                                                    </h4>
+                                                    <div className="attendees-list">
+                                                        {attendeesData.attendees
+                                                            .filter(a => a.status === 'Not Used')
+                                                            .map((attendee, index) => (
+                                                                <div key={attendee.ticketId || index} className="attendee-item">
+                                                                    <div className="attendee-number">{index + 1}</div>
+                                                                    <div className="attendee-info">
+                                                                        <div className="attendee-name">
+                                                                            {attendee.userName}
+                                                                            {attendee.seatNumber && (
+                                                                                <span className="seat-number-badge">
+                                                                                    Ghế {attendee.seatNumber}
+                                                                                </span>
+                                                                            )}
+                                                                        </div>
+                                                                        <div className="attendee-email">{attendee.email}</div>
+                                                                        <div className="attendee-status">
+                                                                            <span className="ticket-status-badge status-not-used">
+                                                                                ○ Chưa sử dụng
+                                                                            </span>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            ))}
                                                     </div>
                                                 </div>
-                                            ))}
-                                        </div>
+                                            )}
+
+                                            {/* Checked Tickets */}
+                                            {attendeesData.attendees.filter(a => a.status === 'Checked').length > 0 && (
+                                                <div className="attendees-section">
+                                                    <h4 className="section-title checked-title">
+                                                        <span className="section-icon">✓</span>
+                                                        Đã check-in ({attendeesData.attendees.filter(a => a.status === 'Checked').length})
+                                                    </h4>
+                                                    <div className="attendees-list">
+                                                        {attendeesData.attendees
+                                                            .filter(a => a.status === 'Checked')
+                                                            .map((attendee, index) => (
+                                                                <div key={attendee.ticketId || index} className="attendee-item">
+                                                                    <div className="attendee-number">{index + 1}</div>
+                                                                    <div className="attendee-info">
+                                                                        <div className="attendee-name">
+                                                                            {attendee.userName}
+                                                                            {attendee.seatNumber && (
+                                                                                <span className="seat-number-badge">
+                                                                                    Ghế {attendee.seatNumber}
+                                                                                </span>
+                                                                            )}
+                                                                        </div>
+                                                                        <div className="attendee-email">{attendee.email}</div>
+                                                                        <div className="attendee-status">
+                                                                            <span className="ticket-status-badge status-checked">
+                                                                                ✓ Đã check-in
+                                                                            </span>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            ))}
+                                                    </div>
+                                                </div>
+                                            )}
+
+                                            {/* Cancelled Tickets */}
+                                            {attendeesData.attendees.filter(a => a.status === 'Cancelled').length > 0 && (
+                                                <div className="attendees-section">
+                                                    <h4 className="section-title cancelled-title">
+                                                        <span className="section-icon">✕</span>
+                                                        Đã hủy ({attendeesData.attendees.filter(a => a.status === 'Cancelled').length})
+                                                    </h4>
+                                                    <div className="attendees-list">
+                                                        {attendeesData.attendees
+                                                            .filter(a => a.status === 'Cancelled')
+                                                            .map((attendee, index) => (
+                                                                <div key={attendee.ticketId || index} className="attendee-item">
+                                                                    <div className="attendee-number">{index + 1}</div>
+                                                                    <div className="attendee-info">
+                                                                        <div className="attendee-name">
+                                                                            {attendee.userName}
+                                                                            {attendee.seatNumber && (
+                                                                                <span className="seat-number-badge">
+                                                                                    Ghế {attendee.seatNumber}
+                                                                                </span>
+                                                                            )}
+                                                                        </div>
+                                                                        <div className="attendee-email">{attendee.email}</div>
+                                                                        <div className="attendee-status">
+                                                                            <span className="ticket-status-badge status-cancelled">
+                                                                                ✕ Đã hủy
+                                                                            </span>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            ))}
+                                                    </div>
+                                                </div>
+                                            )}
+
+                                            {/* Used Tickets (if any) */}
+                                            {attendeesData.attendees.filter(a => a.status === 'Used').length > 0 && (
+                                                <div className="attendees-section">
+                                                    <h4 className="section-title used-title">
+                                                        <span className="section-icon">✓</span>
+                                                        Đã sử dụng ({attendeesData.attendees.filter(a => a.status === 'Used').length})
+                                                    </h4>
+                                                    <div className="attendees-list">
+                                                        {attendeesData.attendees
+                                                            .filter(a => a.status === 'Used')
+                                                            .map((attendee, index) => (
+                                                                <div key={attendee.ticketId || index} className="attendee-item">
+                                                                    <div className="attendee-number">{index + 1}</div>
+                                                                    <div className="attendee-info">
+                                                                        <div className="attendee-name">
+                                                                            {attendee.userName}
+                                                                            {attendee.seatNumber && (
+                                                                                <span className="seat-number-badge">
+                                                                                    Ghế {attendee.seatNumber}
+                                                                                </span>
+                                                                            )}
+                                                                        </div>
+                                                                        <div className="attendee-email">{attendee.email}</div>
+                                                                        <div className="attendee-status">
+                                                                            <span className="ticket-status-badge status-used">
+                                                                                ✓ Đã sử dụng
+                                                                            </span>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            ))}
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </>
                                     ) : (
                                         <div className="no-attendees">
                                             <p>Chưa có người tham gia</p>

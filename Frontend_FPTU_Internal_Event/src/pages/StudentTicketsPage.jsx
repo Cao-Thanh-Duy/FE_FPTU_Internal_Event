@@ -11,6 +11,8 @@ const StudentTicketsPage = () => {
     const [myTickets, setMyTickets] = useState([]);
     const [loading, setLoading] = useState(true);
     const [qrCode, setQrCode] = useState("");
+    const [showCheckedModal, setShowCheckedModal] = useState(false);
+    const [showCancelledModal, setShowCancelledModal] = useState(false);
 
     // Fetch tickets from API
     useEffect(() => {
@@ -109,6 +111,7 @@ const StudentTicketsPage = () => {
         const statusMap = {
             "Not Used": { text: "Đã xác nhận", class: "status-confirmed", icon: <FaCheckCircle /> },
             "Used": { text: "Đã sử dụng", class: "status-used", icon: <FaCheckCircle /> },
+            "Checked": { text: "Đã check-in", class: "status-checked", icon: <FaCheckCircle /> },
             "Cancelled": { text: "Đã hủy", class: "status-cancelled", icon: <FaTimes /> }
         };
         return statusMap[status] || statusMap["Not Used"];
@@ -122,7 +125,9 @@ const StudentTicketsPage = () => {
     };
 
     const upcomingTickets = myTickets.filter(ticket => ticket.status === 'Not Used');
+    const checkedTickets = myTickets.filter(ticket => ticket.status === 'Checked');
     const usedTickets = myTickets.filter(ticket => ticket.status === 'Used');
+    const cancelledTickets = myTickets.filter(ticket => ticket.status === 'Cancelled');
 
     return (
         <div className="student-tickets-page">
@@ -135,6 +140,24 @@ const StudentTicketsPage = () => {
                             <h1>Vé của tôi</h1>
                             <p>Quản lý các vé sự kiện đã đăng ký</p>
                         </div>
+                        <div className="header-buttons">
+                            {checkedTickets.length > 0 && (
+                                <button 
+                                    className="btn-checked-toggle"
+                                    onClick={() => setShowCheckedModal(true)}
+                                >
+                                    <FaCheckCircle /> Checked In ({checkedTickets.length})
+                                </button>
+                            )}
+                            {cancelledTickets.length > 0 && (
+                                <button 
+                                    className="btn-cancelled-toggle"
+                                    onClick={() => setShowCancelledModal(true)}
+                                >
+                                    <FaTimes /> Cancelled ({cancelledTickets.length})
+                                </button>
+                            )}
+                        </div>
                     </div>
 
                     {/* Statistics */}
@@ -144,7 +167,7 @@ const StudentTicketsPage = () => {
                             <div className="stat-label">Vé sắp tới</div>
                         </div>
                         <div className="stat-box">
-                            <div className="stat-number">{usedTickets.length}</div>
+                            <div className="stat-number">{checkedTickets.length}</div>
                             <div className="stat-label">Đã tham gia</div>
                         </div>
                     </div>
@@ -297,6 +320,148 @@ const StudentTicketsPage = () => {
                             <button 
                                 className="btn-close-modal" 
                                 onClick={() => setShowQRModal(false)}
+                            >
+                                Đóng
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Checked In Tickets Modal */}
+            {showCheckedModal && (
+                <div className="modal-overlay" onClick={() => setShowCheckedModal(false)}>
+                    <div className="modal-content modal-large" onClick={(e) => e.stopPropagation()}>
+                        <div className="modal-header">
+                            <h2>
+                                <FaCheckCircle /> Vé đã check-in ({checkedTickets.length})
+                            </h2>
+                            <button 
+                                className="modal-close"
+                                onClick={() => setShowCheckedModal(false)}
+                            >
+                                <FaTimes />
+                            </button>
+                        </div>
+                        
+                        <div className="modal-body modal-body-tickets">
+                            {checkedTickets.length > 0 ? (
+                                <div className="tickets-grid">
+                                    {checkedTickets.map(ticket => (
+                                        <div key={ticket.ticketId} className="ticket-card checked">
+                                            <div className="ticket-header">
+                                                <FaTicketAlt className="ticket-icon" />
+                                                <span className={`ticket-status ${getStatusInfo(ticket.status).class}`}>
+                                                    {getStatusInfo(ticket.status).icon}
+                                                    {getStatusInfo(ticket.status).text}
+                                                </span>
+                                            </div>
+                                            
+                                            <h3 className="ticket-event-name">{ticket.eventName}</h3>
+                                            <div className="ticket-id">Mã vé: {ticket.ticketCode || ticket.ticketId}</div>
+                                            <div className="ticket-id">Số ghế: {ticket.seatNumber}</div>
+                                            
+                                            <div className="ticket-details">
+                                                <div className="detail-row">
+                                                    <FaCalendar className="detail-icon" />
+                                                    <span>{formatDate(ticket.startDay)}</span>
+                                                </div>
+                                            </div>
+
+                                            <div className="ticket-actions">
+                                                <button 
+                                                    className="btn-show-qr"
+                                                    onClick={() => {
+                                                        setShowCheckedModal(false);
+                                                        handleShowQR(ticket);
+                                                    }}
+                                                >
+                                                    <FaQrcode /> Xem QR
+                                                </button>
+                                                <button 
+                                                    className="btn-download"
+                                                    onClick={() => handleDownloadTicket(ticket)}
+                                                >
+                                                    <FaDownload />
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            ) : (
+                                <div className="no-tickets">
+                                    <FaTicketAlt className="no-tickets-icon" />
+                                    <p>Không có vé đã check-in</p>
+                                </div>
+                            )}
+                        </div>
+                        
+                        <div className="modal-footer">
+                            <button 
+                                className="btn-close-modal" 
+                                onClick={() => setShowCheckedModal(false)}
+                            >
+                                Đóng
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Cancelled Tickets Modal */}
+            {showCancelledModal && (
+                <div className="modal-overlay" onClick={() => setShowCancelledModal(false)}>
+                    <div className="modal-content modal-large" onClick={(e) => e.stopPropagation()}>
+                        <div className="modal-header">
+                            <h2>
+                                <FaTimes /> Vé đã hủy ({cancelledTickets.length})
+                            </h2>
+                            <button 
+                                className="modal-close"
+                                onClick={() => setShowCancelledModal(false)}
+                            >
+                                <FaTimes />
+                            </button>
+                        </div>
+                        
+                        <div className="modal-body modal-body-tickets">
+                            {cancelledTickets.length > 0 ? (
+                                <div className="tickets-grid">
+                                    {cancelledTickets.map(ticket => (
+                                        <div key={ticket.ticketId} className="ticket-card cancelled">
+                                            <div className="ticket-header">
+                                                <FaTicketAlt className="ticket-icon" />
+                                                <span className={`ticket-status ${getStatusInfo(ticket.status).class}`}>
+                                                    {getStatusInfo(ticket.status).icon}
+                                                    {getStatusInfo(ticket.status).text}
+                                                </span>
+                                            </div>
+                                            
+                                            <h3 className="ticket-event-name">{ticket.eventName}</h3>
+                                            <div className="ticket-id">Mã vé: {ticket.ticketCode || ticket.ticketId}</div>
+                                            <div className="ticket-id">Số ghế: {ticket.seatNumber}</div>
+                                            
+                                            <div className="ticket-details">
+                                                <div className="detail-row">
+                                                    <FaCalendar className="detail-icon" />
+                                                    <span>{formatDate(ticket.startDay)}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            ) : (
+                                <div className="no-tickets">
+                                    <FaTicketAlt className="no-tickets-icon" />
+                                    <p>Không có vé đã hủy</p>
+                                </div>
+                            )}
+                        </div>
+                        
+                        <div className="modal-footer">
+                            <button 
+                                className="btn-close-modal" 
+                                onClick={() => setShowCancelledModal(false)}
                             >
                                 Đóng
                             </button>
