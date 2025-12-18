@@ -506,16 +506,17 @@ const OrganizerEventPage = () => {
                                                 <FaCalendarAlt className="info-icon" />
                                                 <span>
                                                     {new Date(event.eventDay).toLocaleDateString('vi-VN')}
-                                                    {event.slotEvent && event.slotEvent.length > 0 && (
-                                                        <span className="slot-inline">
-                                                            {event.slotEvent.map((slot, index) => (
-                                                                <span key={index}>
-                                                                    {index > 0 && ', '}
-                                                                    {slot.startTime} - {slot.endTime}
-                                                                </span>
-                                                            ))}
-                                                        </span>
-                                                    )}
+                                                    {event.slotEvent && event.slotEvent.length > 0 && (() => {
+                                                        const startTimes = event.slotEvent.map(slot => slot.startTime);
+                                                        const endTimes = event.slotEvent.map(slot => slot.endTime);
+                                                        const earliestStart = startTimes.sort()[0];
+                                                        const latestEnd = endTimes.sort().reverse()[0];
+                                                        return (
+                                                            <span className="slot-inline">
+                                                                {earliestStart} - {latestEnd}
+                                                            </span>
+                                                        );
+                                                    })()}
                                                 </span>
                                             </div>
                                             
