@@ -29,11 +29,11 @@ const OrganizerEventPage = () => {
     const [formData, setFormData] = useState({
         eventName: '',
         eventDescription: '',
-        eventDay: '', // ✅ FIXED: Changed from eventDate to eventDay
+        eventDay: '',
         maxTicketCount: '',
         venueId: '',
         speakerIds: [],
-        slotId: '', // ✅ FIXED:  Changed from slotIds array to single slotId
+        slotIds: [],
         staffIds: []
     });
 
@@ -151,10 +151,20 @@ const OrganizerEventPage = () => {
     };
 
     const handleSlotSelect = (slotId) => {
-        setFormData({
-            ...formData,
-            slotId: parseInt(slotId)
-        });
+        const currentSlotIds = formData.slotIds;
+        const numSlotId = parseInt(slotId);
+        
+        if (currentSlotIds.includes(numSlotId)) {
+            setFormData({
+                ...formData,
+                slotIds: currentSlotIds.filter(id => id !== numSlotId)
+            });
+        } else {
+            setFormData({
+                ...formData,
+                slotIds: [...currentSlotIds, numSlotId]
+            });
+        }
     };
 
     const handleEditEvent = async (event) => {
@@ -171,10 +181,16 @@ const OrganizerEventPage = () => {
             const speakerIds = (eventData.speakerEvent?. map(s => Number(s.speakerId)) || []).filter(id => !isNaN(id) && id != null);
             const staffIds = (eventData.staffEvent?.map(s => Number(s.staffId || s.userId)) || []).filter(id => !isNaN(id) && id != null);
             
-            // ✅ FIXED: Backend returns single slotId, not array
-            const slotId = eventData.slotId || (eventData.slotEvent && eventData.slotEvent.length > 0 ? eventData. slotEvent[0].slotId : '');
+            // Extract slot IDs by matching slotEvent with local slots data
+            const slotIds = (eventData.slotEvent || []).map(eventSlot => {
+                const matchedSlot = slots.find(s => 
+                    s.slotName === eventSlot.slotName && 
+                    s.startTime === eventSlot.startTime
+                );
+                return matchedSlot ? matchedSlot.slotId : null;
+            }).filter(id => id !== null);
             
-            console.log('Extracted IDs:', { speakerIds, slotId, staffIds });
+            console.log('Extracted IDs:', { speakerIds, slotIds, staffIds });
             
             // Format date to YYYY-MM-DD
             const eventDay = eventData.eventDay ? eventData.eventDay.split('T')[0] : '';
@@ -182,11 +198,11 @@ const OrganizerEventPage = () => {
             const newFormData = {
                 eventName:  eventData.eventName || '',
                 eventDescription: eventData.eventDescription || '',
-                eventDay:  eventDay, // ✅ FIXED:  Use eventDay instead of eventDate
+                eventDay:  eventDay,
                 maxTicketCount: eventData.maxTickerCount?. toString() || '',
                 venueId: eventData.venueId?.toString() || '',
                 speakerIds: speakerIds,
-                slotId: slotId. toString(), // ✅ FIXED: Single slot as string
+                slotIds: slotIds,
                 staffIds: staffIds
             };
             
@@ -283,8 +299,8 @@ const OrganizerEventPage = () => {
             return;
         }
 
-        if (!formData.slotId) {
-            toast.error('Please select a time slot', {
+        if (!formData.slotIds || formData.slotIds.length === 0) {
+            toast.error('Please select at least one time slot', {
                 position: 'top-right',
                 autoClose: 2000
             });
@@ -308,14 +324,14 @@ const OrganizerEventPage = () => {
         }
         
         try {
-            // ✅ FIXED:  Payload structure matching backend CreateUpdateEventRequest
+            // Payload structure matching backend API
             const requestData = {
                 eventName:  formData.eventName. trim(),
                 eventDescription: formData.eventDescription.trim(),
-                eventDay: new Date(formData.eventDay).toISOString(), // ✅ FIXED:  eventDay not eventDate
+                eventDate: formData.eventDay,
                 maxTicketCount: parseInt(formData.maxTicketCount),
                 venueId: parseInt(formData.venueId),
-                slotId: parseInt(formData.slotId), // ✅ FIXED:  Single slotId, not array
+                slotIds: formData.slotIds.map(id => parseInt(id)),
                 speakerIds: formData.speakerIds.map(id => parseInt(id)),
                 staffIds: formData.staffIds.map(id => parseInt(id))
             };
@@ -328,9 +344,9 @@ const OrganizerEventPage = () => {
             if (modalMode === 'create') {
                 response = await axios.post('https://localhost:7047/api/Event', requestData);
             } else if (modalMode === 'edit') {
-                // ✅ FIXED: Update endpoint with query parameter
-                response = await axios. put(
-                    `https://localhost:7047/api/Event? eventId=${selectedEventId}`, 
+                // Update endpoint with query parameter
+                response = await axios.put(
+                    `https://localhost:7047/api/Event?eventId=${selectedEventId}`, 
                     requestData
                 );
             }
@@ -378,7 +394,7 @@ const OrganizerEventPage = () => {
             maxTicketCount: '',
             venueId: '',
             speakerIds: [],
-            slotId: '',
+            slotIds: [],
             staffIds: []
         });
         setModalMode('create');
@@ -688,7 +704,7 @@ const OrganizerEventPage = () => {
                                         type="text"
                                         value={formData.eventName}
                                         onChange={(e) => setFormData({...formData, eventName: e.target.value})}
-                                        required
+                                        required={modalMode === 'create'}
                                         placeholder="Enter event name"
                                     />
                                 </div>
@@ -698,7 +714,7 @@ const OrganizerEventPage = () => {
                                         type="date"
                                         value={formData.eventDay}
                                         onChange={(e) => setFormData({...formData, eventDay: e.target.value})}
-                                        required
+                                        required={modalMode === 'create'}
                                         min={new Date().toISOString().split('T')[0]}
                                     />
                                 </div>
@@ -709,7 +725,7 @@ const OrganizerEventPage = () => {
                                 <textarea
                                     value={formData.eventDescription}
                                     onChange={(e) => setFormData({...formData, eventDescription: e.target.value})}
-                                    required
+                                    required={modalMode === 'create'}
                                     rows="4"
                                     placeholder="Enter event description"
                                 />
@@ -722,7 +738,7 @@ const OrganizerEventPage = () => {
                                         type="number"
                                         value={formData.maxTicketCount}
                                         onChange={(e) => setFormData({...formData, maxTicketCount: e. target.value})}
-                                        required
+                                        required={modalMode === 'create'}
                                         min="1"
                                         placeholder="100"
                                     />
@@ -732,7 +748,7 @@ const OrganizerEventPage = () => {
                                     <select
                                         value={formData.venueId}
                                         onChange={(e) => setFormData({...formData, venueId: e.target.value})}
-                                        required
+                                        required={modalMode === 'create'}
                                     >
                                         <option value="">Select Venue</option>
                                         {venues.map(venue => (
@@ -744,28 +760,27 @@ const OrganizerEventPage = () => {
                                 </div>
                             </div>
 
-                            {/* ✅ FIXED: Single slot selection using radio buttons */}
                             <div className="form-group">
-                                <label>Time Slot * (Select one)</label>
-                                <div className="radio-group">
+                                <label>Time Slots * (Select at least one)</label>
+                                <div className="checkbox-group">
                                     {slots.length === 0 ? (
                                         <p className="no-data">No slots available.  Please create slots first.</p>
                                     ) : (
                                         slots.map(slot => (
-                                            <label key={slot.slotId} className="radio-label">
+                                            <label key={slot.slotId} className="checkbox-label">
                                                 <input
-                                                    type="radio"
-                                                    name="slotId"
-                                                    value={slot.slotId}
-                                                    checked={formData.slotId == slot.slotId}
-                                                    onChange={(e) => handleSlotSelect(e.target.value)}
-                                                    required
+                                                    type="checkbox"
+                                                    checked={formData.slotIds.includes(slot.slotId)}
+                                                    onChange={() => handleSlotSelect(slot.slotId)}
                                                 />
                                                 <span>{slot.slotName} ({slot.startTime} - {slot.endTime})</span>
                                             </label>
                                         ))
                                     )}
                                 </div>
+                                <small className="form-hint">
+                                    {formData.slotIds.length} slot(s) selected
+                                </small>
                             </div>
 
                             <div className="form-group">
