@@ -147,10 +147,6 @@ const StudentTicketsPage = () => {
                             <div className="stat-number">{usedTickets.length}</div>
                             <div className="stat-label">Đã tham gia</div>
                         </div>
-                        <div className="stat-box">
-                            <div className="stat-number">{myTickets.length}</div>
-                            <div className="stat-label">Tổng vé</div>
-                        </div>
                     </div>
 
                     {/* Upcoming Tickets */}

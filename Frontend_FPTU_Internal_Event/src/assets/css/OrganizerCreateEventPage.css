@@ -495,6 +495,43 @@ textarea.form-control {
   transform: none;
 }
 
+/* Inline Search Box Styles */
+.search-box-inline {
+  position: relative;
+  margin-bottom: 12px;
+}
+
+.search-icon-inline {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #9ca3af;
+  font-size: 0.9rem;
+  pointer-events: none;
+}
+
+.search-input-inline {
+  width: 100%;
+  padding: 0.65rem 1rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  transition: all 0.2s;
+  background-color: #f9fafb;
+}
+
+.search-input-inline:focus {
+  outline: none;
+  border-color: #fd7a00;
+  background-color: white;
+  box-shadow: 0 0 0 3px rgba(253, 122, 0, 0.1);
+}
+
+.search-input-inline::placeholder {
+  color: #9ca3af;
+}
+
 /* Selection Grid Styles */
 .selection-grid {
   display: flex;

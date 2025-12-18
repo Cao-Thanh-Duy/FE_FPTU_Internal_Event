@@ -65,46 +65,40 @@ const AdminProfilePage = () => {
                                     <h2>{profile.userName}</h2>
                                     <p className="profile-role-tag">{profile.roleName}</p>
                                     <p className="profile-email">{profile.email}</p>
-                                </div>
-                            </div>
-
-                            {/* Profile Details */}
-                            <div className="profile-details-grid">
-                                {/* Personal Information */}
-                                <div className="profile-section">
-                                    <h3 className="section-title">Personal Information</h3>
-                                    <div className="info-grid">
-                                        <div className="info-item">
-                                            <div className="info-label">
-                                                <FaIdCard className="info-icon" />
+                                    
+                                    {/* Personal Information inside card */}
+                                    <div className="info-grid-inline">
+                                        <div className="info-item-inline">
+                                            <div className="info-label-inline">
+                                                <FaIdCard className="info-icon-inline" />
                                                 <span>User ID</span>
                                             </div>
-                                            <div className="info-value">{profile.userId}</div>
+                                            <div className="info-value-inline">{profile.userId}</div>
                                         </div>
 
-                                        <div className="info-item">
-                                            <div className="info-label">
-                                                <FaUser className="info-icon" />
+                                        <div className="info-item-inline">
+                                            <div className="info-label-inline">
+                                                <FaUser className="info-icon-inline" />
                                                 <span>User Name</span>
                                             </div>
-                                            <div className="info-value">{profile.userName}</div>
+                                            <div className="info-value-inline">{profile.userName}</div>
                                         </div>
 
-                                        <div className="info-item">
-                                            <div className="info-label">
-                                                <FaEnvelope className="info-icon" />
+                                        <div className="info-item-inline">
+                                            <div className="info-label-inline">
+                                                <FaEnvelope className="info-icon-inline" />
                                                 <span>Email</span>
                                             </div>
-                                            <div className="info-value">{profile.email}</div>
+                                            <div className="info-value-inline">{profile.email}</div>
                                         </div>
 
-                                        <div className="info-item">
-                                            <div className="info-label">
-                                                <FaUserTag className="info-icon" />
+                                        <div className="info-item-inline">
+                                            <div className="info-label-inline">
+                                                <FaUserTag className="info-icon-inline" />
                                                 <span>Role</span>
                                             </div>
-                                            <div className="info-value">
-                                                <span className="role-badge">{profile.roleName}</span>
+                                            <div className="info-value-inline">
+                                                <span className="role-badge-inline">{profile.roleName}</span>
                                             </div>
                                         </div>
                                     </div>

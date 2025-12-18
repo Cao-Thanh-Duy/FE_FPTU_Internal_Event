@@ -2,9 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import Header from '../components/Header';
-import { FaArrowLeft, FaCalendarAlt, FaClock, FaMapMarkerAlt, FaInfoCircle, FaSave } from 'react-icons/fa';
+import { FaArrowLeft, FaCalendarAlt, FaClock, FaMapMarkerAlt, FaInfoCircle, FaSave, FaSearch } from 'react-icons/fa';
 import { toast } from 'react-toastify';
-import { getUserInfo } from '../utils/auth';
 import '../assets/css/OrganizerCreateEventPage.css';
 
 const OrganizerCreateEventPage = () => {
@@ -36,6 +35,10 @@ const OrganizerCreateEventPage = () => {
     // Modal states
     const [showSpeakerModal, setShowSpeakerModal] = useState(false);
     const [selectedSpeaker, setSelectedSpeaker] = useState(null);
+
+    // Search states
+    const [speakerSearch, setSpeakerSearch] = useState('');
+    const [staffSearch, setStaffSearch] = useState('');
 
     const formatLocalDate = (date) => {
         const year = date.getFullYear();
@@ -544,8 +547,19 @@ const OrganizerCreateEventPage = () => {
 
                         <div className="form-group">
                             <label>Speakers</label>
+                            <div className="search-box-inline">
+                                <input
+                                    type="text"
+                                    placeholder="Search speakers by name..."
+                                    value={speakerSearch}
+                                    onChange={(e) => setSpeakerSearch(e.target.value)}
+                                    className="search-input-inline"
+                                />
+                            </div>
                             <div className="selection-grid">
-                                {speakers.map(speaker => (
+                                {speakers.filter(speaker => 
+                                    speaker.speakerName.toLowerCase().includes(speakerSearch.toLowerCase())
+                                ).map(speaker => (
                                     <div 
                                         key={speaker. speakerId} 
                                         className={`selection-card ${formData.speakerIds.includes(speaker.speakerId) ? 'selected' : ''}`}
@@ -564,14 +578,27 @@ const OrganizerCreateEventPage = () => {
                                         </div>
                                     </div>
                                 ))}
-                                {speakers.length === 0 && <div className="text-gray-500 text-sm">No speakers available</div>}
+                                {speakers.filter(speaker => 
+                                    speaker.speakerName.toLowerCase().includes(speakerSearch.toLowerCase())
+                                ).length === 0 && <div className="text-gray-500 text-sm">No speakers found</div>}
                             </div>
                         </div>
 
                         <div className="form-group">
                             <label>Staff</label>
+                            <div className="search-box-inline">
+                                <input
+                                    type="text"
+                                    placeholder="Search staff by name..."
+                                    value={staffSearch}
+                                    onChange={(e) => setStaffSearch(e.target.value)}
+                                    className="search-input-inline"
+                                />
+                            </div>
                             <div className="selection-grid">
-                                {users.filter(u => u.roleName === 'Staff').map(user => (
+                                {users.filter(u => u.roleName === 'Staff' && 
+                                    u.userName.toLowerCase().includes(staffSearch.toLowerCase())
+                                ).map(user => (
                                     <div 
                                         key={user.userId} 
                                         className={`selection-card ${formData.staffIds.includes(user.userId) ? 'selected' : ''}`}
@@ -582,7 +609,9 @@ const OrganizerCreateEventPage = () => {
                                         </div>
                                     </div>
                                 ))}
-                                {users.filter(u => u.roleName === 'Staff').length === 0 && <div className="text-gray-500 text-sm">No staff available</div>}
+                                {users.filter(u => u.roleName === 'Staff' && 
+                                    u.userName.toLowerCase().includes(staffSearch.toLowerCase())
+                                ).length === 0 && <div className="text-gray-500 text-sm">No staff found</div>}
                             </div>
                         </div>
                     </div>

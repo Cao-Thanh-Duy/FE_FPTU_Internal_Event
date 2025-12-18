@@ -250,8 +250,22 @@ const StaffEventPage = () => {
                                                 <div key={attendee.ticketId || index} className="attendee-item">
                                                     <div className="attendee-number">{index + 1}</div>
                                                     <div className="attendee-info">
-                                                        <div className="attendee-name">{attendee.userName}</div>
+                                                        <div className="attendee-name">
+                                                            {attendee.userName}
+                                                            {attendee.seatNumber && (
+                                                                <span className="seat-number-badge">
+                                                                    Ghế {attendee.seatNumber}
+                                                                </span>
+                                                            )}
+                                                        </div>
                                                         <div className="attendee-email">{attendee.email}</div>
+                                                        {attendee.status && (
+                                                            <div className="attendee-status">
+                                                                <span className={`ticket-status-badge ${attendee.status === 'Used' ? 'status-used' : attendee.status === 'Not Used' ? 'status-not-used' : 'status-cancelled'}`}>
+                                                                    {attendee.status === 'Used' ? '✓ Đã sử dụng' : attendee.status === 'Not Used' ? '○ Chưa sử dụng' : '✕ Đã hủy'}
+                                                                </span>
+                                                            </div>
+                                                        )}
                                                     </div>
                                                 </div>
                                             ))}

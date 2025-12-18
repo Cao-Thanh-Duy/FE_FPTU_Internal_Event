@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { FaTachometerAlt, FaTh, FaInbox, FaUsers, FaBox, FaSignInAlt, FaUserPlus, FaCrown, FaBook, FaLightbulb, FaQuestionCircle, FaUser, FaCalendarCheck } from 'react-icons/fa';
+import { FaTachometerAlt, FaTh, FaInbox, FaUsers, FaBox, FaSignInAlt, FaSignOutAlt, FaUserPlus, FaCrown, FaBook, FaLightbulb, FaQuestionCircle, FaUser, FaCalendarCheck, FaHome } from 'react-icons/fa';
 import { logout, getUserInfo } from '../utils/auth';
 import { toast } from 'react-toastify';
 import '../assets/css/SidebarAdmin.css';
@@ -79,7 +79,7 @@ const SidebarAdmin = () => {
                 <ul className="menu-list">
                     <li>
                         <button onClick={handleBackHomePage} className="menu-item">
-                            <FaSignInAlt className="menu-icon" />
+                            <FaHome className="menu-icon" />
                             <span>Home Page</span>
                         </button>
                     </li>
@@ -87,8 +87,8 @@ const SidebarAdmin = () => {
 
                     <li>
                         <button onClick={handleLogout} className="menu-item">
-                            <FaSignInAlt className="menu-icon" />
-                            <span>Sign In</span>
+                            <FaSignOutAlt className="menu-icon" />
+                            <span>Sign Out</span>
                         </button>
                     </li>
                     

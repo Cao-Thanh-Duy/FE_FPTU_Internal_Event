@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import Header from '../components/Header';
-import { FaPlus, FaTimes, FaCalendarAlt, FaMapMarkerAlt, FaTicketAlt, FaUsers, FaClock, FaMicrophone, FaInfoCircle, FaEdit, FaUserFriends } from 'react-icons/fa';
+import { FaPlus, FaTimes, FaCalendarAlt, FaMapMarkerAlt, FaTicketAlt, FaUsers, FaClock, FaMicrophone, FaInfoCircle, FaEdit, FaUserFriends, FaSortAmountDown, FaSortAmountUp, FaSearch } from 'react-icons/fa';
 import { toast } from 'react-toastify';
 import { getUserInfo } from '../utils/auth';
 import '../assets/css/OrganizerEventPage.css';
@@ -15,6 +15,8 @@ const OrganizerEventPage = () => {
     const [showAttendeesModal, setShowAttendeesModal] = useState(false);
     const [attendeesData, setAttendeesData] = useState(null);
     const [loadingAttendees, setLoadingAttendees] = useState(false);
+    const [showSpeakerModal, setShowSpeakerModal] = useState(false);
+    const [selectedSpeaker, setSelectedSpeaker] = useState(null);
     const [venues, setVenues] = useState([]);
     const [slots, setSlots] = useState([]);
     const [users, setUsers] = useState([]);
@@ -22,6 +24,8 @@ const OrganizerEventPage = () => {
     const [myEvents, setMyEvents] = useState([]);
     const [loading, setLoading] = useState(true);
     const [filterStatus, setFilterStatus] = useState('all'); // all, pending, approved, rejected
+    const [sortOrder, setSortOrder] = useState('nearest'); // nearest, farthest
+    const [searchTerm, setSearchTerm] = useState('');
     const [formData, setFormData] = useState({
         eventName: '',
         eventDescription: '',
@@ -241,6 +245,16 @@ const OrganizerEventPage = () => {
         }
     };
 
+    const handleViewSpeaker = (speaker) => {
+        setSelectedSpeaker(speaker);
+        setShowSpeakerModal(true);
+    };
+
+    const closeSpeakerModal = () => {
+        setShowSpeakerModal(false);
+        setSelectedSpeaker(null);
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         
@@ -387,6 +401,23 @@ const OrganizerEventPage = () => {
                     </div>
 
                     <div className="filter-toolbar">
+                        <div className="search-box">
+                            <FaSearch className="search-icon" />
+                            <input
+                                type="text"
+                                placeholder="Search events by name..."
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                            />
+                        </div>
+                        <button 
+                            className="sort-btn"
+                            onClick={() => setSortOrder(sortOrder === 'nearest' ? 'farthest' : 'nearest')}
+                            title={sortOrder === 'nearest' ? 'Sắp xếp: Gần nhất → Xa nhất' : 'Sắp xếp: Xa nhất → Gần nhất'}
+                        >
+                            {sortOrder === 'nearest' ? <FaSortAmountDown /> : <FaSortAmountUp />}
+                            {sortOrder === 'nearest' ? 'Gần nhất' : 'Xa nhất'}
+                        </button>
                         <div className="filter-buttons">
                             <button 
                                 className={`filter-btn ${filterStatus === 'all' ? 'active' : ''}`}
@@ -427,12 +458,23 @@ const OrganizerEventPage = () => {
                         </div>
                     ) : (() => {
                         const filteredEvents = myEvents.filter(event => {
+                            // Filter by search term
+                            const matchesSearch = event.eventName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                                                event.eventDescription?.toLowerCase().includes(searchTerm.toLowerCase());
+                            
+                            if (!matchesSearch) return false;
+                            
+                            // Filter by status
                             if (filterStatus === 'all') return true;
                             if (filterStatus === 'pending') return event.status === 'Pending';
                             if (filterStatus === 'approved') return event.status === 'Approve' || event.status === 'Approved';
                             if (filterStatus === 'rejected') return event.status === 'Reject' || event.status === 'Rejected';
                             return true;
-                        }).sort((a, b) => new Date(a.eventDay) - new Date(b.eventDay));
+                        }).sort((a, b) => {
+                            const dateA = new Date(a.eventDay);
+                            const dateB = new Date(b.eventDay);
+                            return sortOrder === 'nearest' ? dateA - dateB : dateB - dateA;
+                        });
 
                         return filteredEvents. length === 0 ? (
                             <div className="no-events-found">
@@ -506,10 +548,13 @@ const OrganizerEventPage = () => {
                                                     <div className="section-content">
                                                         {event. speakerEvent.map((speaker, index) => (
                                                             <div key={index} className="speaker-item">
-                                                                <span className="speaker-name">{speaker.speakerName}</span>
-                                                                {speaker.speakerDescription && (
-                                                                    <span className="speaker-desc">{speaker.speakerDescription}</span>
-                                                                )}
+                                                                <span 
+                                                                    className="speaker-name clickable"
+                                                                    onClick={() => handleViewSpeaker(speaker)}
+                                                                    style={{ cursor: 'pointer', textDecoration: 'underline', color: '#0891b2' }}
+                                                                >
+                                                                    {speaker.speakerName}
+                                                                </span>
                                                             </div>
                                                         ))}
                                                     </div>
@@ -572,6 +617,11 @@ const OrganizerEventPage = () => {
                                                     <div className="attendee-info">
                                                         <div className="attendee-name">{attendee.userName}</div>
                                                         <div className="attendee-email">{attendee.email}</div>
+                                                        <div className="attendee-seat">
+                                                            Seat Number: <span className="seat-number-badge">
+                                                                {attendee.seatNumber || 'N/A'}
+                                                            </span>
+                                                        </div>
                                                         <div className="attendee-ticket">
                                                             Ticket Status: <span className={`status-badge ${attendee.status?. toLowerCase()}`}>
                                                                 {attendee.status || 'Active'}
@@ -593,6 +643,26 @@ const OrganizerEventPage = () => {
                                     <p>No data available. </p>
                                 </div>
                             )}
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Speaker Modal */}
+            {showSpeakerModal && selectedSpeaker && (
+                <div className="modal-overlay" onClick={closeSpeakerModal}>
+                    <div className="modal-content speaker-modal" onClick={(e) => e.stopPropagation()}>
+                        <div className="modal-header">
+                            <h2>
+                                <FaMicrophone /> Speaker Information
+                            </h2>
+                            <button className="btn-close" onClick={closeSpeakerModal}>
+                                <FaTimes />
+                            </button>
+                        </div>
+                        <div className="modal-body">
+                            <h3>{selectedSpeaker.speakerName}</h3>
+                            <p>{selectedSpeaker.speakerDescription || 'No description available.'}</p>
                         </div>
                     </div>
                 </div>

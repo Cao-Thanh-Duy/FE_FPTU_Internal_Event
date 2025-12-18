@@ -224,9 +224,6 @@ const AdminUserPage = () => {
                         <table className="user-table">
                             <thead>
                                 <tr>
-                                    <th>
-                                        <input type="checkbox" />
-                                    </th>
                                     <th>USER ID</th>
                                     <th>NAME</th>
                                     <th>EMAIL</th>
@@ -237,16 +234,13 @@ const AdminUserPage = () => {
                             <tbody>
                                 {filteredUsers.length === 0 ? (
                                     <tr>
-                                        <td colSpan="6" style={{ textAlign: 'center', padding: '40px' }}>
+                                        <td colSpan="5" style={{ textAlign: 'center', padding: '40px' }}>
                                             No users found
                                         </td>
                                     </tr>
                                 ) : (
                                     filteredUsers.map((user) => (
                                     <tr key={user.userId}>
-                                        <td>
-                                            <input type="checkbox" />
-                                        </td>
                                         <td>{user.userId}</td>
                                         <td>
                                             <div className="user-info">

@@ -42,11 +42,34 @@ const Header = () => {
         </Link>
         
         <nav className="header-nav">
-          <Link to="/" className="nav-link">Home</Link>
-          <Link to={isOrganizer ? "/organizer/events" : isStudent ? "/student/events" : "/events"} className="nav-link">
-            {isOrganizer ? "Events Management" : "Events"}
-          </Link>
-          <Link to="/about" className="nav-link">About</Link>
+          {!isAdmin && !isStaff && !isStudent && <Link to="/" className="nav-link">Home</Link>}
+          {!isAdmin && (
+            <Link to={isOrganizer ? "/organizer/events" : isStaff ? "/staff/events" : isStudent ? "/student/events" : "/events"} className="nav-link">
+              {isOrganizer ? "Events Management" : "Events"}
+            </Link>
+          )}
+          {!isAdmin && !isOrganizer && !isStudent && !isStaff && <Link to="/about" className="nav-link">About</Link>}
+          
+          {/* Profile link for Organizer */}
+          {isLoggedIn && isOrganizer && (
+            <Link to="/organizer/profile" className={`nav-link ${isActive('/organizer/profile') ? 'active' : ''}`}>
+              Profile
+            </Link>
+          )}
+          
+          {/* Profile link for Student */}
+          {isLoggedIn && isStudent && (
+            <Link to="/student/profile" className={`nav-link ${isActive('/student/profile') ? 'active' : ''}`}>
+              Profile
+            </Link>
+          )}
+          
+          {/* Profile link for Staff */}
+          {isLoggedIn && isStaff && (
+            <Link to="/staff/profile" className={`nav-link ${isActive('/staff/profile') ? 'active' : ''}`}>
+              Profile
+            </Link>
+          )}
           
           {/* Nếu role = Admin */}
           {isLoggedIn && isAdmin && (
