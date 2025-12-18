@@ -128,14 +128,19 @@ const OrganizerCreateEventPage = () => {
             
             console.log('📅 Raw events from API:', events);
             
-            const approvedEvents = events.filter(e => 
-                e.status === 'Approve' || 
-                e.status === 'Approved' || 
-                e.status === 'approve' ||
-                e.status === 1
-            );
+            // Filter events that block the schedule (Pending and Approved)
+            // Exclude Rejected events (status 2 or 'Rejected')
+            const blockingEvents = events.filter(e => {
+                const s = e.status;
+                // Check for Approved status
+                const isApproved = s === 'Approve' || s === 'Approved' || s === 'approve' || s === 1;
+                // Check for Pending status
+                const isPending = s === 'Pending' || s === 'pending' || s === 0;
+                
+                return isApproved || isPending;
+            });
             
-            const mappedEvents = approvedEvents.map(event => {
+            const mappedEvents = blockingEvents.map(event => {
                 const venue = venues.find(v => v.venueName === event.venueName);
                 
                 return {
