@@ -504,7 +504,19 @@ const OrganizerEventPage = () => {
                                         <div className="event-info">
                                             <div className="info-item">
                                                 <FaCalendarAlt className="info-icon" />
-                                                <span>{new Date(event.eventDay).toLocaleDateString('vi-VN')}</span>
+                                                <span>
+                                                    {new Date(event.eventDay).toLocaleDateString('vi-VN')}
+                                                    {event.slotEvent && event.slotEvent.length > 0 && (
+                                                        <span className="slot-inline">
+                                                            {event.slotEvent.map((slot, index) => (
+                                                                <span key={index}>
+                                                                    {index > 0 && ', '}
+                                                                    {slot.startTime} - {slot.endTime}
+                                                                </span>
+                                                            ))}
+                                                        </span>
+                                                    )}
+                                                </span>
                                             </div>
                                             
                                             <div className="info-item">
@@ -521,23 +533,6 @@ const OrganizerEventPage = () => {
                                                 <FaTicketAlt className="info-icon" />
                                                 <span>{event.currentTickerCount || 0} / {event.maxTickerCount} tickets</span>
                                             </div>
-                                            
-                                            {event.slotEvent && event.slotEvent.length > 0 && (
-                                                <div className="info-section">
-                                                    <div className="section-header">
-                                                        <FaClock className="info-icon" />
-                                                        <span className="section-title">Time Slots: </span>
-                                                    </div>
-                                                    <div className="section-content">
-                                                        {event.slotEvent.map((slot, index) => (
-                                                            <div key={index} className="slot-item">
-                                                                <span className="slot-name">{slot.slotName}:</span>
-                                                                <span className="slot-time">{slot.startTime} - {slot.endTime}</span>
-                                                            </div>
-                                                        ))}
-                                                    </div>
-                                                </div>
-                                            )}
                                             
                                             {event.speakerEvent && event.speakerEvent.length > 0 && (
                                                 <div className="info-section">
