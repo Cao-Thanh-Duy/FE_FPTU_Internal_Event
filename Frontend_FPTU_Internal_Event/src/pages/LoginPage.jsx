@@ -56,7 +56,7 @@ const LoginPage = () => {
         } else if (role === 'Staff') {
           navigate('/');
         } else if (role === 'Organizer') {
-          navigate('/organizer/events');
+          navigate('/');
         } else if (role === 'Student') {
           navigate('/');
         } else {
