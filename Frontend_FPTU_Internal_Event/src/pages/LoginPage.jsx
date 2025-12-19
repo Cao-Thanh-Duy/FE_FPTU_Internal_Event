@@ -129,11 +129,6 @@ const LoginPage = () => {
           <div className="right-title">
             <p>FPTU Internal Event Registration & Ticketing System</p>
           </div>
-
-          <button className="btn-google">
-            <FcGoogle size={24} style={{ marginRight: '10px' }} />
-            <span>(Internal FPTU Only)</span>
-          </button>
         </div>
 
       </div>

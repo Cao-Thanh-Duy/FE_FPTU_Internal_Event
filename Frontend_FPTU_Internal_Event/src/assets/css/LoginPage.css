@@ -74,6 +74,7 @@
   outline: none;
   background-color: #fff !important; 
   color: #333 !important;
+  box-sizing: border-box;
 }
 
 .input-field:focus {
@@ -84,8 +85,7 @@
 /* Nút Login */
 .btn-orange {
   width: 100%;
-  padding: 12px;
- 
+  padding: 12px 15px;
   background-color: #F36F21;
   color: white;
   border: none;
@@ -95,6 +95,7 @@
   cursor: pointer;
   transition: opacity 0.2s;
   margin-top: 10px;
+  box-sizing: border-box;
 }
 
 .btn-orange:hover {
