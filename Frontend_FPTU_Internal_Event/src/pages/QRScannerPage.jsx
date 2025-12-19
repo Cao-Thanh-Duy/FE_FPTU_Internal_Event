@@ -85,7 +85,7 @@ const QRScannerPage = () => {
             await html5QrCodeRef.current.start(
                 { facingMode: "environment" },
                 config,
-                (decodedText, decodedResult) => {
+                (decodedText) => {
                     // Gọi handleScanSuccess và dừng quét ngay
                     handleScanSuccess(decodedText);
                 },
@@ -118,38 +118,8 @@ const QRScannerPage = () => {
     };
 
     // Hàm quét QR từ ảnh upload
-    const handleFileScan = async (event) => {
-        const file = event.target.files[0];
-        if (!file) return;
-
-        let tempContainer = null;
-        const tempId = `${qrCodeRegionId}-file`;
-
-        try {
-            tempContainer = document.createElement('div');
-            tempContainer.id = tempId;
-            tempContainer.style.display = 'none';
-            document.body.appendChild(tempContainer);
-
-            const html5QrCode = new Html5Qrcode(tempId);
-            const result = await html5QrCode.scanFile(file, true);
-            await html5QrCode.stop();
-            handleScanSuccess(result);
-        } catch (err) {
-            console.error("Error scanning file:", err);
-            toast.error('Unable to read QR code from this image');
-        } finally {
-            if (tempContainer) {
-                tempContainer.remove();
-            }
-            event.target.value = '';
-        }
-    };
 
     // Reset input value and trigger file scan
-    const handleImageUpload = (event) => {
-        handleFileScan(event);
-    };
 
     // Hàm xử lý nhập code thủ công
     const handleManualSubmit = (e) => {

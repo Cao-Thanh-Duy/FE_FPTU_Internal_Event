@@ -355,9 +355,6 @@ const StudentEventPage = () => {
                             <button className="btn-download" onClick={downloadTicket}>
                                 Download Ticket
                             </button>
-                            <button className="btn-close" onClick={() => setShowTicketModal(false)}>
-                                Close
-                            </button>
                         </div>
                     </div>
                 </div>
