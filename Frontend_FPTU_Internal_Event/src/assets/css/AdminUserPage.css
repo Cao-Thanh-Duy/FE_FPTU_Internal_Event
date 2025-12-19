@@ -21,29 +21,38 @@
 
 /* Header */
 .user-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
   margin-bottom: 30px;
 }
 
 .user-header h1 {
-  font-size: 2rem;
+  font-size: 28px;
   font-weight: 700;
   color: #1f2937;
   margin: 0;
 }
 
-.user-actions {
+/* Toolbar */
+.user-toolbar {
   display: flex;
-  gap: 12px;
+  gap: 20px;
+  margin-bottom: 30px;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.toolbar-actions {
+  display: flex;
+  gap: 15px;
+  align-items: center;
 }
 
 .btn-export {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 10px 20px;
+  padding: 0 20px;
+  height: 42px;
   background-color: #ffffff;
   border: 1px solid #d1d5db;
   border-radius: 8px;
@@ -51,6 +60,7 @@
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s;
+  font-size: 14px;
 }
 
 .btn-export:hover {
@@ -61,7 +71,8 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 10px 20px;
+  padding: 0 20px;
+  height: 42px;
   background-color: #0891b2;
   border: none;
   border-radius: 8px;
@@ -69,20 +80,18 @@
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s;
+  font-size: 14px;
 }
 
 .btn-add-user:hover {
   background-color: #0e7490;
 }
 
-/* Toolbar */
-.user-toolbar {
-  margin-bottom: 20px;
-}
-
 .search-box {
   position: relative;
-  max-width: 400px;
+  flex: 1;
+  min-width: 300px;
+  max-width: 500px;
 }
 
 .search-icon {
@@ -95,19 +104,21 @@
 }
 
 .search-box input {
-  color: rgb(0, 0, 0);
+  color: #333;
   width: 100%;
-  padding: 12px 12px 12px 45px;
+  padding: 10px 15px 10px 45px;
   background-color: #ffffff;
-  border: 2px solid #000000;
+  border: 1px solid #ddd;
   border-radius: 8px;
-  font-size: 0.95rem;
-  transition: border-color 0.2s;
+  font-size: 14px;
+  transition: all 0.3s;
+  height: 42px;
 }
 
 .search-box input:focus {
   outline: none;
-  border-color: #0891b2;
+  border-color: #ff6b35;
+  box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.1);
 }
 
 /* Table */
@@ -375,25 +386,15 @@
 .form-group input,
 .form-group select {
   width: 100%;
-  
-  padding: 10px;
+  height: 42px;
+  padding: 8px 12px;
   background-color: #ffffff;
   border: 2px solid #000000;
   border-radius: 8px;
   font-size: 1rem;
   color: #1f2937;
   transition: all 0.2s;
-  appearance: auto;
-}
-
-.form-group select {
-  
-}
-
-.form-group select option {
-  
-  color: #1f2937;
-  background-color: #ffffff;
+  box-sizing: border-box;
 }
 
 .form-group input:focus,

@@ -174,14 +174,6 @@ const AdminVenuePage = () => {
                     {/* Header */}
                     <div className="venue-header">
                         <h1>All Venues</h1>
-                        <div className="venue-actions">
-                            <button className="btn-export" onClick={handleExport}>
-                                <FaFileExport /> Export
-                            </button>
-                            <button className="btn-add-venue" onClick={handleAddVenue}>
-                                <FaPlus /> Add Venue
-                            </button>
-                        </div>
                     </div>
 
                     {/* Search */}
@@ -194,6 +186,14 @@ const AdminVenuePage = () => {
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
                             />
+                        </div>
+                        <div className="toolbar-actions">
+                            <button className="btn-export" onClick={handleExport}>
+                                <FaFileExport /> Export
+                            </button>
+                            <button className="btn-add-venue" onClick={handleAddVenue}>
+                                <FaPlus /> Add Venue
+                            </button>
                         </div>
                     </div>
 

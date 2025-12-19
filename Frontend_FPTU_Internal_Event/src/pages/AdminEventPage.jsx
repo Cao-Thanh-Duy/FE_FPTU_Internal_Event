@@ -152,39 +152,41 @@ const AdminEventPage = () => {
                                 onChange={(e) => setSearchTerm(e.target.value)}
                             />
                         </div>
-                        <button 
-                            className="sort-btn"
-                            onClick={() => setSortOrder(sortOrder === 'nearest' ? 'farthest' : 'nearest')}
-                            title={sortOrder === 'nearest' ? 'Sắp xếp: Gần nhất → Xa nhất' : 'Sắp xếp: Xa nhất → Gần nhất'}
-                        >
-                            {sortOrder === 'nearest' ? <FaSortAmountDown /> : <FaSortAmountUp />}
-                            {sortOrder === 'nearest' ? 'Gần nhất' : 'Xa nhất'}
-                        </button>
-                        <div className="filter-buttons">
+                        <div className="toolbar-actions">
                             <button 
-                                className={`filter-btn ${filterStatus === 'all' ? 'active' : ''}`}
-                                onClick={() => setFilterStatus('all')}
+                                className="sort-btn"
+                                onClick={() => setSortOrder(sortOrder === 'nearest' ? 'farthest' : 'nearest')}
+                                title={sortOrder === 'nearest' ? 'Sắp xếp: Gần nhất → Xa nhất' : 'Sắp xếp: Xa nhất → Gần nhất'}
                             >
-                                All
+                                {sortOrder === 'nearest' ? <FaSortAmountDown /> : <FaSortAmountUp />}
+                                {sortOrder === 'nearest' ? 'Gần nhất' : 'Xa nhất'}
                             </button>
-                            <button 
-                                className={`filter-btn ${filterStatus === 'pending' ? 'active' : ''}`}
-                                onClick={() => setFilterStatus('pending')}
-                            >
-                                Pending
-                            </button>
-                            <button 
-                                className={`filter-btn ${filterStatus === 'approved' ? 'active' : ''}`}
-                                onClick={() => setFilterStatus('approved')}
-                            >
-                                Approved
-                            </button>
-                            <button 
-                                className={`filter-btn ${filterStatus === 'rejected' ? 'active' : ''}`}
-                                onClick={() => setFilterStatus('rejected')}
-                            >
-                                Rejected
-                            </button>
+                            <div className="filter-buttons">
+                                <button 
+                                    className={`filter-btn ${filterStatus === 'all' ? 'active' : ''}`}
+                                    onClick={() => setFilterStatus('all')}
+                                >
+                                    All
+                                </button>
+                                <button 
+                                    className={`filter-btn ${filterStatus === 'pending' ? 'active' : ''}`}
+                                    onClick={() => setFilterStatus('pending')}
+                                >
+                                    Pending
+                                </button>
+                                <button 
+                                    className={`filter-btn ${filterStatus === 'approved' ? 'active' : ''}`}
+                                    onClick={() => setFilterStatus('approved')}
+                                >
+                                    Approved
+                                </button>
+                                <button 
+                                    className={`filter-btn ${filterStatus === 'rejected' ? 'active' : ''}`}
+                                    onClick={() => setFilterStatus('rejected')}
+                                >
+                                    Rejected
+                                </button>
+                            </div>
                         </div>
                     </div>
 

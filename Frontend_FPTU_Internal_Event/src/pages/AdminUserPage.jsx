@@ -193,14 +193,6 @@ const AdminUserPage = () => {
                 <div className="user-container">
                     <div className="user-header">
                         <h1>All users</h1>
-                        <div className="user-actions">
-                            <button className="btn-export" onClick={handleExport}>
-                                <FaFileExport /> Export
-                            </button>
-                            <button className="btn-add-user" onClick={handleAddUser}>
-                                <FaPlus /> Add user
-                            </button>
-                        </div>
                     </div>
 
                     <div className="user-toolbar">
@@ -212,6 +204,14 @@ const AdminUserPage = () => {
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
                             />
+                        </div>
+                        <div className="toolbar-actions">
+                            <button className="btn-export" onClick={handleExport}>
+                                <FaFileExport /> Export
+                            </button>
+                            <button className="btn-add-user" onClick={handleAddUser}>
+                                <FaPlus /> Add user
+                            </button>
                         </div>
                     </div>
 
