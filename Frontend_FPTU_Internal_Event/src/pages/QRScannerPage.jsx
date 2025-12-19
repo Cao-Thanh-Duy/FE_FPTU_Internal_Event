@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import "../assets/css/QRScannerPage.css";
 import SidebarStaff from "../components/SidebarStaff";
-import { FaQrcode, FaCamera, FaCheckCircle, FaTimesCircle, FaUpload, FaKeyboard, FaBan } from 'react-icons/fa';
+import { FaQrcode, FaCamera, FaCheckCircle, FaTimesCircle, FaKeyboard, FaBan } from 'react-icons/fa';
 import { toast } from 'react-toastify';
 import { Html5Qrcode } from 'html5-qrcode';
 import axios from 'axios';
@@ -270,15 +270,6 @@ const QRScannerPage = () => {
                                         <button onClick={startCamera} className="btn-start-camera">
                                             <FaCamera /> Bật Camera
                                         </button>
-                                        <label className="btn-upload">
-                                            <FaUpload /> Upload ảnh QR
-                                            <input 
-                                                type="file" 
-                                                accept="image/*" 
-                                                onChange={handleImageUpload}
-                                                style={{ display: 'none' }}
-                                            />
-                                        </label>
                                         <button 
                                             onClick={() => setShowManualInput(!showManualInput)} 
                                             className="btn-manual-input"

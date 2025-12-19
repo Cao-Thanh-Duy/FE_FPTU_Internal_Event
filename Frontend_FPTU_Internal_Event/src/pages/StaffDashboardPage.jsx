@@ -330,7 +330,7 @@ const StaffDashboardPage = () => {
                                                     </span>
                                                     <span className="event-info-item">
                                                         <FaUsers />
-                                                        {event.currentTickerCount || 0} / {event.maxTickerCount} người
+                                                        {event.maxTickerCount - (event.currentTickerCount || 0)} / {event.maxTickerCount} người tham gia
                                                     </span>
                                                 </div>
                                                 {event.slotEvent && event.slotEvent.length > 0 && (
