@@ -26,7 +26,7 @@ const QRScannerPage = () => {
             // Dừng quét ngay khi có kết quả
             await stopCamera();
             
-            toast.info('Đang lấy thông tin ticket...');
+            toast.info('Getting ticket information...');
             
             // Gọi API để lấy thông tin ticket từ ticketCode
             const response = await axios.get(`https://localhost:7047/infoticket?ticketCode=${decodedText}`);
@@ -43,13 +43,13 @@ const QRScannerPage = () => {
                 };
                 
                 setScanHistory(prev => [newScan, ...prev].slice(0, 10));
-                toast.success('Đã lấy thông tin ticket thành công!');
+                toast.success('Ticket information retrieved successfully!');
             } else {
                 throw new Error(response.data.message || 'Failed to get ticket info');
             }
         } catch (error) {
             console.error("Error processing QR code:", error);
-            const errorMessage = error.response?.data?.message || error.message || 'Lỗi khi xử lý mã QR';
+            const errorMessage = error.response?.data?.message || error.message || 'Error processing QR code';
             toast.error(errorMessage);
             
             // Thêm vào lịch sử với status error
@@ -95,12 +95,12 @@ const QRScannerPage = () => {
                 }
             );
 
-            toast.success('Camera đã được bật');
+            toast.success('Camera has been turned on');
         } catch (err) {
             console.error("Error accessing camera:", err);
             setIsScanning(false);
             
-            toast.error('Không thể truy cập camera. Vui lòng cấp quyền camera hoặc sử dụng HTTPS/localhost.');
+            toast.error('Unable to access camera. Please grant camera permission or use HTTPS/localhost.');
         }
     };
 
@@ -137,7 +137,7 @@ const QRScannerPage = () => {
             handleScanSuccess(result);
         } catch (err) {
             console.error("Error scanning file:", err);
-            toast.error('Không thể đọc mã QR từ ảnh này');
+            toast.error('Unable to read QR code from this image');
         } finally {
             if (tempContainer) {
                 tempContainer.remove();
@@ -159,7 +159,7 @@ const QRScannerPage = () => {
             setManualCode("");
             setShowManualInput(false);
         } else {
-            toast.warning('Vui lòng nhập mã check-in');
+            toast.warning('Please enter check-in code');
         }
     };
 
@@ -172,7 +172,7 @@ const QRScannerPage = () => {
             const response = await axios.put(`https://localhost:7047/CheckIn?ticketId=${ticketId}`);
             
             if (response.data.success) {
-                toast.success('Check-in thành công!');
+                toast.success('Check-in successful!');
                 
                 // Cập nhật scannedData với status mới
                 setScannedData(prev => ({
@@ -186,11 +186,11 @@ const QRScannerPage = () => {
                     idx === 0 ? { ...item, status: 'Checked' } : item
                 ));
             } else {
-                toast.error(response.data.message || 'Check-in thất bại');
+                toast.error(response.data.message || 'Check-in failed');
             }
         } catch (error) {
             console.error('Error checking in:', error);
-            const errorMessage = error.response?.data?.message || 'Không thể check-in. Vui lòng thử lại.';
+            const errorMessage = error.response?.data?.message || 'Unable to check-in. Please try again.';
             toast.error(errorMessage);
         } finally {
             setIsProcessing(false);
@@ -201,14 +201,14 @@ const QRScannerPage = () => {
     const handleCancelTicket = async (ticketId) => {
         if (!ticketId) return;
         
-        if (!window.confirm('Bạn có chắc chắn muốn hủy ticket này?')) return;
+        if (!window.confirm('Are you sure you want to cancel this ticket?')) return;
         
         setIsProcessing(true);
         try {
             const response = await axios.put(`https://localhost:7047/Cancelled?ticketId=${ticketId}`);
             
             if (response.data.success) {
-                toast.success('Hủy ticket thành công!');
+                toast.success('Ticket cancelled successfully!');
                 
                 // Cập nhật scannedData với status mới
                 setScannedData(prev => ({
@@ -221,11 +221,11 @@ const QRScannerPage = () => {
                     idx === 0 ? { ...item, status: 'Cancelled' } : item
                 ));
             } else {
-                toast.error(response.data.message || 'Hủy ticket thất bại');
+                toast.error(response.data.message || 'Cancel ticket failed');
             }
         } catch (error) {
             console.error('Error cancelling ticket:', error);
-            const errorMessage = error.response?.data?.message || 'Không thể hủy ticket. Vui lòng thử lại.';
+            const errorMessage = error.response?.data?.message || 'Unable to cancel ticket. Please try again.';
             toast.error(errorMessage);
         } finally {
             setIsProcessing(false);
@@ -246,8 +246,8 @@ const QRScannerPage = () => {
             <div className="scanner-main">
                 <div className="scanner-content">
                     <div className="page-header">
-                        <h1>Quét QR Check-in</h1>
-                        <p>Quét mã QR của người tham gia để check-in sự kiện</p>
+                        <h1>QR Scanner Check-in</h1>
+                        <p>Scan attendees' QR code to check-in for the event</p>
                     </div>
 
                     <div className="scanner-container">
@@ -256,8 +256,8 @@ const QRScannerPage = () => {
                                 {!isScanning ? (
                                     <div className="camera-placeholder">
                                         <FaQrcode className="qr-icon-large" />
-                                        <h3>Camera chưa được bật</h3>
-                                        <p>Nhấn nút bên dưới để bắt đầu quét</p>
+                                        <h3>Camera is not turned on</h3>
+                                        <p>Press the button below to start scanning</p>
                                     </div>
                                 ) : (
                                     <div id={qrCodeRegionId} className="qr-reader-container"></div>
@@ -268,25 +268,25 @@ const QRScannerPage = () => {
                                 {!isScanning ? (
                                     <>
                                         <button onClick={startCamera} className="btn-start-camera">
-                                            <FaCamera /> Bật Camera
+                                            <FaCamera /> Turn On Camera
                                         </button>
                                         <button 
                                             onClick={() => setShowManualInput(!showManualInput)} 
                                             className="btn-manual-input"
                                         >
-                                            <FaKeyboard /> Nhập Code
+                                            <FaKeyboard /> Enter Code
                                         </button>
                                     </>
                                 ) : (
                                     <>
                                         <button onClick={stopCamera} className="btn-stop-camera">
-                                            Tắt Camera
+                                            Turn Off Camera
                                         </button>
                                         <button 
                                             onClick={() => setShowManualInput(!showManualInput)} 
                                             className="btn-manual-input"
                                         >
-                                            <FaKeyboard /> Nhập Code
+                                            <FaKeyboard /> Enter Code
                                         </button>
                                     </>
                                 )}
@@ -295,19 +295,19 @@ const QRScannerPage = () => {
                             {/* Manual Input Form */}
                             {showManualInput && (
                                 <div className="manual-input-section">
-                                    <h3>Nhập mã check-in thủ công</h3>
+                                    <h3>Enter check-in code manually</h3>
                                     <form onSubmit={handleManualSubmit}>
                                         <div className="input-group">
                                             <input
                                                 type="text"
                                                 value={manualCode}
                                                 onChange={(e) => setManualCode(e.target.value)}
-                                                placeholder="Nhập mã check-in hoặc User ID..."
+                                                placeholder="Enter check-in code or User ID..."
                                                 className="manual-code-input"
                                                 autoFocus
                                             />
                                             <button type="submit" className="btn-submit-code">
-                                                Xác nhận
+                                                Confirm
                                             </button>
                                         </div>
                                     </form>
@@ -316,7 +316,7 @@ const QRScannerPage = () => {
 
                             {scannedData && (
                                 <div className="scanned-result">
-                                    <h3>Thông tin Ticket:</h3>
+                                    <h3>Ticket Information:</h3>
                                     <div className="result-details">
                                         <p><strong>Ticket ID:</strong> {scannedData.ticketId}</p>
                                         <p><strong>Ticket Code:</strong> {scannedData.ticketCode}</p>
@@ -349,11 +349,11 @@ const QRScannerPage = () => {
 
                         {/* Scan History */}
                         <div className="history-section">
-                            <h3>Lịch sử quét ({scanHistory.length})</h3>
+                            <h3>Scan History ({scanHistory.length})</h3>
                             <div className="history-list">
                                 {scanHistory.length === 0 ? (
                                     <div className="no-history">
-                                        <p>Chưa có lịch sử quét</p>
+                                        <p>No scan history yet</p>
                                     </div>
                                 ) : (
                                     scanHistory.map((scan, index) => (

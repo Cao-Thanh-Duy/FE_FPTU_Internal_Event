@@ -29,11 +29,11 @@ const StudentTicketsPage = () => {
                 setMyTickets(response.data.data);
                 console.log('Tickets:', response.data.data);
             } else {
-                toast.error('Không thể tải danh sách vé');
+                toast.error('Unable to load tickets');
             }
         } catch (error) {
             console.error('Error fetching tickets:', error);
-            toast.error('Có lỗi xảy ra khi tải danh sách vé');
+            toast.error('An error occurred while loading tickets');
         } finally {
             setLoading(false);
         }
@@ -48,11 +48,11 @@ const StudentTicketsPage = () => {
                 setSelectedTicket(ticket);
                 setShowQRModal(true);
             } else {
-                toast.error('Không thể tải mã QR');
+                toast.error('Unable to load QR code');
             }
         } catch (error) {
             console.error('Error fetching QR code:', error);
-            toast.error('Có lỗi xảy ra khi tải mã QR');
+            toast.error('An error occurred while loading QR code');
         }
     };
 
@@ -63,14 +63,14 @@ const StudentTicketsPage = () => {
                 if (response.data.success) {
                     downloadQRImage(response.data.qrcode, ticket);
                 } else {
-                    toast.error('Không thể tải mã QR');
+                    toast.error('Unable to load QR code');
                 }
             } else {
                 downloadQRImage(qrCode, ticket);
             }
         } catch (error) {
             console.error('Error downloading ticket:', error);
-            toast.error('Có lỗi xảy ra khi tải vé');
+            toast.error('An error occurred while downloading ticket');
         }
     };
 
@@ -79,40 +79,40 @@ const StudentTicketsPage = () => {
         link.href = qrCodeData;
         link.download = `ticket-${ticket.ticketCode || ticket.ticketId}.png`;
         link.click();
-        toast.success('Đã tải xuống vé!', {
+        toast.success('Ticket downloaded!', {
             position: "top-right",
             autoClose: 2000,
         });
     };
 
     const handleCancelTicket = async (ticket) => {
-        if (window.confirm(`Bạn có chắc chắn muốn hủy vé cho sự kiện "${ticket.eventName}"?`)) {
+        if (window.confirm(`Are you sure you want to cancel the ticket for event "${ticket.eventName}"?`)) {
             try {
                 const response = await axios.put(`https://localhost:7047/Cancelled?ticketId=${ticket.ticketId}`);
                 
                 if (response.data.success) {
-                    toast.success('Đã hủy vé thành công!', {
+                    toast.success('Ticket cancelled successfully!', {
                         position: "top-right",
                         autoClose: 2000,
                     });
                     // Refresh tickets list
                     fetchTickets();
                 } else {
-                    toast.error(response.data.message || 'Không thể hủy vé');
+                    toast.error(response.data.message || 'Unable to cancel ticket');
                 }
             } catch (error) {
                 console.error('Error cancelling ticket:', error);
-                toast.error(error.response?.data?.message || 'Có lỗi xảy ra khi hủy vé');
+                toast.error(error.response?.data?.message || 'An error occurred while cancelling ticket');
             }
         }
     };
 
     const getStatusInfo = (status) => {
         const statusMap = {
-            "Not Used": { text: "Đã xác nhận", class: "status-confirmed", icon: <FaCheckCircle /> },
-            "Used": { text: "Đã sử dụng", class: "status-used", icon: <FaCheckCircle /> },
-            "Checked": { text: "Đã check-in", class: "status-checked", icon: <FaCheckCircle /> },
-            "Cancelled": { text: "Đã hủy", class: "status-cancelled", icon: <FaTimes /> }
+            "Not Used": { text: "Confirmed", class: "status-confirmed", icon: <FaCheckCircle /> },
+            "Used": { text: "Used", class: "status-used", icon: <FaCheckCircle /> },
+            "Checked": { text: "Checked In", class: "status-checked", icon: <FaCheckCircle /> },
+            "Cancelled": { text: "Cancelled", class: "status-cancelled", icon: <FaTimes /> }
         };
         return statusMap[status] || statusMap["Not Used"];
     };
@@ -137,8 +137,8 @@ const StudentTicketsPage = () => {
                 <div className="tickets-content">
                     <div className="page-header">
                         <div>
-                            <h1>Vé của tôi</h1>
-                            <p>Quản lý các vé sự kiện đã đăng ký</p>
+                            <h1>My Tickets</h1>
+                            <p>Manage your registered event tickets</p>
                         </div>
                         <div className="header-buttons">
                             {checkedTickets.length > 0 && (
@@ -164,22 +164,22 @@ const StudentTicketsPage = () => {
                     <div className="tickets-stats">
                         <div className="stat-box">
                             <div className="stat-number">{upcomingTickets.length}</div>
-                            <div className="stat-label">Vé sắp tới</div>
+                            <div className="stat-label">Upcoming</div>
                         </div>
                         <div className="stat-box">
                             <div className="stat-number">{checkedTickets.length}</div>
-                            <div className="stat-label">Đã tham gia</div>
+                            <div className="stat-label">Attended</div>
                         </div>
                     </div>
 
                     {/* Upcoming Tickets */}
                     {loading ? (
                         <div className="loading-message">
-                            <p>Đang tải danh sách vé...</p>
+                            <p>Loading tickets...</p>
                         </div>
                     ) : upcomingTickets.length > 0 ? (
                         <div className="tickets-section">
-                            <h2 className="section-title">Vé sắp tới</h2>
+                            <h2 className="section-title">Upcoming Tickets</h2>
                             <div className="tickets-grid">
                                 {upcomingTickets.map(ticket => (
                                     <div key={ticket.ticketId} className="ticket-card upcoming">
@@ -192,8 +192,8 @@ const StudentTicketsPage = () => {
                                         </div>
                                         
                                         <h3 className="ticket-event-name">{ticket.eventName}</h3>
-                                        <div className="ticket-id">Mã vé: {ticket.ticketCode || ticket.ticketId}</div>
-                                        <div className="ticket-id">Số ghế: {ticket.seatNumber}</div>
+                                        <div className="ticket-id">Ticket Code: {ticket.ticketCode || ticket.ticketId}</div>
+                                        <div className="ticket-id">Seat Number: {ticket.seatNumber}</div>
                                         
                                         <div className="ticket-details">
                                             <div className="detail-row">
@@ -207,7 +207,7 @@ const StudentTicketsPage = () => {
                                                 className="btn-show-qr"
                                                 onClick={() => handleShowQR(ticket)}
                                             >
-                                                <FaQrcode /> Xem QR
+                                                <FaQrcode /> View QR
                                             </button>
                                             <button 
                                                 className="btn-download"
@@ -219,7 +219,7 @@ const StudentTicketsPage = () => {
                                                 className="btn-cancel"
                                                 onClick={() => handleCancelTicket(ticket)}
                                             >
-                                                <FaTimes /> Hủy vé
+                                                <FaTimes /> Cancel
                                             </button>
                                         </div>
                                     </div>
@@ -231,7 +231,7 @@ const StudentTicketsPage = () => {
                     {/* Used Tickets */}
                     {!loading && usedTickets.length > 0 && (
                         <div className="tickets-section">
-                            <h2 className="section-title">Đã tham gia</h2>
+                            <h2 className="section-title">Attended</h2>
                             <div className="tickets-grid">
                                 {usedTickets.map(ticket => (
                                     <div key={ticket.ticketId} className="ticket-card used">
@@ -244,8 +244,8 @@ const StudentTicketsPage = () => {
                                         </div>
                                         
                                         <h3 className="ticket-event-name">{ticket.eventName}</h3>
-                                        <div className="ticket-id">Mã vé: {ticket.ticketCode || ticket.ticketId}</div>
-                                        <div className="ticket-id">Số ghế: {ticket.seatNumber}</div>
+                                        <div className="ticket-id">Ticket Code: {ticket.ticketCode || ticket.ticketId}</div>
+                                        <div className="ticket-id">Seat Number: {ticket.seatNumber}</div>
                                         
                                         <div className="ticket-details">
                                             <div className="detail-row">
@@ -262,8 +262,8 @@ const StudentTicketsPage = () => {
                     {!loading && myTickets.length === 0 && (
                         <div className="no-tickets">
                             <FaTicketAlt className="no-tickets-icon" />
-                            <p>Bạn chưa có vé nào</p>
-                            <p className="no-tickets-hint">Hãy đăng ký tham gia các sự kiện thú vị!</p>
+                            <p>You have no tickets yet</p>
+                            <p className="no-tickets-hint">Register for exciting events!</p>
                         </div>
                     )}
                 </div>
@@ -274,13 +274,7 @@ const StudentTicketsPage = () => {
                 <div className="modal-overlay" onClick={() => setShowQRModal(false)}>
                     <div className="modal-content" onClick={(e) => e.stopPropagation()}>
                         <div className="modal-header">
-                            <h2>Vé tham gia sự kiện</h2>
-                            <button 
-                                className="modal-close"
-                                onClick={() => setShowQRModal(false)}
-                            >
-                                <FaTimes />
-                            </button>
+                            <h2>Event Ticket</h2>
                         </div>
                         
                         <div className="modal-body">
@@ -288,10 +282,10 @@ const StudentTicketsPage = () => {
                                 <div className="qr-ticket-info">
                                     <h3>{selectedTicket.eventName}</h3>
                                     <div className="qr-ticket-details">
-                                        <p><strong>Mã vé:</strong> {selectedTicket.ticketCode || selectedTicket.ticketId}</p>
-                                        <p><strong>Số ghế:</strong> {selectedTicket.seatNumber}</p>
-                                        <p><FaCalendar /> <strong>Ngày:</strong> {formatDate(selectedTicket.startDay)}</p>
-                                        <p><strong>Người đặt:</strong> {selectedTicket.userName}</p>
+                                        <p><strong>Ticket Code:</strong> {selectedTicket.ticketCode || selectedTicket.ticketId}</p>
+                                        <p><strong>Seat Number:</strong> {selectedTicket.seatNumber}</p>
+                                        <p><strong>Date:</strong> {formatDate(selectedTicket.startDay)}</p>
+                                        <p><strong>Booked by:</strong> {selectedTicket.userName}</p>
                                     </div>
                                 </div>
                                 
@@ -304,7 +298,7 @@ const StudentTicketsPage = () => {
                                         )}
                                     </div>
                                     <p className="qr-instruction">
-                                        Vui lòng xuất trình mã QR này khi tham gia sự kiện
+                                        Please present this QR code when attending the event
                                     </p>
                                 </div>
                             </div>
@@ -315,13 +309,13 @@ const StudentTicketsPage = () => {
                                 className="btn-download-modal" 
                                 onClick={() => handleDownloadTicket(selectedTicket)}
                             >
-                                <FaDownload /> Tải xuống
+                                <FaDownload /> Download
                             </button>
                             <button 
                                 className="btn-close-modal" 
                                 onClick={() => setShowQRModal(false)}
                             >
-                                Đóng
+                                Close
                             </button>
                         </div>
                     </div>
@@ -334,14 +328,8 @@ const StudentTicketsPage = () => {
                     <div className="modal-content modal-large" onClick={(e) => e.stopPropagation()}>
                         <div className="modal-header">
                             <h2>
-                                <FaCheckCircle /> Vé đã check-in ({checkedTickets.length})
+                                <FaCheckCircle /> Checked In Tickets ({checkedTickets.length})
                             </h2>
-                            <button 
-                                className="modal-close"
-                                onClick={() => setShowCheckedModal(false)}
-                            >
-                                <FaTimes />
-                            </button>
                         </div>
                         
                         <div className="modal-body modal-body-tickets">
@@ -358,8 +346,8 @@ const StudentTicketsPage = () => {
                                             </div>
                                             
                                             <h3 className="ticket-event-name">{ticket.eventName}</h3>
-                                            <div className="ticket-id">Mã vé: {ticket.ticketCode || ticket.ticketId}</div>
-                                            <div className="ticket-id">Số ghế: {ticket.seatNumber}</div>
+                                            <div className="ticket-id">Ticket Code: {ticket.ticketCode || ticket.ticketId}</div>
+                                            <div className="ticket-id">Seat Number: {ticket.seatNumber}</div>
                                             
                                             <div className="ticket-details">
                                                 <div className="detail-row">
@@ -376,7 +364,7 @@ const StudentTicketsPage = () => {
                                                         handleShowQR(ticket);
                                                     }}
                                                 >
-                                                    <FaQrcode /> Xem QR
+                                                    <FaQrcode /> View QR
                                                 </button>
                                                 <button 
                                                     className="btn-download"
@@ -391,7 +379,7 @@ const StudentTicketsPage = () => {
                             ) : (
                                 <div className="no-tickets">
                                     <FaTicketAlt className="no-tickets-icon" />
-                                    <p>Không có vé đã check-in</p>
+                                    <p>No checked-in tickets</p>
                                 </div>
                             )}
                         </div>
@@ -401,7 +389,7 @@ const StudentTicketsPage = () => {
                                 className="btn-close-modal" 
                                 onClick={() => setShowCheckedModal(false)}
                             >
-                                Đóng
+                                Close
                             </button>
                         </div>
                     </div>
@@ -414,14 +402,8 @@ const StudentTicketsPage = () => {
                     <div className="modal-content modal-large" onClick={(e) => e.stopPropagation()}>
                         <div className="modal-header">
                             <h2>
-                                <FaTimes /> Vé đã hủy ({cancelledTickets.length})
+                                <FaTimes /> Cancelled Tickets ({cancelledTickets.length})
                             </h2>
-                            <button 
-                                className="modal-close"
-                                onClick={() => setShowCancelledModal(false)}
-                            >
-                                <FaTimes />
-                            </button>
                         </div>
                         
                         <div className="modal-body modal-body-tickets">
@@ -438,8 +420,8 @@ const StudentTicketsPage = () => {
                                             </div>
                                             
                                             <h3 className="ticket-event-name">{ticket.eventName}</h3>
-                                            <div className="ticket-id">Mã vé: {ticket.ticketCode || ticket.ticketId}</div>
-                                            <div className="ticket-id">Số ghế: {ticket.seatNumber}</div>
+                                            <div className="ticket-id">Ticket Code: {ticket.ticketCode || ticket.ticketId}</div>
+                                            <div className="ticket-id">Seat Number: {ticket.seatNumber}</div>
                                             
                                             <div className="ticket-details">
                                                 <div className="detail-row">
@@ -453,7 +435,7 @@ const StudentTicketsPage = () => {
                             ) : (
                                 <div className="no-tickets">
                                     <FaTicketAlt className="no-tickets-icon" />
-                                    <p>Không có vé đã hủy</p>
+                                    <p>No cancelled tickets</p>
                                 </div>
                             )}
                         </div>
@@ -463,7 +445,7 @@ const StudentTicketsPage = () => {
                                 className="btn-close-modal" 
                                 onClick={() => setShowCancelledModal(false)}
                             >
-                                Đóng
+                                Close
                             </button>
                         </div>
                     </div>

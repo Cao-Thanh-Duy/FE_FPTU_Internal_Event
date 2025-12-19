@@ -186,7 +186,7 @@ const StaffDashboardPage = () => {
                 <div className="dashboard-content">
                     <div className="dashboard-header">
                         <h1>Staff Dashboard</h1>
-                        <p>Chào mừng đến với trang quản lý dành cho nhân viên</p>
+                        <p>Welcome to the staff management portal</p>
                     </div>
 
                     {/* Quick Action Cards */}
@@ -199,8 +199,8 @@ const StaffDashboardPage = () => {
                                 <FaCalendarAlt />
                             </div>
                             <div className="action-content">
-                                <h3>Quản lý Events</h3>
-                                <p>Xem các sự kiện được phân công</p>
+                                <h3>Manage Events</h3>
+                                <p>View assigned events</p>
                             </div>
                         </div>
                         
@@ -212,8 +212,8 @@ const StaffDashboardPage = () => {
                                 <FaQrcode />
                             </div>
                             <div className="action-content">
-                                <h3>Quét QR Check-in</h3>
-                                <p>Check-in người tham gia sự kiện</p>
+                                <h3>QR Scanner</h3>
+                                <p>Check-in event attendees</p>
                             </div>
                         </div>
                     </div>
@@ -225,9 +225,9 @@ const StaffDashboardPage = () => {
                                 <FaListAlt />
                             </div>
                             <div className="stat-details">
-                                <h3>Tổng Events Được Giao</h3>
+                                <h3>Total Assigned Events</h3>
                                 <p className="stat-number">{dashboardData.totalAssignedEvents}</p>
-                                <p className="stat-description">Events bạn phụ trách</p>
+                                <p className="stat-description">Events you manage</p>
                             </div>
                         </div>
 
@@ -236,9 +236,9 @@ const StaffDashboardPage = () => {
                                 <FaClock />
                             </div>
                             <div className="stat-details">
-                                <h3>Events Sắp Tới</h3>
+                                <h3>Upcoming Events</h3>
                                 <p className="stat-number">{dashboardData.upcomingEvents}</p>
-                                <p className="stat-description">Sự kiện chưa diễn ra</p>
+                                <p className="stat-description">Events not yet started</p>
                             </div>
                         </div>
 
@@ -247,9 +247,9 @@ const StaffDashboardPage = () => {
                                 <FaCheckCircle />
                             </div>
                             <div className="stat-details">
-                                <h3>Events Đã Hoàn Thành</h3>
+                                <h3>Completed Events</h3>
                                 <p className="stat-number">{dashboardData.completedEvents}</p>
-                                <p className="stat-description">Sự kiện đã kết thúc</p>
+                                <p className="stat-description">Events finished</p>
                             </div>
                         </div>
 
@@ -258,9 +258,9 @@ const StaffDashboardPage = () => {
                                 <FaUsers />
                             </div>
                             <div className="stat-details">
-                                <h3>Tổng Người Tham Gia</h3>
+                                <h3>Total Attendees</h3>
                                 <p className="stat-number">{dashboardData.totalAttendees}</p>
-                                <p className="stat-description">Đã đăng ký tham gia</p>
+                                <p className="stat-description">Registered attendees</p>
                             </div>
                         </div>
 
@@ -269,9 +269,9 @@ const StaffDashboardPage = () => {
                                 <FaTicketAlt />
                             </div>
                             <div className="stat-details">
-                                <h3>Đã Check-in</h3>
+                                <h3>Checked In</h3>
                                 <p className="stat-number">{dashboardData.totalCheckedIn}</p>
-                                <p className="stat-description">Người đã check-in</p>
+                                <p className="stat-description">People checked in</p>
                             </div>
                         </div>
 
@@ -280,9 +280,9 @@ const StaffDashboardPage = () => {
                                 <FaChartBar />
                             </div>
                             <div className="stat-details">
-                                <h3>Tỷ Lệ Check-in</h3>
+                                <h3>Check-in Rate</h3>
                                 <p className="stat-number">{dashboardData.checkInRate}%</p>
-                                <p className="stat-description">Hiệu suất check-in</p>
+                                <p className="stat-description">Check-in performance</p>
                             </div>
                         </div>
                     </div>
@@ -291,20 +291,20 @@ const StaffDashboardPage = () => {
                     <div className="upcoming-events-section">
                         <div className="section-header">
                             <h2>
-                                <FaClock /> Events Sắp Tới
+                                <FaClock /> Upcoming Events
                             </h2>
                             <button 
                                 className="btn-view-all"
                                 onClick={() => navigate('/staff/events')}
                             >
-                                Xem Tất Cả
+                                View All
                             </button>
                         </div>
 
                         {dashboardData.upcomingEventsList.length === 0 ? (
                             <div className="no-events">
                                 <FaExclamationTriangle className="no-events-icon" />
-                                <p>Không có sự kiện sắp tới</p>
+                                <p>No upcoming events</p>
                             </div>
                         ) : (
                             <div className="events-list">
@@ -330,7 +330,7 @@ const StaffDashboardPage = () => {
                                                     </span>
                                                     <span className="event-info-item">
                                                         <FaUsers />
-                                                        {event.maxTickerCount - (event.currentTickerCount || 0)} / {event.maxTickerCount} người tham gia
+                                                        {event.maxTickerCount - (event.currentTickerCount || 0)} / {event.maxTickerCount} attendees
                                                     </span>
                                                 </div>
                                                 {event.slotEvent && event.slotEvent.length > 0 && (
@@ -367,7 +367,7 @@ const StaffDashboardPage = () => {
                             className="btn-refresh"
                             onClick={fetchStaffDashboardData}
                         >
-                            Làm Mới Dữ Liệu
+                            Refresh Data
                         </button>
                     </div>
                 </div>

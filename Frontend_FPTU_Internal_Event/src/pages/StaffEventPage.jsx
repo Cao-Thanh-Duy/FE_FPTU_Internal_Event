@@ -29,7 +29,7 @@ const StaffEventPage = () => {
             const { userId, token } = getUserInfo();
             
             if (!userId || !token) {
-                setError("Không tìm thấy thông tin đăng nhập");
+                setError("Login information not found");
                 setLoading(false);
                 return;
             }
@@ -67,7 +67,7 @@ const StaffEventPage = () => {
                         id: event.eventId,
                         name: event.eventName,
                         date: event.eventDay,
-                        time: timeSlots || "Chưa có thời gian",
+                        time: timeSlots || "No time specified",
                         venue: `${event.venueName} - ${event.locationDetails}`,
                         participants: event.maxTickerCount - event.currentTickerCount,
                         maxParticipants: event.maxTickerCount,
@@ -82,7 +82,7 @@ const StaffEventPage = () => {
             }
         } catch (err) {
             console.error("Error fetching staff events:", err);
-            setError(err.response?.data?.message || "Không thể tải danh sách sự kiện");
+            setError(err.response?.data?.message || "Unable to load events list");
         } finally {
             setLoading(false);
         }
@@ -94,9 +94,9 @@ const StaffEventPage = () => {
 
     const getStatusBadge = (status) => {
         const statusMap = {
-            upcoming: { text: "Sắp diễn ra", class: "badge-upcoming" },
-            ongoing: { text: "Đang diễn ra", class: "badge-ongoing" },
-            completed: { text: "Đã hoàn thành", class: "badge-completed" }
+            upcoming: { text: "Upcoming", class: "badge-upcoming" },
+            ongoing: { text: "Ongoing", class: "badge-ongoing" },
+            completed: { text: "Completed", class: "badge-completed" }
         };
         return statusMap[status] || statusMap.upcoming;
     };
@@ -112,7 +112,7 @@ const StaffEventPage = () => {
             setAttendeesData(data);
         } catch (error) {
             console.error('Error fetching attendees:', error);
-            alert('Không thể tải danh sách người tham gia');
+            alert('Unable to load attendees list');
             setShowAttendeesModal(false);
         } finally {
             setLoadingAttendees(false);
@@ -127,8 +127,8 @@ const StaffEventPage = () => {
                 <div className="event-content">
                     <div className="page-header">
                         <div>
-                            <h1>Quản lý Events</h1>
-                            <p>Danh sách các sự kiện được phân công</p>
+                            <h1>Manage Events</h1>
+                            <p>List of assigned events</p>
                         </div>
                     </div>
 
@@ -138,7 +138,7 @@ const StaffEventPage = () => {
                             <FaSearch className="search-icon" />
                             <input
                                 type="text"
-                                placeholder="Tìm kiếm sự kiện..."
+                                placeholder="Search events..."
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
                                 className="search-input"
@@ -149,7 +149,7 @@ const StaffEventPage = () => {
                     {/* Loading State */}
                     {loading && (
                         <div className="loading-message">
-                            <p>Đang tải danh sách sự kiện...</p>
+                            <p>Loading events list...</p>
                         </div>
                     )}
 
@@ -158,7 +158,7 @@ const StaffEventPage = () => {
                         <div className="error-message">
                             <p>❌ {error}</p>
                             <button onClick={fetchStaffEvents} className="btn-retry">
-                                Thử lại
+                                Retry
                             </button>
                         </div>
                     )}
@@ -192,12 +192,12 @@ const StaffEventPage = () => {
                                         </div>
                                         <div className="detail-item">
                                             <FaUsers className="detail-icon" />
-                                            <span>{event.participants}/{event.maxParticipants} người tham gia</span>
+                                            <span>{event.participants}/{event.maxParticipants} attendees</span>
                                         </div>
                                     </div>
                                     
                                     <div className="event-actions">
-                                        <button className="btn-view" onClick={() => handleViewAttendees(event.id)}>Xem người tham gia</button>
+                                        <button className="btn-view" onClick={() => handleViewAttendees(event.id)}>View Attendees</button>
                                         <button className="btn-checkin" onClick={() => navigate('/staff/qr-scanner')}>Check-in</button>
                                     </div>
                                 </div>
@@ -207,7 +207,7 @@ const StaffEventPage = () => {
 
                     {!loading && !error && filteredEvents.length === 0 && (
                         <div className="no-results">
-                            <p>Không tìm thấy sự kiện nào</p>
+                            <p>No events found</p>
                         </div>
                     )}
                 </div>
@@ -222,9 +222,9 @@ const StaffEventPage = () => {
                     <div className="modal-content attendees-modal" onClick={(e) => e.stopPropagation()}>
                         <div className="modal-header">
                             <h2>
-                                <FaUserFriends /> Danh sách người tham gia
+                                <FaUserFriends /> Attendees List
                             </h2>
-                            <button className="btn-close-modal" onClick={() => {
+                            <button className="modal-close" onClick={() => {
                                 setShowAttendeesModal(false);
                                 setAttendeesData(null);
                             }}>
@@ -234,14 +234,14 @@ const StaffEventPage = () => {
                         <div className="modal-body">
                             {loadingAttendees ? (
                                 <div className="loading-attendees">
-                                    <p>Đang tải danh sách...</p>
+                                    <p>Loading list...</p>
                                 </div>
                             ) : attendeesData ? (
                                 <>
                                     <div className="attendees-summary">
                                         <h3>{attendeesData.eventName}</h3>
                                         <p className="total-count">
-                                            Tổng số người tham gia: <strong>
+                                            Total attendees: <strong>
                                                 {attendeesData.attendees ? 
                                                     attendeesData.attendees.filter(a => a.status === 'Checked' || a.status === 'Not Used').length 
                                                     : 0}
@@ -255,7 +255,7 @@ const StaffEventPage = () => {
                                                 <div className="attendees-section">
                                                     <h4 className="section-title not-used-title">
                                                         <span className="section-icon">○</span>
-                                                        Chưa sử dụng ({attendeesData.attendees.filter(a => a.status === 'Not Used').length})
+                                                        Not Used ({attendeesData.attendees.filter(a => a.status === 'Not Used').length})
                                                     </h4>
                                                     <div className="attendees-list">
                                                         {attendeesData.attendees
@@ -268,14 +268,14 @@ const StaffEventPage = () => {
                                                                             {attendee.userName}
                                                                             {attendee.seatNumber && (
                                                                                 <span className="seat-number-badge">
-                                                                                    Ghế {attendee.seatNumber}
+                                                                                    Seat {attendee.seatNumber}
                                                                                 </span>
                                                                             )}
                                                                         </div>
                                                                         <div className="attendee-email">{attendee.email}</div>
                                                                         <div className="attendee-status">
                                                                             <span className="ticket-status-badge status-not-used">
-                                                                                ○ Chưa sử dụng
+                                                                                ○ Not Used
                                                                             </span>
                                                                         </div>
                                                                     </div>
@@ -290,7 +290,7 @@ const StaffEventPage = () => {
                                                 <div className="attendees-section">
                                                     <h4 className="section-title checked-title">
                                                         <span className="section-icon">✓</span>
-                                                        Đã check-in ({attendeesData.attendees.filter(a => a.status === 'Checked').length})
+                                                        Checked In ({attendeesData.attendees.filter(a => a.status === 'Checked').length})
                                                     </h4>
                                                     <div className="attendees-list">
                                                         {attendeesData.attendees
@@ -303,14 +303,14 @@ const StaffEventPage = () => {
                                                                             {attendee.userName}
                                                                             {attendee.seatNumber && (
                                                                                 <span className="seat-number-badge">
-                                                                                    Ghế {attendee.seatNumber}
+                                                                                    Seat {attendee.seatNumber}
                                                                                 </span>
                                                                             )}
                                                                         </div>
                                                                         <div className="attendee-email">{attendee.email}</div>
                                                                         <div className="attendee-status">
                                                                             <span className="ticket-status-badge status-checked">
-                                                                                ✓ Đã check-in
+                                                                                ✓ Checked In
                                                                             </span>
                                                                         </div>
                                                                     </div>
@@ -325,7 +325,7 @@ const StaffEventPage = () => {
                                                 <div className="attendees-section">
                                                     <h4 className="section-title cancelled-title">
                                                         <span className="section-icon">✕</span>
-                                                        Đã hủy ({attendeesData.attendees.filter(a => a.status === 'Cancelled').length})
+                                                        Cancelled ({attendeesData.attendees.filter(a => a.status === 'Cancelled').length})
                                                     </h4>
                                                     <div className="attendees-list">
                                                         {attendeesData.attendees
@@ -338,14 +338,14 @@ const StaffEventPage = () => {
                                                                             {attendee.userName}
                                                                             {attendee.seatNumber && (
                                                                                 <span className="seat-number-badge">
-                                                                                    Ghế {attendee.seatNumber}
+                                                                                    Seat {attendee.seatNumber}
                                                                                 </span>
                                                                             )}
                                                                         </div>
                                                                         <div className="attendee-email">{attendee.email}</div>
                                                                         <div className="attendee-status">
                                                                             <span className="ticket-status-badge status-cancelled">
-                                                                                ✕ Đã hủy
+                                                                                ✕ Cancelled
                                                                             </span>
                                                                         </div>
                                                                     </div>
@@ -360,7 +360,7 @@ const StaffEventPage = () => {
                                                 <div className="attendees-section">
                                                     <h4 className="section-title used-title">
                                                         <span className="section-icon">✓</span>
-                                                        Đã sử dụng ({attendeesData.attendees.filter(a => a.status === 'Used').length})
+                                                        Used ({attendeesData.attendees.filter(a => a.status === 'Used').length})
                                                     </h4>
                                                     <div className="attendees-list">
                                                         {attendeesData.attendees
@@ -373,14 +373,14 @@ const StaffEventPage = () => {
                                                                             {attendee.userName}
                                                                             {attendee.seatNumber && (
                                                                                 <span className="seat-number-badge">
-                                                                                    Ghế {attendee.seatNumber}
+                                                                                    Seat {attendee.seatNumber}
                                                                                 </span>
                                                                             )}
                                                                         </div>
                                                                         <div className="attendee-email">{attendee.email}</div>
                                                                         <div className="attendee-status">
                                                                             <span className="ticket-status-badge status-used">
-                                                                                ✓ Đã sử dụng
+                                                                                ✓ Used
                                                                             </span>
                                                                         </div>
                                                                     </div>
@@ -392,13 +392,13 @@ const StaffEventPage = () => {
                                         </>
                                     ) : (
                                         <div className="no-attendees">
-                                            <p>Chưa có người tham gia</p>
+                                            <p>No attendees yet</p>
                                         </div>
                                     )}
                                 </>
                             ) : (
                                 <div className="no-data">
-                                    <p>Không có dữ liệu</p>
+                                    <p>No data</p>
                                 </div>
                             )}
                         </div>

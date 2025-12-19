@@ -13,7 +13,7 @@ const SidebarStaff = () => {
 
     const handleLogout = () => {
         logout();
-        toast.success('Đăng xuất thành công!', {
+        toast.success('Logout successful!', {
             position: "top-right",
             autoClose: 2000,
         });
@@ -44,13 +44,13 @@ const SidebarStaff = () => {
                         <li>
                             <Link to="/staff/events" className={`menu-item ${location.pathname === '/staff/events' ? 'active' : ''}`}>
                                 <FaCalendar className="menu-icon" />
-                                <span className="menu-label">Quản lý Events</span>
+                                <span className="menu-label">Manage Events</span>
                             </Link>
                         </li>
                         <li>
                             <Link to="/staff/qr-scanner" className={`menu-item ${location.pathname === '/staff/qr-scanner' ? 'active' : ''}`}>
                                 <FaQrcode className="menu-icon" />
-                                <span className="menu-label">Quét QR Check-in</span>
+                                <span className="menu-label">QR Scanner</span>
                             </Link>
                         </li>
                         <li>
@@ -67,13 +67,13 @@ const SidebarStaff = () => {
                         <li>
                             <button onClick={handleBackHomePage} className="menu-item">
                                 <FaHome className="menu-icon" />
-                                <span className="menu-label">Trang chủ</span>
+                                <span className="menu-label">Home</span>
                             </button>
                         </li>
                         <li>
                             <button onClick={handleLogout} className="menu-item">
                                 <FaSignInAlt className="menu-icon" />
-                                <span className="menu-label">Đăng xuất</span>
+                                <span className="menu-label">Logout</span>
                             </button>
                         </li>
                     </ul>

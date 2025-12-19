@@ -13,7 +13,7 @@ const SidebarStudent = () => {
 
     const handleLogout = () => {
         logout();
-        toast.success('Đăng xuất thành công!', {
+        toast.success('Logout successful!', {
             position: "top-right",
             autoClose: 2000,
         });
@@ -38,19 +38,19 @@ const SidebarStudent = () => {
                         <li>
                             <Link to="/student/events" className={`menu-item ${location.pathname === '/student/events' ? 'active' : ''}`}>
                                 <FaCalendar className="menu-icon" />
-                                <span className="menu-label">Sự kiện</span>
+                                <span className="menu-label">Events</span>
                             </Link>
                         </li>
                         <li>
                             <Link to="/student/my-tickets" className={`menu-item ${location.pathname === '/student/my-tickets' ? 'active' : ''}`}>
                                 <FaTicketAlt className="menu-icon" />
-                                <span className="menu-label">Vé của tôi</span>
+                                <span className="menu-label">My Tickets</span>
                             </Link>
                         </li>
                         <li>
                             <Link to="/student/profile" className={`menu-item ${location.pathname === '/student/profile' ? 'active' : ''}`}>
                                 <FaUser className="menu-icon" />
-                                <span className="menu-label">Thông tin cá nhân</span>
+                                <span className="menu-label">Profile</span>
                             </Link>
                         </li>
                     </ul>
@@ -61,13 +61,13 @@ const SidebarStudent = () => {
                         <li>
                             <button onClick={handleBackHomePage} className="menu-item">
                                 <FaHome className="menu-icon" />
-                                <span className="menu-label">Trang chủ</span>
+                                <span className="menu-label">Home</span>
                             </button>
                         </li>
                         <li>
                             <button onClick={handleLogout} className="menu-item">
                                 <FaSignInAlt className="menu-icon" />
-                                <span className="menu-label">Đăng xuất</span>
+                                <span className="menu-label">Logout</span>
                             </button>
                         </li>
                     </ul>
@@ -79,7 +79,7 @@ const SidebarStudent = () => {
                 <div className="user-info">
                     <FaUser className="user-icon" />
                     <div className="user-details">
-                        <div className="user-name">{userInfo.userName || 'Sinh viên'}</div>
+                        <div className="user-name">{userInfo.userName || 'Student'}</div>
                         <div className="user-role">{userInfo.roleName || 'Student'}</div>
                     </div>
                 </div>

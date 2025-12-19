@@ -35,11 +35,11 @@ const StudentEventPage = () => {
                 console.log('Approved events from API:', approvedEvents);
                 setEvents(approvedEvents);
             } else {
-                toast.error('Không thể tải danh sách sự kiện');
+                toast.error('Unable to load events list');
             }
         } catch (error) {
             console.error('Error fetching events:', error);
-            toast.error('Có lỗi xảy ra khi tải sự kiện');
+            toast.error('An error occurred while loading events');
         } finally {
             setLoading(false);
         }
@@ -79,13 +79,13 @@ const StudentEventPage = () => {
                 setBookedEvents([...bookedEvents, event.eventId]);
             }
             
-            toast.success('Đặt vé thành công!', {
+            toast.success('Ticket booked successfully!', {
                 position: "top-right",
                 autoClose: 2000,
             });
         } catch (error) {
             console.error('Error generating QR code:', error);
-            toast.error('Có lỗi xảy ra khi tạo vé!');
+            toast.error('An error occurred while creating ticket!');
         }
     };
 
@@ -107,14 +107,14 @@ const StudentEventPage = () => {
                     // Cập nhật lại danh sách events để giảm availableSeats
                     fetchEvents();
                 } else {
-                    toast.error(response.data.message || 'Không thể đặt vé');
+                    toast.error(response.data.message || 'Unable to book ticket');
                 }
             } catch (error) {
                 console.error('Error booking ticket:', error);
-                toast.error(error.response?.data?.message || 'Có lỗi xảy ra khi đặt vé!');
+                toast.error(error.response?.data?.message || 'An error occurred while booking ticket!');
             }
         } else {
-            toast.warning('Sự kiện đã hết chỗ!');
+            toast.warning('Event is sold out!');
         }
     };
 
@@ -123,16 +123,16 @@ const StudentEventPage = () => {
         link.href = ticketQRCode;
         link.download = `ticket-${selectedEvent.eventName.replace(/\s+/g, '-')}.png`;
         link.click();
-        toast.success('Đã tải xuống vé!');
+        toast.success('Ticket downloaded!');
     };
 
     const getStatusBadge = (status) => {
         const statusMap = {
-            "Approve": { text: "Sắp diễn ra", class: "badge-upcoming" },
-            "Pending": { text: "Đang chờ", class: "badge-ongoing" },
-            "Reject": { text: "Đã từ chối", class: "badge-completed" }
+            "Approve": { text: "Upcoming", class: "badge-upcoming" },
+            "Pending": { text: "Pending", class: "badge-ongoing" },
+            "Reject": { text: "Rejected", class: "badge-completed" }
         };
-        return statusMap[status] || { text: "Sắp diễn ra", class: "badge-upcoming" };
+        return statusMap[status] || { text: "Upcoming", class: "badge-upcoming" };
     };
 
     // Format date để hiển thị
@@ -144,7 +144,7 @@ const StudentEventPage = () => {
 
     // Format time range từ slotEvent array
     const formatTimeRange = (slotEvent) => {
-        if (!slotEvent || slotEvent.length === 0) return 'Chưa xác định';
+        if (!slotEvent || slotEvent.length === 0) return 'Not specified';
         const slot = slotEvent[0]; // Lấy slot đầu tiên
         return `${slot.startTime} - ${slot.endTime}`;
     };
@@ -173,8 +173,8 @@ const StudentEventPage = () => {
                 <div className="event-content">
                     <div className="page-header">
                         <div>
-                            <h1>Sự kiện sắp diễn ra</h1>
-                            <p>Khám phá và đăng ký tham gia các sự kiện tại FPT University</p>
+                            <h1>Upcoming Events</h1>
+                            <p>Discover and register for events at FPT University</p>
                         </div>
                     </div>
 
@@ -184,7 +184,7 @@ const StudentEventPage = () => {
                             <FaSearch className="search-icon" />
                             <input
                                 type="text"
-                                placeholder="Tìm kiếm sự kiện..."
+                                placeholder="Search events..."
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
                                 className="search-input"
@@ -196,7 +196,7 @@ const StudentEventPage = () => {
                     <div className="events-grid">
                         {loading ? (
                             <div className="loading-message">
-                                <p>Đang tải danh sách sự kiện...</p>
+                                <p>Loading events...</p>
                             </div>
                         ) : filteredEvents.length > 0 ? (
                             filteredEvents.map(event => {
@@ -213,14 +213,14 @@ const StudentEventPage = () => {
                                         <p className="event-description">{event.eventDescription}</p>
                                         {event.speakerEvent && event.speakerEvent.length > 0 && (
                                             <p className="event-organizer">
-                                                Diễn giả: 
+                                                Speaker: 
                                                 {event.speakerEvent.map((speaker, index) => (
                                                     <span key={index}>
                                                         {index > 0 && ', '}
                                                         <strong 
                                                             className="speaker-name-link"
                                                             onClick={() => handleViewSpeaker(speaker)}
-                                                            title="Click để xem thông tin diễn giả"
+                                                            title="Click to view speaker information"
                                                         >
                                                             {speaker.speakerName}
                                                         </strong>
@@ -240,11 +240,11 @@ const StudentEventPage = () => {
                                             </div>
                                             <div className="detail-item">
                                                 <FaMapMarkerAlt className="detail-icon" />
-                                                <span>{event.venueName || 'Chưa xác định'} - {event.locationDetails || ''}</span>
+                                                <span>{event.venueName || 'Not specified'} - {event.locationDetails || ''}</span>
                                             </div>
                                             <div className="detail-item">
                                                 <FaUsers className="detail-icon" />
-                                                <span>{event.currentTickerCount}/{event.maxTickerCount} vé còn lại</span>
+                                                <span>{event.currentTickerCount}/{event.maxTickerCount} tickets remaining</span>
                                             </div>
                                         </div>
 
@@ -254,7 +254,7 @@ const StudentEventPage = () => {
                                                     className="btn-booked"
                                                     disabled
                                                 >
-                                                    <FaTicketAlt /> Đã đặt vé
+                                                    <FaTicketAlt /> Booked
                                                 </button>
                                             ) : (
                                                 <button 
@@ -265,7 +265,7 @@ const StudentEventPage = () => {
                                                     }}
                                                     disabled={availableSeats <= 0}
                                                 >
-                                                    <FaTicketAlt /> {availableSeats > 0 ? 'Đặt vé ngay' : 'Hết chỗ'}
+                                                    <FaTicketAlt /> {availableSeats > 0 ? 'Book Now' : 'Sold Out'}
                                                 </button>
                                             )}
                                         </div>
@@ -274,7 +274,7 @@ const StudentEventPage = () => {
                             })
                         ) : (
                             <div className="no-events">
-                                <p>Không tìm thấy sự kiện nào phù hợp</p>
+                                <p>No matching events found</p>
                             </div>
                         )}
                     </div>
@@ -289,7 +289,7 @@ const StudentEventPage = () => {
                 }}>
                     <div className="modal-content speaker-modal" onClick={(e) => e.stopPropagation()}>
                         <div className="modal-header">
-                            <h2>Thông tin diễn giả</h2>
+                            <h2>Speaker Information</h2>
                             <button 
                                 className="modal-close"
                                 onClick={() => {
@@ -306,26 +306,14 @@ const StudentEventPage = () => {
                                 <div className="speaker-details">
                                     <h3 className="speaker-name">{selectedSpeaker.speakerName}</h3>
                                     <div className="speaker-description">
-                                        <p>{selectedSpeaker.speakerDescription || selectedSpeaker.speakerDecription || 'Không có thông tin mô tả'}</p>
+                                        <p>{selectedSpeaker.speakerDescription || selectedSpeaker.speakerDecription || 'No description available'}</p>
                                     </div>
                                 </div>
                             ) : (
                                 <div className="no-data">
-                                    <p>Không có thông tin</p>
+                                    <p>No information available</p>
                                 </div>
                             )}
-                        </div>
-                        
-                        <div className="modal-footer">
-                            <button 
-                                className="btn-close" 
-                                onClick={() => {
-                                    setShowSpeakerModal(false);
-                                    setSelectedSpeaker(null);
-                                }}
-                            >
-                                Đóng
-                            </button>
                         </div>
                     </div>
                 </div>
@@ -336,7 +324,7 @@ const StudentEventPage = () => {
                 <div className="modal-overlay" onClick={() => setShowTicketModal(false)}>
                     <div className="modal-content" onClick={(e) => e.stopPropagation()}>
                         <div className="modal-header">
-                            <h2>Vé tham gia sự kiện</h2>
+                            <h2>Event Ticket</h2>
                             <button 
                                 className="modal-close"
                                 onClick={() => setShowTicketModal(false)}
@@ -350,25 +338,25 @@ const StudentEventPage = () => {
                                 <div className="ticket-info">
                                     <h3>{selectedEvent?.eventName}</h3>
                                     <div className="ticket-details">
-                                        <p><FaCalendar /> <strong>Ngày:</strong> {formatDate(selectedEvent?.eventDay)}</p>
-                                        <p><FaClock /> <strong>Thời gian:</strong> {formatTimeRange(selectedEvent?.slotEvent)}</p>
-                                        <p><FaMapMarkerAlt /> <strong>Địa điểm:</strong> {selectedEvent?.venueName} - {selectedEvent?.locationDetails}</p>
+                                        <p><FaCalendar /> <strong>Date:</strong> {formatDate(selectedEvent?.eventDay)}</p>
+                                        <p><FaClock /> <strong>Time:</strong> {formatTimeRange(selectedEvent?.slotEvent)}</p>
+                                        <p><FaMapMarkerAlt /> <strong>Location:</strong> {selectedEvent?.venueName} - {selectedEvent?.locationDetails}</p>
                                     </div>
                                 </div>
                                 
                                 <div className="ticket-qr">
                                     <img src={ticketQRCode} alt="QR Code" />
-                                    <p className="qr-instruction">Vui lòng xuất trình mã QR này khi tham gia sự kiện</p>
+                                    <p className="qr-instruction">Please present this QR code when attending the event</p>
                                 </div>
                             </div>
                         </div>
                         
                         <div className="modal-footer">
                             <button className="btn-download" onClick={downloadTicket}>
-                                Tải xuống vé
+                                Download Ticket
                             </button>
                             <button className="btn-close" onClick={() => setShowTicketModal(false)}>
-                                Đóng
+                                Close
                             </button>
                         </div>
                     </div>
