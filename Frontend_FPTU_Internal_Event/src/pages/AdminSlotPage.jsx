@@ -165,10 +165,6 @@ const AdminSlotPage = () => {
                 <div className="slot-container">
                     <div className="slot-header">
                         <h1>All slots</h1>
-                        <div className="slot-actions">
-                            <button className="btn-export" onClick={handleExport}><FaFileExport /> Export</button>
-                            <button className="btn-add-slot" onClick={handleAddSlot}><FaPlus /> Add slot</button>
-                        </div>
                     </div>
 
                     <div className="slot-toolbar">
@@ -180,6 +176,10 @@ const AdminSlotPage = () => {
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
                             />
+                        </div>
+                        <div className="toolbar-actions">
+                            <button className="btn-export" onClick={handleExport}><FaFileExport /> Export</button>
+                            <button className="btn-add-slot" onClick={handleAddSlot}><FaPlus /> Add slot</button>
                         </div>
                     </div>
 
