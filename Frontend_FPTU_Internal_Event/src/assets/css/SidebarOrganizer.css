@@ -1,0 +1,138 @@
+.sidebar-organizer {
+  width: 250px;
+  height: 100vh;
+  background-color: #ffffff;
+  border-right: 1px solid #e5e7eb;
+  position: fixed;
+  left: 0;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  overflow-x: hidden;
+  z-index: 1000;
+}
+
+.sidebar-header {
+  padding: 10px;
+  border-bottom: 1px solid #e5e7eb;
+  align-items: center;
+  justify-content: center;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+}
+
+.logo img {
+  padding-top: 20px;
+}
+
+.logo-text {
+  margin-left: 20px;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #f55b01;
+}
+
+.sidebar-nav {
+  flex: 1;
+  padding: 10px 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.sidebar-nav-content {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.menu-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.menu-divider {
+  height: 1px;
+  background-color: #e5e7eb;
+  margin: 10px 20px;
+}
+
+.menu-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 20px;
+  color: #6b7280;
+  text-decoration: none;
+  font-size: 0.95rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  border: none;
+  background: none;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+}
+
+.menu-item:hover {
+  background-color: #f3f4f6;
+  color: #fd7a00;
+}
+
+.menu-item.active {
+  background-color: #ede9fe;
+  color: #fd7a00;
+}
+
+.menu-icon {
+  font-size: 1.1rem;
+  min-width: 20px;
+}
+
+.user-info {
+  padding: 15px 20px;
+  border-top: 1px solid #e5e7eb;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background-color: #f9fafb;
+}
+
+.user-icon {
+  font-size: 1.5rem;
+  color: #fd7a00;
+}
+
+.user-name {
+  font-weight: 600;
+  color: #1f2937;
+  font-size: 0.9rem;
+}
+
+.user-role {
+  color: #6b7280;
+  font-size: 0.85rem;
+}
+
+/* Scrollbar styling */
+.sidebar-organizer::-webkit-scrollbar {
+  width: 6px;
+}
+
+.sidebar-organizer::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+.sidebar-organizer::-webkit-scrollbar-thumb {
+  background: #fd7a00;
+  border-radius: 3px;
+}
+
+.sidebar-organizer::-webkit-scrollbar-thumb:hover {
+  background: #e56b00;
+}

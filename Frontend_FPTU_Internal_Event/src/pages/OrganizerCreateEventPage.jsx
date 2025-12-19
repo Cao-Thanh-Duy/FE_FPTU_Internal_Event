@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import Header from '../components/Header';
+import SidebarOrganizer from '../components/SidebarOrganizer';
 import { FaArrowLeft, FaCalendarAlt, FaClock, FaMapMarkerAlt, FaInfoCircle, FaSave, FaSearch } from 'react-icons/fa';
 import { toast } from 'react-toastify';
 import '../assets/css/OrganizerCreateEventPage.css';
@@ -394,7 +394,7 @@ const OrganizerCreateEventPage = () => {
             
             const todayMidnight = new Date(today.getFullYear(), today.getMonth(), today.getDate());
             const dateMidnight = new Date(date.getFullYear(), date.getMonth(), date.getDate());
-            const isPast = dateMidnight < todayMidnight;
+            const isPast = dateMidnight <= todayMidnight;
             
             let bookedSlots = [];
             let availableSlots = [];
@@ -471,7 +471,7 @@ const OrganizerCreateEventPage = () => {
 
     return (
         <div className="create-event-container">
-            <Header />
+            <SidebarOrganizer />
             <div className="create-event-content">
                 <div className="page-header">
                     <div className="page-title">

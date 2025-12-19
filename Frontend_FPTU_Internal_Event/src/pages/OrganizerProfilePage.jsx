@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import Header from '../components/Header';
+import SidebarOrganizer from '../components/SidebarOrganizer';
 import { FaUser, FaEnvelope, FaUserTag, FaIdCard } from 'react-icons/fa';
 import { toast } from 'react-toastify';
 import { getUserInfo } from '../utils/auth';
@@ -39,7 +39,7 @@ const OrganizerProfilePage = () => {
 
     return (
         <div className="organizer-profile-page">
-            <Header />
+            <SidebarOrganizer />
             
             <div className="profile-main">
                 <div className="profile-content">

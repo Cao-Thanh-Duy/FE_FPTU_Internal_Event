@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import Header from '../components/Header';
-import Footer from '../components/Footer';
+import SidebarOrganizer from '../components/SidebarOrganizer';
 import { FaSearch, FaPlus, FaEdit, FaTrash, FaTimes, FaUser } from 'react-icons/fa';
 import { toast } from 'react-toastify';
 import '../assets/css/OrganizerSpeakerPage.css';
@@ -176,7 +175,7 @@ const OrganizerSpeakerPage = () => {
 
     return (
         <div className="organizer-speaker-page">
-            <Header />
+            <SidebarOrganizer />
             
             <div className="speaker-content">
                 <div className="speaker-container">
@@ -296,8 +295,6 @@ const OrganizerSpeakerPage = () => {
                     </div>
                 </div>
             )}
-
-            <Footer />
         </div>
     );
 };

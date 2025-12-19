@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import Header from '../components/Header';
+import SidebarOrganizer from '../components/SidebarOrganizer';
 import { FaPlus, FaTimes, FaCalendarAlt, FaMapMarkerAlt, FaTicketAlt, FaUsers, FaClock, FaMicrophone, FaInfoCircle, FaEdit, FaUserFriends, FaSortAmountDown, FaSortAmountUp, FaSearch } from 'react-icons/fa';
 import { toast } from 'react-toastify';
 import { getUserInfo } from '../utils/auth';
@@ -405,7 +405,7 @@ const OrganizerEventPage = () => {
 
     return (
         <div className="organizer-event-page">
-            <Header />
+            <SidebarOrganizer />
             
             <div className="organizer-main-content">
                 <div className="organizer-container">
@@ -548,7 +548,7 @@ const OrganizerEventPage = () => {
                                             
                                             <div className="info-item">
                                                 <FaTicketAlt className="info-icon" />
-                                                <span>{event.currentTickerCount || 0} / {event.maxTickerCount} tickets</span>
+                                                <span>{(event.maxTickerCount - (event.currentTickerCount || 0))} / {event.maxTickerCount} ticket booked</span>
                                             </div>
                                             
                                             {event.speakerEvent && event.speakerEvent.length > 0 && (
@@ -578,7 +578,7 @@ const OrganizerEventPage = () => {
                                     {(event.status === 'Approve' || event.status === 'Approved') && (
                                         <div className="event-card-footer">
                                             <button className="btn-view-attendees" onClick={() => handleViewAttendees(event.eventId)}>
-                                                <FaUserFriends /> View Attendees ({event.currentTickerCount || 0})
+                                                <FaUserFriends /> View Attendees ({event.maxTickerCount - (event.currentTickerCount || 0)})
                                             </button>
                                         </div>
                                     )}
@@ -618,12 +618,12 @@ const OrganizerEventPage = () => {
                                     <div className="attendees-summary">
                                         <h3>{attendeesData.eventName}</h3>
                                         <p className="total-count">
-                                            Total Attendees: <strong>{attendeesData.totalAttendees}</strong>
+                                            Total Attendees: <strong>{attendeesData.attendees?.filter(a => a.status === 'Checked' || a.status === 'Not Used').length || 0}</strong>
                                         </p>
                                     </div>
-                                    {attendeesData.attendees && attendeesData.attendees. length > 0 ? (
+                                    {attendeesData.attendees && attendeesData.attendees.filter(a => a.status === 'Checked' || a.status === 'Not Used'). length > 0 ? (
                                         <div className="attendees-list">
-                                            {attendeesData.attendees.map((attendee, index) => (
+                                            {attendeesData.attendees.filter(a => a.status === 'Checked' || a.status === 'Not Used').map((attendee, index) => (
                                                 <div key={attendee.ticketId || index} className="attendee-item">
                                                     <div className="attendee-number">{index + 1}</div>
                                                     <div className="attendee-info">
