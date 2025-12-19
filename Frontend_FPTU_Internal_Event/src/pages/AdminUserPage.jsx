@@ -136,15 +136,17 @@ const AdminUserPage = () => {
                     throw new Error(response.data.message || 'Failed to create user');
                 }
             } else {
-                // Update User API - only userName can be updated
+                // Update User API - all fields can be updated
+                const requestData = {
+                    userName: formData.userName,
+                    email: formData.email,
+                    password: formData.password,
+                    roleId: parseInt(formData.roleId)
+                };
+
                 const response = await axios.put(
-                    `https://localhost:7047/api/User?userId=${selectedUser.userId}`,
-                    JSON.stringify(formData.userName),
-                    {
-                        headers: {
-                            'Content-Type': 'application/json'
-                        }
-                    }
+                    `https://localhost:7047/api/User/update-profile-by-admin?userId=${selectedUser.userId}`,
+                    requestData
                 );
                 
                 if (response.data.success || response.status === 200) {
@@ -312,7 +314,6 @@ const AdminUserPage = () => {
                                     value={formData.email}
                                     onChange={(e) => setFormData({...formData, email: e.target.value})}
                                     required
-                                    disabled={modalMode === 'edit'}
                                 />
                             </div>
                             <div className="form-group">
@@ -321,27 +322,24 @@ const AdminUserPage = () => {
                                     type="password"
                                     value={formData.password}
                                     onChange={(e) => setFormData({...formData, password: e.target.value})}
-                                    required={modalMode === 'add'}
-                                    disabled={modalMode === 'edit'}
-                                    placeholder={modalMode === 'edit' ? 'Cannot be changed' : ''}
+                                    required
+                                    placeholder={modalMode === 'edit' ? 'Enter new password' : ''}
                                 />
                             </div>
-                            {modalMode === 'add' && (
-                                <div className="form-group">
-                                    <label>Role *</label>
-                                    <select
-                                        value={formData.roleId}
-                                        onChange={(e) => setFormData({...formData, roleId: e.target.value})}
-                                        required
-                                    >
-                                        <option value="">Select Role</option>
-                                        <option value="1">Admin</option>
-                                        <option value="2">Student</option>
-                                        <option value="3">Staff</option>
-                                        <option value="4">Organizer</option>
-                                    </select>
-                                </div>
-                            )}
+                            <div className="form-group">
+                                <label>Role *</label>
+                                <select
+                                    value={formData.roleId}
+                                    onChange={(e) => setFormData({...formData, roleId: e.target.value})}
+                                    required
+                                >
+                                    <option value="">Select Role</option>
+                                    <option value="1">Admin</option>
+                                    <option value="2">Student</option>
+                                    <option value="3">Staff</option>
+                                    <option value="4">Organizer</option>
+                                </select>
+                            </div>
                             <div className="modal-footer">
                                 <button type="button" className="btn-cancel" onClick={() => setShowModal(false)}>
                                     Cancel
