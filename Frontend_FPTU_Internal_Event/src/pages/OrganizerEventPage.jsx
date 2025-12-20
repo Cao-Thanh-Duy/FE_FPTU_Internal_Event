@@ -9,40 +9,19 @@ import '../assets/css/OrganizerEventPage.css';
 
 const OrganizerEventPage = () => {
     const navigate = useNavigate();
-    const [showModal, setShowModal] = useState(false);
-    const [modalMode, setModalMode] = useState('create'); // 'create' or 'edit'
-    const [selectedEventId, setSelectedEventId] = useState(null);
     const [showAttendeesModal, setShowAttendeesModal] = useState(false);
     const [attendeesData, setAttendeesData] = useState(null);
     const [loadingAttendees, setLoadingAttendees] = useState(false);
     const [showSpeakerModal, setShowSpeakerModal] = useState(false);
     const [selectedSpeaker, setSelectedSpeaker] = useState(null);
-    const [venues, setVenues] = useState([]);
-    const [slots, setSlots] = useState([]);
-    const [users, setUsers] = useState([]);
-    const [speakers, setSpeakers] = useState([]);
     const [myEvents, setMyEvents] = useState([]);
     const [loading, setLoading] = useState(true);
     const [filterStatus, setFilterStatus] = useState('all'); // all, pending, approved, rejected
     const [sortOrder, setSortOrder] = useState('nearest'); // nearest, farthest
     const [searchTerm, setSearchTerm] = useState('');
-    const [formData, setFormData] = useState({
-        eventName: '',
-        eventDescription: '',
-        eventDay: '',
-        maxTicketCount: '',
-        venueId: '',
-        speakerIds: [],
-        slotIds: [],
-        staffIds: []
-    });
 
     useEffect(() => {
         fetchMyEvents();
-        fetchVenues();
-        fetchSlots();
-        fetchUsers();
-        fetchSpeakers();
     }, []);
 
     const fetchMyEvents = async () => {
@@ -85,144 +64,9 @@ const OrganizerEventPage = () => {
         }
     };
 
-    const fetchVenues = async () => {
-        try {
-            const response = await axios.get('https://localhost:7047/api/Venue');
-            const data = response.data?.data ??  response.data;
-            if (Array.isArray(data)) {
-                setVenues(data);
-            }
-        } catch (error) {
-            console.error('Error fetching venues:', error);
-        }
-    };
-
-    const fetchSlots = async () => {
-        try {
-            const response = await axios.get('https://localhost:7047/api/Slot');
-            const data = response.data?.data ?? response.data;
-            if (Array.isArray(data)) {
-                setSlots(data);
-            }
-        } catch (error) {
-            console.error('Error fetching slots:', error);
-        }
-    };
-
-    const fetchUsers = async () => {
-        try {
-            const response = await axios.get('https://localhost:7047/api/User');
-            const data = response.data?.data ?? response.data;
-            if (Array.isArray(data)) {
-                setUsers(data);
-            }
-        } catch (error) {
-            console.error('Error fetching users:', error);
-        }
-    };
-
-    const fetchSpeakers = async () => {
-        try {
-            const response = await axios.get('https://localhost:7047/api/Speaker');
-            const data = response. data?.data ?? response.data;
-            if (Array.isArray(data)) {
-                setSpeakers(data);
-            }
-        } catch (error) {
-            console.error('Error fetching speakers:', error);
-        }
-    };
-
-    const handleMultiSelect = (fieldName, value) => {
-        const currentValues = formData[fieldName];
-        const numValue = parseInt(value);
-        
-        if (currentValues.includes(numValue)) {
-            setFormData({
-                ...formData,
-                [fieldName]: currentValues.filter(id => id !== numValue)
-            });
-        } else {
-            setFormData({
-                ...formData,
-                [fieldName]:  [...currentValues, numValue]
-            });
-        }
-    };
-
-    const handleSlotSelect = (slotId) => {
-        const currentSlotIds = formData.slotIds;
-        const numSlotId = parseInt(slotId);
-        
-        if (currentSlotIds.includes(numSlotId)) {
-            setFormData({
-                ...formData,
-                slotIds: currentSlotIds.filter(id => id !== numSlotId)
-            });
-        } else {
-            setFormData({
-                ...formData,
-                slotIds: [...currentSlotIds, numSlotId]
-            });
-        }
-    };
-
-    const handleEditEvent = async (event) => {
-        try {
-            setLoading(true);
-            
-            // Fetch full event details
-            const response = await axios.get(`https://localhost:7047/api/Event/${event.eventId}`);
-            const eventData = response.data?.data ?? response.data;
-            
-            console.log('Fetched event data:', eventData);
-            
-            // Extract IDs from event relationships
-            const speakerIds = (eventData.speakerEvent?. map(s => Number(s.speakerId)) || []).filter(id => !isNaN(id) && id != null);
-            const staffIds = (eventData.staffEvent?.map(s => Number(s.staffId || s.userId)) || []).filter(id => !isNaN(id) && id != null);
-            
-            // Extract slot IDs by matching slotEvent with local slots data
-            const slotIds = (eventData.slotEvent || []).map(eventSlot => {
-                const matchedSlot = slots.find(s => 
-                    s.slotName === eventSlot.slotName && 
-                    s.startTime === eventSlot.startTime
-                );
-                return matchedSlot ? matchedSlot.slotId : null;
-            }).filter(id => id !== null);
-            
-            console.log('Extracted IDs:', { speakerIds, slotIds, staffIds });
-            
-            // Format date to YYYY-MM-DD
-            const eventDay = eventData.eventDay ? eventData.eventDay.split('T')[0] : '';
-            
-            const newFormData = {
-                eventName:  eventData.eventName || '',
-                eventDescription: eventData.eventDescription || '',
-                eventDay:  eventDay,
-                maxTicketCount: eventData.maxTickerCount?. toString() || '',
-                venueId: eventData.venueId?.toString() || '',
-                speakerIds: speakerIds,
-                slotIds: slotIds,
-                staffIds: staffIds
-            };
-            
-            console.log('Setting form data:', newFormData);
-            setFormData(newFormData);
-            
-            setSelectedEventId(event.eventId);
-            setModalMode('edit');
-            setShowModal(true);
-        } catch (error) {
-            console.error('Error fetching event details:', error);
-            console.error('Error response:', error. response?.data);
-            
-            toast.error('Failed to load event details. ', {
-                position: 'top-right',
-                autoClose: 3000
-            });
-        } finally {
-            setLoading(false);
-        }
+    const handleEditEvent = (event) => {
+        // Navigate to update page with event ID
+        navigate('/organizer/update-event', { state: { eventId: event.eventId } });
     };
 
     const handleViewAttendees = async (eventId) => {
@@ -271,138 +115,6 @@ const OrganizerEventPage = () => {
         setSelectedSpeaker(null);
     };
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        
-        // ✅ FIXED:  Validation
-        if (!formData.eventName. trim()) {
-            toast.error('Please enter event name', {
-                position: 'top-right',
-                autoClose:  2000
-            });
-            return;
-        }
-
-        if (!formData.eventDay) {
-            toast.error('Please select event date', {
-                position: 'top-right',
-                autoClose: 2000
-            });
-            return;
-        }
-
-        if (!formData.venueId) {
-            toast. error('Please select a venue', {
-                position: 'top-right',
-                autoClose: 2000
-            });
-            return;
-        }
-
-        if (!formData.slotIds || formData.slotIds.length === 0) {
-            toast.error('Please select at least one time slot', {
-                position: 'top-right',
-                autoClose: 2000
-            });
-            return;
-        }
-
-        if (formData.speakerIds. length === 0) {
-            toast.error('Please select at least one speaker', {
-                position:  'top-right',
-                autoClose: 2000
-            });
-            return;
-        }
-
-        if (formData.staffIds.length === 0) {
-            toast.error('Please select at least one staff member', {
-                position: 'top-right',
-                autoClose: 2000
-            });
-            return;
-        }
-        
-        try {
-            // Payload structure matching backend API
-            const requestData = {
-                eventName:  formData.eventName. trim(),
-                eventDescription: formData.eventDescription.trim(),
-                eventDate: formData.eventDay,
-                maxTicketCount: parseInt(formData.maxTicketCount),
-                venueId: parseInt(formData.venueId),
-                slotIds: formData.slotIds.map(id => parseInt(id)),
-                speakerIds: formData.speakerIds.map(id => parseInt(id)),
-                staffIds: formData.staffIds.map(id => parseInt(id))
-            };
-
-            console.log('Mode:', modalMode);
-            console. log('Event ID:', selectedEventId);
-            console.log('Request data:', JSON.stringify(requestData, null, 2));
-
-            let response;
-            if (modalMode === 'create') {
-                response = await axios.post('https://localhost:7047/api/Event', requestData);
-            } else if (modalMode === 'edit') {
-                // Update endpoint with query parameter
-                response = await axios.put(
-                    `https://localhost:7047/api/Event?eventId=${selectedEventId}`, 
-                    requestData
-                );
-            }
-            
-            if (response.data?.success || response.status === 201 || response.status === 200) {
-                const successMessage = modalMode === 'edit' 
-                    ? 'Event updated successfully!  Status set to Pending for admin approval.' 
-                    : 'Event created successfully! ';
-                    
-                toast.success(successMessage, {
-                    position: 'top-right',
-                    autoClose: 3000
-                });
-                
-                setShowModal(false);
-                resetForm();
-                
-                // Refresh the events list
-                await fetchMyEvents();
-            } else {
-                throw new Error(response.data?.message || `Failed to ${modalMode} event`);
-            }
-        } catch (error) {
-            console. error(`Error ${modalMode === 'edit' ? 'updating' : 'creating'} event:`, error);
-            console.error('Error response:', error. response?.data);
-            
-            const errorMessage = 
-                error.response?.data?. message || 
-                error.response?.data?.title || 
-                error.message || 
-                `Failed to ${modalMode === 'edit' ? 'update' :  'save'} event. `;
-            
-            toast.error(errorMessage, {
-                position: 'top-right',
-                autoClose: 4000
-            });
-        }
-    };
-
-    const resetForm = () => {
-        setFormData({
-            eventName: '',
-            eventDescription: '',
-            eventDay: '',
-            maxTicketCount: '',
-            venueId: '',
-            speakerIds: [],
-            slotIds: [],
-            staffIds: []
-        });
-        setModalMode('create');
-        setSelectedEventId(null);
-    };
-
-    const staffList = users.filter(u => u.roleName === 'Staff');
-
     return (
         <div className="organizer-event-page">
             <SidebarOrganizer />
@@ -426,39 +138,41 @@ const OrganizerEventPage = () => {
                                 onChange={(e) => setSearchTerm(e.target.value)}
                             />
                         </div>
-                        <button 
-                            className="sort-btn"
-                            onClick={() => setSortOrder(sortOrder === 'nearest' ? 'farthest' : 'nearest')}
-                            title={sortOrder === 'nearest' ? 'Sắp xếp: Gần nhất → Xa nhất' : 'Sắp xếp: Xa nhất → Gần nhất'}
-                        >
-                            {sortOrder === 'nearest' ? <FaSortAmountDown /> : <FaSortAmountUp />}
-                            {sortOrder === 'nearest' ? 'Gần nhất' : 'Xa nhất'}
-                        </button>
-                        <div className="filter-buttons">
+                        <div className="toolbar-right">
                             <button 
-                                className={`filter-btn ${filterStatus === 'all' ? 'active' : ''}`}
-                                onClick={() => setFilterStatus('all')}
+                                className="sort-btn"
+                                onClick={() => setSortOrder(sortOrder === 'nearest' ? 'farthest' : 'nearest')}
+                                title={sortOrder === 'nearest' ? 'Sắp xếp: Gần nhất → Xa nhất' : 'Sắp xếp: Xa nhất → Gần nhất'}
                             >
-                                All Events
+                                {sortOrder === 'nearest' ? <FaSortAmountDown /> : <FaSortAmountUp />}
+                                {sortOrder === 'nearest' ? 'Gần nhất' : 'Xa nhất'}
                             </button>
-                            <button 
-                                className={`filter-btn ${filterStatus === 'pending' ? 'active' : ''}`}
-                                onClick={() => setFilterStatus('pending')}
-                            >
-                                Pending
-                            </button>
-                            <button 
-                                className={`filter-btn ${filterStatus === 'approved' ? 'active' : ''}`}
-                                onClick={() => setFilterStatus('approved')}
-                            >
-                                Approved
-                            </button>
-                            <button 
-                                className={`filter-btn ${filterStatus === 'rejected' ? 'active' : ''}`}
-                                onClick={() => setFilterStatus('rejected')}
-                            >
-                                Rejected
-                            </button>
+                            <div className="filter-buttons">
+                                <button 
+                                    className={`filter-btn ${filterStatus === 'all' ? 'active' : ''}`}
+                                    onClick={() => setFilterStatus('all')}
+                                >
+                                    All Events
+                                </button>
+                                <button 
+                                    className={`filter-btn ${filterStatus === 'pending' ? 'active' : ''}`}
+                                    onClick={() => setFilterStatus('pending')}
+                                >
+                                    Pending
+                                </button>
+                                <button 
+                                    className={`filter-btn ${filterStatus === 'approved' ? 'active' : ''}`}
+                                    onClick={() => setFilterStatus('approved')}
+                                >
+                                    Approved
+                                </button>
+                                <button 
+                                    className={`filter-btn ${filterStatus === 'rejected' ? 'active' : ''}`}
+                                    onClick={() => setFilterStatus('rejected')}
+                                >
+                                    Rejected
+                                </button>
+                            </div>
                         </div>
                     </div>
 
@@ -504,7 +218,11 @@ const OrganizerEventPage = () => {
                                     <div className="event-card-header">
                                         <h3>{event.eventName}</h3>
                                         <div className="event-header-actions">
-                                            <span className={`event-status ${event.status === 'Approve' ? 'active' : 'inactive'}`}>
+                                            <span className={`event-status ${
+                                                event.status === 'Approve' || event.status === 'Approved' ? 'active' : 
+                                                event.status === 'Pending' ? 'pending' : 
+                                                'inactive'
+                                            }`}>
                                                 {event.status || 'Pending'}
                                             </span>
                                             {(event.status === 'Pending' || event.status === 'Approve' || event.status === 'Approved') && (
@@ -548,7 +266,7 @@ const OrganizerEventPage = () => {
                                             
                                             <div className="info-item">
                                                 <FaTicketAlt className="info-icon" />
-                                                <span>{(event.maxTickerCount - (event.currentTickerCount || 0))} / {event.maxTickerCount} ticket booked</span>
+                                                <span>{(event.currentTickerCount || 0)} / {event.maxTickerCount} tickets booked</span>
                                             </div>
                                             
                                             {event.speakerEvent && event.speakerEvent.length > 0 && (
@@ -578,7 +296,7 @@ const OrganizerEventPage = () => {
                                     {(event.status === 'Approve' || event.status === 'Approved') && (
                                         <div className="event-card-footer">
                                             <button className="btn-view-attendees" onClick={() => handleViewAttendees(event.eventId)}>
-                                                <FaUserFriends /> View Attendees ({event.maxTickerCount - (event.currentTickerCount || 0)})
+                                                <FaUserFriends /> View Attendees ({event.currentTickerCount || 0})
                                             </button>
                                         </div>
                                     )}
@@ -676,177 +394,6 @@ const OrganizerEventPage = () => {
                             <h3>{selectedSpeaker.speakerName}</h3>
                             <p>{selectedSpeaker.speakerDescription || 'No description available.'}</p>
                         </div>
-                    </div>
-                </div>
-            )}
-
-            {/* Create/Edit Event Modal */}
-            {showModal && (
-                <div className="modal-overlay" onClick={() => {
-                    setShowModal(false);
-                    resetForm();
-                }}>
-                    <div className="modal-content modal-large" onClick={(e) => e.stopPropagation()}>
-                        <div className="modal-header">
-                            <h2>{modalMode === 'create' ?  'Create New Event' : 'Edit Event'}</h2>
-                            <button className="btn-close" onClick={() => {
-                                setShowModal(false);
-                                resetForm();
-                            }}>
-                                <FaTimes />
-                            </button>
-                        </div>
-                        <form onSubmit={handleSubmit}>
-                            <div className="form-row">
-                                <div className="form-group">
-                                    <label>Event Name *</label>
-                                    <input
-                                        type="text"
-                                        value={formData.eventName}
-                                        onChange={(e) => setFormData({...formData, eventName: e.target.value})}
-                                        required={modalMode === 'create'}
-                                        placeholder="Enter event name"
-                                    />
-                                </div>
-                                <div className="form-group">
-                                    <label>Event Date *</label>
-                                    <input
-                                        type="date"
-                                        value={formData.eventDay}
-                                        onChange={(e) => setFormData({...formData, eventDay: e.target.value})}
-                                        required={modalMode === 'create'}
-                                        min={new Date().toISOString().split('T')[0]}
-                                    />
-                                </div>
-                            </div>
-
-                            <div className="form-group">
-                                <label>Event Description *</label>
-                                <textarea
-                                    value={formData.eventDescription}
-                                    onChange={(e) => setFormData({...formData, eventDescription: e.target.value})}
-                                    required={modalMode === 'create'}
-                                    rows="4"
-                                    placeholder="Enter event description"
-                                />
-                            </div>
-
-                            <div className="form-row">
-                                <div className="form-group">
-                                    <label>Max Ticket Count *</label>
-                                    <input
-                                        type="number"
-                                        value={formData.maxTicketCount}
-                                        onChange={(e) => setFormData({...formData, maxTicketCount: e. target.value})}
-                                        required={modalMode === 'create'}
-                                        min="1"
-                                        placeholder="100"
-                                    />
-                                </div>
-                                <div className="form-group">
-                                    <label>Venue *</label>
-                                    <select
-                                        value={formData.venueId}
-                                        onChange={(e) => setFormData({...formData, venueId: e.target.value})}
-                                        required={modalMode === 'create'}
-                                    >
-                                        <option value="">Select Venue</option>
-                                        {venues.map(venue => (
-                                            <option key={venue.venueId} value={venue.venueId}>
-                                                {venue.venueName} (Capacity: {venue.maxSeat || 0})
-                                            </option>
-                                        ))}
-                                    </select>
-                                </div>
-                            </div>
-
-                            <div className="form-group">
-                                <label>Time Slots * (Select at least one)</label>
-                                <div className="checkbox-group">
-                                    {slots.length === 0 ? (
-                                        <p className="no-data">No slots available.  Please create slots first.</p>
-                                    ) : (
-                                        slots.map(slot => (
-                                            <label key={slot.slotId} className="checkbox-label">
-                                                <input
-                                                    type="checkbox"
-                                                    checked={formData.slotIds.includes(slot.slotId)}
-                                                    onChange={() => handleSlotSelect(slot.slotId)}
-                                                />
-                                                <span>{slot.slotName} ({slot.startTime} - {slot.endTime})</span>
-                                            </label>
-                                        ))
-                                    )}
-                                </div>
-                                <small className="form-hint">
-                                    {formData.slotIds.length} slot(s) selected
-                                </small>
-                            </div>
-
-                            <div className="form-group">
-                                <label>Speakers * (Select at least one)</label>
-                                <div className="checkbox-group">
-                                    {speakers.length === 0 ? (
-                                        <p className="no-data">No speakers available</p>
-                                    ) : (
-                                        speakers.map(speaker => (
-                                            <label key={speaker.speakerId} className="checkbox-label">
-                                                <input
-                                                    type="checkbox"
-                                                    checked={formData.speakerIds.includes(speaker.speakerId)}
-                                                    onChange={() => handleMultiSelect('speakerIds', speaker.speakerId)}
-                                                />
-                                                <span>{speaker.speakerName}</span>
-                                            </label>
-                                        ))
-                                    )}
-                                </div>
-                                <small className="form-hint">
-                                    {formData.speakerIds. length} speaker(s) selected
-                                </small>
-                            </div>
-
-                            <div className="form-group">
-                                <label>Staff Members * (Select at least one)</label>
-                                <div className="checkbox-group">
-                                    {staffList.length === 0 ? (
-                                        <p className="no-data">No staff available</p>
-                                    ) : (
-                                        staffList.map(staff => (
-                                            <label key={staff. userId} className="checkbox-label">
-                                                <input
-                                                    type="checkbox"
-                                                    checked={formData. staffIds.includes(staff.userId)}
-                                                    onChange={() => handleMultiSelect('staffIds', staff.userId)}
-                                                />
-                                                <span>{staff.userName} ({staff.email})</span>
-                                            </label>
-                                        ))
-                                    )}
-                                </div>
-                                <small className="form-hint">
-                                    {formData.staffIds.length} staff member(s) selected
-                                </small>
-                            </div>
-
-                            {modalMode === 'edit' && (
-                                <div className="form-notice">
-                                    <FaInfoCircle /> Note: After updating, the event status will be reset to "Pending" for admin approval.
-                                </div>
-                            )}
-
-                            <div className="modal-footer">
-                                <button type="button" className="btn-cancel" onClick={() => {
-                                    setShowModal(false);
-                                    resetForm();
-                                }}>
-                                    Cancel
-                                </button>
-                                <button type="submit" className="btn-submit">
-                                    {modalMode === 'create' ? 'Create Event' : 'Update Event'}
-                                </button>
-                            </div>
-                        </form>
                     </div>
                 </div>
             )}

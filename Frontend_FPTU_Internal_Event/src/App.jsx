@@ -23,6 +23,7 @@ import StudentProfilePage from "./pages/StudentProfilePage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { setupAxiosInterceptors } from './utils/auth';
 import AdminVenuePage from "./pages/AdminVenuePage";
+import OrganizerUpdateEventPage from "./pages/OrganizerUpdateEventPage";
 
 function App() {
   useEffect(() => {
@@ -114,6 +115,15 @@ function App() {
           element={
             <ProtectedRoute allowedRoles={['Organizer']}>
               <OrganizerCreateEventPage />
+            </ProtectedRoute>
+          } 
+        />
+
+        <Route 
+          path="/organizer/update-event" 
+          element={
+            <ProtectedRoute allowedRoles={['Organizer']}>
+              <OrganizerUpdateEventPage />
             </ProtectedRoute>
           } 
         />

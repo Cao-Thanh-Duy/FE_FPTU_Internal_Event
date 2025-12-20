@@ -38,25 +38,32 @@
 
 .speaker-toolbar {
   display: flex;
-  gap: 20px;
+  gap: 16px;
   margin-bottom: 30px;
   flex-wrap: wrap;
   align-items: center;
+  justify-content: space-between;
 }
 
 .search-box {
   position: relative;
-  flex: 1;
-  min-width: 300px;
+  flex: 0 1 auto;
+  min-width: 250px;
+  max-width: 400px;
+  width: 100%;
 }
 
 .search-box input {
   width: 100%;
-  padding: 12px 45px 12px 15px;
-  border: 1px solid #ddd;
+  padding: 12px 15px 12px 45px;
+  border: 2px solid #d1d5db;
   border-radius: 8px;
   font-size: 14px;
   transition: all 0.3s;
+}
+
+.search-box input::placeholder {
+  color: #9ca3af;
 }
 
 .search-box input:focus {
@@ -67,32 +74,40 @@
 
 .search-icon {
   position: absolute;
-  right: 15px;
+  left: 15px;
   top: 50%;
   transform: translateY(-50%);
-  color: #999;
+  color: #9ca3af;
   font-size: 16px;
+  pointer-events: none;
 }
 
 .btn-add {
-  padding: 12px 24px;
-  background-color: #ff6b35;
+  padding: 12px 26px;
+  background: linear-gradient(135deg, #ff6b35 0%, #ff8c61 100%);
   color: white;
   border: none;
-  border-radius: 8px;
+  border-radius: 10px;
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
   display: flex;
   align-items: center;
-  gap: 8px;
-  transition: all 0.3s;
+  gap: 10px;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(255, 107, 53, 0.25);
+  white-space: nowrap;
 }
 
 .btn-add:hover {
-  background-color: #ff5722;
+  background: linear-gradient(135deg, #ff5722 0%, #ff7043 100%);
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(255, 107, 53, 0.3);
+  box-shadow: 0 6px 16px rgba(255, 107, 53, 0.4);
+}
+
+.btn-add:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(255, 107, 53, 0.3);
 }
 
 .speakers-grid {
@@ -374,12 +389,18 @@
   }
 
   .speaker-toolbar {
-    flex-direction: column;
-    align-items: stretch;
+    gap: 12px;
   }
 
   .search-box {
+    width: 100%;
+    max-width: 100%;
     min-width: 100%;
+  }
+
+  .btn-add {
+    width: 100%;
+    justify-content: center;
   }
 
   .speakers-grid {
