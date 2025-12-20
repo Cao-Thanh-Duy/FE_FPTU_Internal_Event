@@ -315,6 +315,22 @@ const OrganizerCreateEventPage = () => {
             return;
         }
 
+        if (formData.speakerIds.length === 0) {
+            toast.error("Please select at least 1 speaker", {
+                position: 'top-right',
+                autoClose: 3000
+            });
+            return;
+        }
+
+        if (formData.staffIds.length === 0) {
+            toast.error("Please select at least 1 staff member", {
+                position: 'top-right',
+                autoClose: 3000
+            });
+            return;
+        }
+
         setLoading(true);
         try {
             const payload = {

@@ -52,14 +52,9 @@ const HomePage = () => {
                                 Vào trang quản trị
                             </button>
                         ) : (
-                            <>
-                                <button className="btn-primary" onClick={() => navigate('/login')}>
-                                    Đăng nhập ngay
-                                </button>
-                                <button className="btn-secondary" onClick={() => document.getElementById('events')?.scrollIntoView({ behavior: 'smooth' })}>
-                                    Xem sự kiện
-                                </button>
-                            </>
+                            <button className="btn-primary" onClick={() => navigate('/login')}>
+                                Đăng nhập ngay
+                            </button>
                         )}
                     </div>
                 </div>

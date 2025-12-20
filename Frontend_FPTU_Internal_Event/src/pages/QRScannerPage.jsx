@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import "../assets/css/QRScannerPage.css";
 import SidebarStaff from "../components/SidebarStaff";
-import { FaQrcode, FaCamera, FaCheckCircle, FaTimesCircle, FaKeyboard, FaBan } from 'react-icons/fa';
+import { FaQrcode, FaCamera, FaCheckCircle, FaTimesCircle, FaKeyboard, FaBan, FaClock } from 'react-icons/fa';
 import { toast } from 'react-toastify';
 import { Html5Qrcode } from 'html5-qrcode';
 import axios from 'axios';
@@ -292,6 +292,17 @@ const QRScannerPage = () => {
                                         <p><strong>Ticket Code:</strong> {scannedData.ticketCode}</p>
                                         <p><strong>User:</strong> {scannedData.userName}</p>
                                         <p><strong>Event:</strong> {scannedData.eventName}</p>
+                                        <p><strong>Event Date:</strong> {scannedData.startDay ? new Date(scannedData.startDay).toLocaleDateString('vi-VN') : 'N/A'}</p>
+                                        {scannedData.slots && scannedData.slots.length > 0 && (
+                                            <p>
+                                                <strong>Time Slots:</strong>
+                                                {scannedData.slots.map((slot, index) => (
+                                                    <div key={index}>
+                                                        {slot.slotName}: {slot.startTime} - {slot.endTime}
+                                                    </div>
+                                                ))}
+                                            </p>
+                                        )}
                                         <p><strong>Status:</strong> <span className={`status-badge ${scannedData.status?.toLowerCase()}`}>{scannedData.status}</span></p>
                                         {scannedData.checkInTime && (
                                             <p><strong>Check-in Time:</strong> {new Date(scannedData.checkInTime).toLocaleString('vi-VN')}</p>

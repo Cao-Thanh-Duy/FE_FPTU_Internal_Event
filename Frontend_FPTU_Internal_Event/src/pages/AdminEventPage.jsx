@@ -156,10 +156,10 @@ const AdminEventPage = () => {
                             <button 
                                 className="sort-btn"
                                 onClick={() => setSortOrder(sortOrder === 'nearest' ? 'farthest' : 'nearest')}
-                                title={sortOrder === 'nearest' ? 'Sắp xếp: Gần nhất → Xa nhất' : 'Sắp xếp: Xa nhất → Gần nhất'}
+                                title={sortOrder === 'nearest' ? 'Sort: Nearest first' : 'Sort: Farthest first'}
                             >
                                 {sortOrder === 'nearest' ? <FaSortAmountDown /> : <FaSortAmountUp />}
-                                {sortOrder === 'nearest' ? 'Gần nhất' : 'Xa nhất'}
+                                {sortOrder === 'nearest' ? 'Nearest First' : 'Farthest First'}
                             </button>
                             <div className="filter-buttons">
                                 <button 

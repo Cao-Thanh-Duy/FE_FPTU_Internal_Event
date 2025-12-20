@@ -142,10 +142,10 @@ const OrganizerEventPage = () => {
                             <button 
                                 className="sort-btn"
                                 onClick={() => setSortOrder(sortOrder === 'nearest' ? 'farthest' : 'nearest')}
-                                title={sortOrder === 'nearest' ? 'Sắp xếp: Gần nhất → Xa nhất' : 'Sắp xếp: Xa nhất → Gần nhất'}
+                                title={sortOrder === 'nearest' ? 'Sort: Nearest first' : 'Sort: Farthest first'}
                             >
                                 {sortOrder === 'nearest' ? <FaSortAmountDown /> : <FaSortAmountUp />}
-                                {sortOrder === 'nearest' ? 'Gần nhất' : 'Xa nhất'}
+                                {sortOrder === 'nearest' ? 'Nearest First' : 'Farthest First'}
                             </button>
                             <div className="filter-buttons">
                                 <button 
@@ -266,7 +266,7 @@ const OrganizerEventPage = () => {
                                             
                                             <div className="info-item">
                                                 <FaTicketAlt className="info-icon" />
-                                                <span>{(event.currentTickerCount || 0)} / {event.maxTickerCount} tickets booked</span>
+                                                <span>{(event.maxTickerCount - (event.currentTickerCount || 0))} / {event.maxTickerCount} tickets booked</span>
                                             </div>
                                             
                                             {event.speakerEvent && event.speakerEvent.length > 0 && (
@@ -296,7 +296,7 @@ const OrganizerEventPage = () => {
                                     {(event.status === 'Approve' || event.status === 'Approved') && (
                                         <div className="event-card-footer">
                                             <button className="btn-view-attendees" onClick={() => handleViewAttendees(event.eventId)}>
-                                                <FaUserFriends /> View Attendees ({event.currentTickerCount || 0})
+                                                <FaUserFriends /> View Attendees ({event.maxTickerCount - (event.currentTickerCount || 0)})
                                             </button>
                                         </div>
                                     )}

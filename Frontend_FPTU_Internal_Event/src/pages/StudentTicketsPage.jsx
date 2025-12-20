@@ -503,6 +503,24 @@ const StudentTicketsPage = () => {
                                                     </div>
                                                 )}
                                             </div>
+
+                                            <div className="ticket-actions">
+                                                <button 
+                                                    className="btn-show-qr"
+                                                    onClick={() => {
+                                                        setShowCancelledModal(false);
+                                                        handleShowQR(ticket);
+                                                    }}
+                                                >
+                                                    <FaQrcode /> View QR
+                                                </button>
+                                                <button 
+                                                    className="btn-download"
+                                                    onClick={() => handleDownloadTicket(ticket)}
+                                                >
+                                                    <FaDownload />
+                                                </button>
+                                            </div>
                                         </div>
                                     ))}
                                 </div>
