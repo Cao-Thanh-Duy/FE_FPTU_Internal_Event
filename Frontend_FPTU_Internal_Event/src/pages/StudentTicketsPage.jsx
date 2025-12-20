@@ -124,7 +124,18 @@ const StudentTicketsPage = () => {
         return date.toLocaleDateString('vi-VN');
     };
 
-    const upcomingTickets = myTickets.filter(ticket => ticket.status === 'Not Used');
+    const upcomingTickets = myTickets.filter(ticket => {
+        if (ticket.status !== 'Not Used') return false;
+        
+        // Lọc theo ngày: chỉ hiển thị ticket từ ngày hiện tại trở đi
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const ticketDate = new Date(ticket.startDay);
+        ticketDate.setHours(0, 0, 0, 0);
+        
+        return ticketDate >= today;
+    });
+    
     const checkedTickets = myTickets.filter(ticket => ticket.status === 'Checked');
     const usedTickets = myTickets.filter(ticket => ticket.status === 'Used');
     const cancelledTickets = myTickets.filter(ticket => ticket.status === 'Cancelled');
@@ -200,6 +211,19 @@ const StudentTicketsPage = () => {
                                                 <FaCalendar className="detail-icon" />
                                                 <span>{formatDate(ticket.startDay)}</span>
                                             </div>
+                                            {ticket.slots && ticket.slots.length > 0 && (
+                                                <div className="detail-row">
+                                                    <FaClock className="detail-icon" />
+                                                    <div className="slots-info">
+                                                        {ticket.slots.map((slot, index) => (
+                                                            <div key={index} className="slot-detail">
+                                                                <span className="slot-name">{slot.slotName}:</span>
+                                                                <span className="slot-time"> {slot.startTime} - {slot.endTime}</span>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            )}
                                         </div>
 
                                         <div className="ticket-actions">
@@ -252,6 +276,19 @@ const StudentTicketsPage = () => {
                                                 <FaCalendar className="detail-icon" />
                                                 <span>{formatDate(ticket.startDay)}</span>
                                             </div>
+                                            {ticket.slots && ticket.slots.length > 0 && (
+                                                <div className="detail-row">
+                                                    <FaClock className="detail-icon" />
+                                                    <div className="slots-info">
+                                                        {ticket.slots.map((slot, index) => (
+                                                            <div key={index} className="slot-detail">
+                                                                <span className="slot-name">{slot.slotName}:</span>
+                                                                <span className="slot-time">{slot.startTime} - {slot.endTime}</span>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            )}
                                         </div>
                                     </div>
                                 ))}
@@ -285,6 +322,17 @@ const StudentTicketsPage = () => {
                                         <p><strong>Ticket Code:</strong> {selectedTicket.ticketCode || selectedTicket.ticketId}</p>
                                         <p><strong>Seat Number:</strong> {selectedTicket.seatNumber}</p>
                                         <p><strong>Date:</strong> {formatDate(selectedTicket.startDay)}</p>
+                                        {selectedTicket.slots && selectedTicket.slots.length > 0 && (
+                                            <div className="ticket-slots">
+                                                <strong>Time Slots:</strong>
+                                                {selectedTicket.slots.map((slot, index) => (
+                                                    <div key={index} className="slot-item">
+                                                        <FaClock style={{marginRight: '5px'}} />
+                                                        {slot.slotName}: {slot.startTime} - {slot.endTime}
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
                                         <p><strong>Booked by:</strong> {selectedTicket.userName}</p>
                                     </div>
                                 </div>
@@ -354,6 +402,19 @@ const StudentTicketsPage = () => {
                                                     <FaCalendar className="detail-icon" />
                                                     <span>{formatDate(ticket.startDay)}</span>
                                                 </div>
+                                                {ticket.slots && ticket.slots.length > 0 && (
+                                                    <div className="detail-row">
+                                                        <FaClock className="detail-icon" />
+                                                        <div className="slots-info">
+                                                            {ticket.slots.map((slot, index) => (
+                                                                <div key={index} className="slot-detail">
+                                                                    <span className="slot-name">{slot.slotName}:</span>
+                                                                    <span className="slot-time">{slot.startTime} - {slot.endTime}</span>
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    </div>
+                                                )}
                                             </div>
 
                                             <div className="ticket-actions">
@@ -428,6 +489,19 @@ const StudentTicketsPage = () => {
                                                     <FaCalendar className="detail-icon" />
                                                     <span>{formatDate(ticket.startDay)}</span>
                                                 </div>
+                                                {ticket.slots && ticket.slots.length > 0 && (
+                                                    <div className="detail-row">
+                                                        <FaClock className="detail-icon" />
+                                                        <div className="slots-info">
+                                                            {ticket.slots.map((slot, index) => (
+                                                                <div key={index} className="slot-detail">
+                                                                    <span className="slot-name">{slot.slotName}:</span>
+                                                                    <span className="slot-time">{slot.startTime} - {slot.endTime}</span>
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    </div>
+                                                )}
                                             </div>
                                         </div>
                                     ))}

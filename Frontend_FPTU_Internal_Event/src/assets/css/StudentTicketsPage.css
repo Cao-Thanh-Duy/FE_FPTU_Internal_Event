@@ -243,7 +243,7 @@
 
 .detail-row {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 10px;
   font-size: 0.95rem;
   color: #4b5563;
@@ -253,10 +253,35 @@
   color: #f55b01;
   font-size: 1rem;
   min-width: 16px;
+  margin-top: 2px;
 }
 
 .ticket-card.used .detail-icon {
   color: #9ca3af;
+}
+
+/* Slots Information */
+.slots-info {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+}
+
+.slot-detail {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.9rem;
+}
+
+.slot-name {
+  font-weight: 600;
+  color: #374151;
+}
+
+.slot-time {
+  color: #6b7280;
 }
 
 /* Ticket Actions */
@@ -434,6 +459,37 @@
 
 .qr-ticket-details svg {
   color: #f55b01;
+}
+
+/* Ticket Slots in QR Modal */
+.ticket-slots {
+  margin: 15px 0;
+  padding: 15px;
+  background-color: #ffffff;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+}
+
+.ticket-slots strong {
+  display: block;
+  margin-bottom: 10px;
+  color: #1f2937;
+  font-size: 0.95rem;
+}
+
+.slot-item {
+  display: flex;
+  align-items: center;
+  padding: 8px 12px;
+  margin-bottom: 8px;
+  background-color: #f3f4f6;
+  border-radius: 6px;
+  color: #374151;
+  font-size: 0.9rem;
+}
+
+.slot-item:last-child {
+  margin-bottom: 0;
 }
 
 .qr-code-display {

@@ -38,11 +38,15 @@
 /* Search Section */
 .search-section {
   margin-bottom: 30px;
+  display: flex;
+  gap: 15px;
+  align-items: center;
 }
 
 .search-box {
   position: relative;
   max-width: 400px;
+  flex: 1;
 }
 
 .search-icon {
@@ -68,6 +72,34 @@
   outline: none;
   border-color: #fd7a00;
   box-shadow: 0 0 0 3px rgba(253, 122, 0, 0.1);
+}
+
+/* Sort Button */
+.btn-sort {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 20px;
+  background-color: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #374151;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+  margin-left: auto;
+}
+
+.btn-sort:hover {
+  background-color: #f9fafb;
+  border-color: #fd7a00;
+  color: #fd7a00;
+}
+
+.btn-sort svg {
+  font-size: 1.1rem;
 }
 
 /* Events Grid */
@@ -325,6 +357,55 @@
   color: #fd7a00;
   font-size: 1.2rem;
   font-weight: 700;
+}
+
+/* Attendees Filter Buttons */
+.attendees-filter-buttons {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 24px;
+  padding: 12px;
+  background-color: #f9fafb;
+  border-radius: 8px;
+}
+
+.filter-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 16px;
+  background-color: #ffffff;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #6b7280;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.filter-btn:hover {
+  border-color: #fd7a00;
+  background-color: #fff7ed;
+  color: #fd7a00;
+}
+
+.filter-btn.active {
+  background-color: #fd7a00;
+  border-color: #fd7a00;
+  color: #ffffff;
+}
+
+.filter-btn .filter-icon {
+  font-size: 1.1rem;
+  font-weight: bold;
+}
+
+.filter-btn .filter-count {
+  font-size: 0.85rem;
+  opacity: 0.9;
 }
 
 .attendees-list {

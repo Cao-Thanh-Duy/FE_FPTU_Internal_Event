@@ -35,11 +35,15 @@
 /* Search Section */
 .search-section {
   margin-bottom: 30px;
+  display: flex;
+  gap: 15px;
+  align-items: center;
 }
 
 .search-box {
   position: relative;
   max-width: 500px;
+  flex: 1;
 }
 
 .search-icon {
@@ -64,6 +68,34 @@
   outline: none;
   border-color: #f55b01;
   box-shadow: 0 0 0 3px rgba(245, 91, 1, 0.1);
+}
+
+/* Sort Button */
+.btn-sort {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 20px;
+  background-color: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #374151;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+  margin-left: auto;
+}
+
+.btn-sort:hover {
+  background-color: #f9fafb;
+  border-color: #f55b01;
+  color: #f55b01;
+}
+
+.btn-sort svg {
+  font-size: 1.1rem;
 }
 
 /* Events Grid */

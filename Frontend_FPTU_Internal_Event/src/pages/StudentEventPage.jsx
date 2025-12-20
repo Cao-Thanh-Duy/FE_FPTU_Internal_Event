@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import "../assets/css/StudentEventPage.css";
 import SidebarStudent from "../components/SidebarStudent";
-import { FaCalendar, FaClock, FaMapMarkerAlt, FaUsers, FaSearch, FaTicketAlt, FaTimes } from 'react-icons/fa';
+import { FaCalendar, FaClock, FaMapMarkerAlt, FaUsers, FaSearch, FaTicketAlt, FaTimes, FaSortAmountDown, FaSortAmountUp } from 'react-icons/fa';
 import QRCode from 'qrcode';
 import { toast } from 'react-toastify';
 import axios from 'axios';
@@ -16,10 +16,15 @@ const StudentEventPage = () => {
     const [loading, setLoading] = useState(true);
     const [showSpeakerModal, setShowSpeakerModal] = useState(false);
     const [selectedSpeaker, setSelectedSpeaker] = useState(null);
+    const [sortOrder, setSortOrder] = useState('asc'); // 'asc' = gần nhất, 'desc' = xa nhất
     
     // Fetch events from API
     useEffect(() => {
-        fetchEvents();
+        const loadData = async () => {
+            const eventsList = await fetchEvents();
+            await fetchUserTickets(eventsList);
+        };
+        loadData();
     }, []);
 
     const fetchEvents = async () => {
@@ -34,20 +39,78 @@ const StudentEventPage = () => {
                 );
                 console.log('Approved events from API:', approvedEvents);
                 setEvents(approvedEvents);
+                return approvedEvents; // Trả về để sử dụng trong fetchUserTickets
             } else {
                 toast.error('Unable to load events list');
+                return [];
             }
         } catch (error) {
             console.error('Error fetching events:', error);
             toast.error('An error occurred while loading events');
+            return [];
         } finally {
             setLoading(false);
         }
     };
 
-    const filteredEvents = events.filter(event =>
-        event.eventName?.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    const fetchUserTickets = async (eventsList = null) => {
+        try {
+            const userId = localStorage.getItem('userId');
+            if (!userId) return;
+            
+            const token = localStorage.getItem('token');
+            const response = await axios.get(`https://localhost:7047/api/Ticket?userId=${userId}`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            
+            if (response.data.success) {
+                console.log('User tickets response:', response.data.data);
+                // Lấy danh sách eventId từ các ticket chưa bị hủy
+                const userTickets = response.data.data || [];
+                
+                // Sử dụng eventsList nếu được truyền vào, nếu không thì dùng events từ state
+                const eventsToCheck = eventsList || events;
+                
+                const bookedEventIds = userTickets
+                    .filter(ticket => ticket.status !== 'Cancelled')
+                    .map(ticket => {
+                        // Thử lấy eventId trực tiếp từ ticket
+                        if (ticket.eventId) {
+                            return ticket.eventId;
+                        }
+                        // Nếu không có eventId, tìm event theo eventName
+                        const event = eventsToCheck.find(e => e.eventName === ticket.eventName);
+                        return event?.eventId;
+                    })
+                    .filter(eventId => eventId); // Loại bỏ undefined/null
+                
+                console.log('User booked event IDs:', bookedEventIds);
+                setBookedEvents(bookedEventIds);
+            }
+        } catch (error) {
+            console.error('Error fetching user tickets:', error);
+        }
+    };
+
+    const filteredEvents = events.filter(event => {
+        // Lọc theo tên event
+        const matchesSearch = event.eventName?.toLowerCase().includes(searchTerm.toLowerCase());
+        
+        // Lọc theo ngày: chỉ hiển thị event từ ngày hiện tại trở đi
+        const today = new Date();
+        today.setHours(0, 0, 0, 0); // Set về 00:00:00 để so sánh chính xác
+        const eventDate = new Date(event.eventDay);
+        eventDate.setHours(0, 0, 0, 0);
+        const isFutureEvent = eventDate >= today;
+        
+        return matchesSearch && isFutureEvent;
+    }).sort((a, b) => {
+        const dateA = new Date(a.eventDay);
+        const dateB = new Date(b.eventDay);
+        return sortOrder === 'asc' ? dateA - dateB : dateB - dateA;
+    });
 
     const generateTicketQR = async (event, ticketId) => {
         try {
@@ -104,8 +167,9 @@ const StudentEventPage = () => {
                     const ticketId = response.data.data?.ticketId || `TKT-${event.eventId}-${Date.now()}`;
                     await generateTicketQR(event, ticketId);
                     
-                    // Cập nhật lại danh sách events để giảm availableSeats
+                    // Cập nhật lại danh sách events và tickets
                     fetchEvents();
+                    fetchUserTickets();
                 } else {
                     toast.error(response.data.message || 'Unable to book ticket');
                 }
@@ -190,6 +254,21 @@ const StudentEventPage = () => {
                                 className="search-input"
                             />
                         </div>
+                        <button 
+                            className="btn-sort"
+                            onClick={() => setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc')}
+                            title={sortOrder === 'asc' ? 'Sort: Nearest first' : 'Sort: Farthest first'}
+                        >
+                            {sortOrder === 'asc' ? (
+                                <>
+                                    <FaSortAmountDown /> Nearest First
+                                </>
+                            ) : (
+                                <>
+                                    <FaSortAmountUp /> Farthest First
+                                </>
+                            )}
+                        </button>
                     </div>
 
                     {/* Events List */}
