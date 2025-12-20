@@ -278,10 +278,10 @@ const OrganizerEventPage = () => {
                                                     <div className="section-content">
                                                         {event. speakerEvent.map((speaker, index) => (
                                                             <div key={index} className="speaker-item">
+                                                                <FaMicrophone style={{ color: '#f59e0b', fontSize: '0.75rem' }} />
                                                                 <span 
                                                                     className="speaker-name clickable"
                                                                     onClick={() => handleViewSpeaker(speaker)}
-                                                                    style={{ cursor: 'pointer', textDecoration: 'underline', color: '#0891b2' }}
                                                                 >
                                                                     {speaker.speakerName}
                                                                 </span>
