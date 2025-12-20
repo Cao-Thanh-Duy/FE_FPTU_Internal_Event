@@ -149,16 +149,19 @@
 }
 
 .events-grid {
+  align-items: start;
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-  gap: 30px;
-  width: 100%;
   gap: 40px;
   width: 100%;
-  padding: 10px;
+  width: 100%;
+  padding: 5px;
 }
 
 .event-card {
+  min-width: 0;
+  width: 100%;
+  box-sizing: border-box;
   background: white;
   border-radius: 10px;
   overflow: hidden;
@@ -501,6 +504,7 @@
   padding: 20px 24px;
   border-bottom: 1px solid #e5e7eb;
   background: #f9fafb;
+  position: relative;
 }
 
 .modal-header h2 {
@@ -522,6 +526,10 @@
   justify-content: center;
   border-radius: 4px;
   transition: all 0.2s;
+  position: absolute;
+  right: 15px;
+  top: 50%;
+  transform: translateY(-50%);
 }
 
 .modal-close:hover {
