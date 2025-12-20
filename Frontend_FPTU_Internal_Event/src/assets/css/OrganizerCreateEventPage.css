@@ -650,6 +650,7 @@ textarea.form-control {
   align-items: center;
   background-color: #f8f9fa;
   border-radius: 16px 16px 0 0;
+  gap: 1rem;
 }
 
 .modal-header h3 {
@@ -662,16 +663,18 @@ textarea.form-control {
 .close-modal-btn {
   background: none;
   border: none;
-  font-size: 1.5rem;
+  font-size: 2rem;
   color: #a0aec0;
   cursor: pointer;
-  padding: 0.5rem;
+  padding: 0.25rem 0.5rem;
   line-height: 1;
   border-radius: 50%;
   transition: all 0.2s;
   display: flex;
   align-items: center;
   justify-content: center;
+  margin-left: center;
+  flex-shrink: 0;
 }
 
 .close-modal-btn:hover {

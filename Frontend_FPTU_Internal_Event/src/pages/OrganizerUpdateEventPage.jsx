@@ -39,6 +39,8 @@ const OrganizerUpdateEventPage = () => {
     // Modal states
     const [showSpeakerModal, setShowSpeakerModal] = useState(false);
     const [selectedSpeaker, setSelectedSpeaker] = useState(null);
+    const [showStaffModal, setShowStaffModal] = useState(false);
+    const [selectedStaff, setSelectedStaff] = useState(null);
 
     // Search states
     const [speakerSearch, setSpeakerSearch] = useState('');
@@ -248,6 +250,11 @@ const OrganizerUpdateEventPage = () => {
     const handleShowSpeakerInfo = (speaker) => {
         setSelectedSpeaker(speaker);
         setShowSpeakerModal(true);
+    };
+
+    const handleShowStaffInfo = (staff) => {
+        setSelectedStaff(staff);
+        setShowStaffModal(true);
     };
 
     const getDaysInMonth = (date) => {
@@ -680,6 +687,14 @@ const OrganizerUpdateEventPage = () => {
                                     >
                                         <div className="card-content">
                                             <span className="card-name">{user.userName}</span>
+                                            <button 
+                                                type="button"
+                                                className="info-btn" 
+                                                onClick={(e) => { e.stopPropagation(); handleShowStaffInfo(user); }}
+                                                title="View Details"
+                                            >
+                                                <FaInfoCircle />
+                                            </button>
                                         </div>
                                     </div>
                                 ))}
@@ -786,16 +801,29 @@ const OrganizerUpdateEventPage = () => {
                                 <span className="speaker-detail-value">{selectedSpeaker.speakerName}</span>
                             </div>
                             <div className="speaker-detail-row">
-                                <span className="speaker-detail-label">Email</span>
-                                <span className="speaker-detail-value">{selectedSpeaker.email || 'N/A'}</span>
-                            </div>
-                            <div className="speaker-detail-row">
-                                <span className="speaker-detail-label">Phone</span>
-                                <span className="speaker-detail-value">{selectedSpeaker.phoneNumber || 'N/A'}</span>
-                            </div>
-                            <div className="speaker-detail-row">
                                 <span className="speaker-detail-label">Bio</span>
-                                <span className="speaker-detail-value">{selectedSpeaker.bio || 'No biography available.'}</span>
+                                <span className="speaker-detail-value">{selectedSpeaker.speakerDecription || selectedSpeaker.speakerDescription || selectedSpeaker.bio || 'No biography available.'}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {showStaffModal && selectedStaff && (
+                <div className="modal-overlay" onClick={() => setShowStaffModal(false)}>
+                    <div className="modal-content" onClick={e => e.stopPropagation()}>
+                        <div className="modal-header">
+                            <h3>Staff Details</h3>
+                            <button className="close-modal-btn" onClick={() => setShowStaffModal(false)}>&times;</button>
+                        </div>
+                        <div className="modal-body">
+                            <div className="speaker-detail-row">
+                                <span className="speaker-detail-label">Name</span>
+                                <span className="speaker-detail-value">{selectedStaff.userName}</span>
+                            </div>
+                            <div className="speaker-detail-row">
+                                <span className="speaker-detail-label">Email</span>
+                                <span className="speaker-detail-value">{selectedStaff.email || 'N/A'}</span>
                             </div>
                         </div>
                     </div>
