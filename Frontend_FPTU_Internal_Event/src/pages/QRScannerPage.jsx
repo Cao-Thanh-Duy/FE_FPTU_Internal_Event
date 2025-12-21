@@ -308,22 +308,54 @@ const QRScannerPage = () => {
                                             <p><strong>Check-in Time:</strong> {new Date(scannedData.checkInTime).toLocaleString('vi-VN')}</p>
                                         )}
                                     </div>
-                                    <div className="action-buttons">
-                                        <button 
-                                            className="btn-checkin"
-                                            onClick={() => handleCheckIn(scannedData.ticketId)}
-                                            disabled={isProcessing || scannedData.status === 'Checked' || scannedData.status === 'Cancelled'}
-                                        >
-                                            <FaCheckCircle /> Check In
-                                        </button>
-                                        <button 
-                                            className="btn-cancel-ticket"
-                                            onClick={() => handleCancelTicket(scannedData.ticketId)}
-                                            disabled={isProcessing || scannedData.status === 'Cancelled'}
-                                        >
-                                            <FaBan /> Cancel Ticket
-                                        </button>
-                                    </div>
+                                    {(() => {
+                                        // Kiểm tra ngày sự kiện
+                                        const today = new Date();
+                                        today.setHours(0, 0, 0, 0);
+                                        
+                                        const eventDate = new Date(scannedData.startDay);
+                                        eventDate.setHours(0, 0, 0, 0);
+                                        
+                                        const isToday = eventDate.getTime() === today.getTime();
+                                        const isFutureEvent = eventDate > today;
+                                        const isPastEvent = eventDate < today;
+                                        
+                                        const isDisabled = isProcessing || scannedData.status === 'Checked' || scannedData.status === 'Cancelled' || !isToday;
+                                        const isCancelDisabled = isProcessing || scannedData.status === 'Cancelled' || !isToday;
+                                        
+                                        return (
+                                            <>
+                                                {!isToday && (
+                                                    <div className={`date-warning ${isFutureEvent ? 'future' : 'past'}`}>
+                                                        <FaClock />
+                                                        {isFutureEvent ? (
+                                                            <span>⚠️ Ticket not yet valid - Event scheduled for {new Date(scannedData.startDay).toLocaleDateString('vi-VN')}</span>
+                                                        ) : (
+                                                            <span>⚠️ Ticket expired - Event was on {new Date(scannedData.startDay).toLocaleDateString('vi-VN')}</span>
+                                                        )}
+                                                    </div>
+                                                )}
+                                                <div className="action-buttons">
+                                                    <button 
+                                                        className="btn-checkin"
+                                                        onClick={() => handleCheckIn(scannedData.ticketId)}
+                                                        disabled={isDisabled}
+                                                        title={!isToday ? (isFutureEvent ? 'Event not started yet' : 'Event has ended') : ''}
+                                                    >
+                                                        <FaCheckCircle /> Check In
+                                                    </button>
+                                                    <button 
+                                                        className="btn-cancel-ticket"
+                                                        onClick={() => handleCancelTicket(scannedData.ticketId)}
+                                                        disabled={isCancelDisabled}
+                                                        title={!isToday ? (isFutureEvent ? 'Event not started yet' : 'Event has ended') : ''}
+                                                    >
+                                                        <FaBan /> Cancel Ticket
+                                                    </button>
+                                                </div>
+                                            </>
+                                        );
+                                    })()}
                                 </div>
                             )}
                         </div>
