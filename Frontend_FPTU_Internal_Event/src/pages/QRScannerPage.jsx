@@ -340,7 +340,7 @@ const QRScannerPage = () => {
                                     scanHistory.map((scan, index) => (
                                         <div key={index} className={`history-item ${scan.status}`}>
                                             <div className="history-icon">
-                                                {scan.status === 'success' ? 
+                                                {(scan.status === 'success' || scan.status === 'Checked') ? 
                                                     <FaCheckCircle className="icon-success" /> : 
                                                     <FaTimesCircle className="icon-error" />
                                                 }

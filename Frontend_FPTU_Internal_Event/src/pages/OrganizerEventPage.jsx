@@ -19,6 +19,7 @@ const OrganizerEventPage = () => {
     const [filterStatus, setFilterStatus] = useState('all'); // all, pending, approved, rejected
     const [sortOrder, setSortOrder] = useState('nearest'); // nearest, farthest
     const [searchTerm, setSearchTerm] = useState('');
+    const [attendeesFilter, setAttendeesFilter] = useState('Not Used'); // 'Not Used', 'Checked', 'Cancelled'
 
     useEffect(() => {
         fetchMyEvents();
@@ -73,6 +74,7 @@ const OrganizerEventPage = () => {
         try {
             setLoadingAttendees(true);
             setShowAttendeesModal(true);
+            setAttendeesFilter('Not Used'); // Reset filter về Not Used
             
             // ✅ CORRECT: This API endpoint is already correct
             const response = await axios.get(`https://localhost:7047/api/Ticket/event/${eventId}/attendees`);
@@ -329,48 +331,100 @@ const OrganizerEventPage = () => {
                         <div className="modal-body">
                             {loadingAttendees ? (
                                 <div className="loading-attendees">
-                                    <p>Loading attendees...</p>
+                                    <p>Loading list...</p>
                                 </div>
-                            ) : attendeesData ?  (
+                            ) : attendeesData ? (
                                 <>
                                     <div className="attendees-summary">
                                         <h3>{attendeesData.eventName}</h3>
                                         <p className="total-count">
-                                            Total Attendees: <strong>{attendeesData.attendees?.filter(a => a.status === 'Checked' || a.status === 'Not Used').length || 0}</strong>
+                                            Total attendees: <strong>
+                                                {attendeesData.attendees ? 
+                                                    attendeesData.attendees.filter(a => a.status === 'Checked' || a.status === 'Not Used').length 
+                                                    : 0}
+                                            </strong>
                                         </p>
                                     </div>
-                                    {attendeesData.attendees && attendeesData.attendees.filter(a => a.status === 'Checked' || a.status === 'Not Used'). length > 0 ? (
-                                        <div className="attendees-list">
-                                            {attendeesData.attendees.filter(a => a.status === 'Checked' || a.status === 'Not Used').map((attendee, index) => (
-                                                <div key={attendee.ticketId || index} className="attendee-item">
-                                                    <div className="attendee-number">{index + 1}</div>
-                                                    <div className="attendee-info">
-                                                        <div className="attendee-name">{attendee.userName}</div>
-                                                        <div className="attendee-email">{attendee.email}</div>
-                                                        <div className="attendee-seat">
-                                                            Seat Number: <span className="seat-number-badge">
-                                                                {attendee.seatNumber || 'N/A'}
-                                                            </span>
+                                    
+                                    {/* Filter Buttons */}
+                                    <div className="attendees-filter-buttons">
+                                        <button 
+                                            className={`filter-btn ${attendeesFilter === 'Not Used' ? 'active' : ''}`}
+                                            onClick={() => setAttendeesFilter('Not Used')}
+                                        >
+                                            <span className="filter-icon">○</span>
+                                            Not Used
+                                            <span className="filter-count">
+                                                ({attendeesData.attendees?.filter(a => a.status === 'Not Used').length || 0})
+                                            </span>
+                                        </button>
+                                        <button 
+                                            className={`filter-btn ${attendeesFilter === 'Checked' ? 'active' : ''}`}
+                                            onClick={() => setAttendeesFilter('Checked')}
+                                        >
+                                            <span className="filter-icon">✓</span>
+                                            Checked
+                                            <span className="filter-count">
+                                                ({attendeesData.attendees?.filter(a => a.status === 'Checked').length || 0})
+                                            </span>
+                                        </button>
+                                        <button 
+                                            className={`filter-btn ${attendeesFilter === 'Cancelled' ? 'active' : ''}`}
+                                            onClick={() => setAttendeesFilter('Cancelled')}
+                                        >
+                                            <span className="filter-icon">✕</span>
+                                            Cancelled
+                                            <span className="filter-count">
+                                                ({attendeesData.attendees?.filter(a => a.status === 'Cancelled').length || 0})
+                                            </span>
+                                        </button>
+                                    </div>
+
+                                    {attendeesData.attendees && attendeesData.attendees.length > 0 ? (
+                                        <div className="attendees-section">
+                                            <div className="attendees-list">
+                                                {attendeesData.attendees
+                                                    .filter(a => a.status === attendeesFilter)
+                                                    .map((attendee, index) => (
+                                                        <div key={attendee.ticketId || index} className="attendee-item">
+                                                            <div className="attendee-number">{index + 1}</div>
+                                                            <div className="attendee-info">
+                                                                <div className="attendee-name">
+                                                                    {attendee.userName}
+                                                                    {attendee.seatNumber && (
+                                                                        <span className="seat-number-badge">
+                                                                            Seat {attendee.seatNumber}
+                                                                        </span>
+                                                                    )}
+                                                                </div>
+                                                                <div className="attendee-email">{attendee.email}</div>
+                                                                <div className="attendee-status">
+                                                                    <span className={`ticket-status-badge status-${attendeesFilter.toLowerCase().replace(' ', '-')}`}>
+                                                                        {attendeesFilter === 'Not Used' && '○'}
+                                                                        {attendeesFilter === 'Checked' && '✓'}
+                                                                        {attendeesFilter === 'Cancelled' && '✕'}
+                                                                        {' '}{attendeesFilter}
+                                                                    </span>
+                                                                </div>
+                                                            </div>
                                                         </div>
-                                                        <div className="attendee-ticket">
-                                                            Ticket Status: <span className={`status-badge ${attendee.status?. toLowerCase()}`}>
-                                                                {attendee.status || 'Active'}
-                                                            </span>
-                                                        </div>
-                                                    </div>
+                                                    ))}
+                                            </div>
+                                            {attendeesData.attendees.filter(a => a.status === attendeesFilter).length === 0 && (
+                                                <div className="no-attendees">
+                                                    <p>No {attendeesFilter.toLowerCase()} attendees</p>
                                                 </div>
-                                            ))}
+                                            )}
                                         </div>
                                     ) : (
                                         <div className="no-attendees">
-                                            <FaInfoCircle style={{ fontSize: '48px', color: '#ccc', marginBottom: '16px' }} />
-                                            <p>No attendees registered for this event yet.</p>
+                                            <p>No attendees yet</p>
                                         </div>
                                     )}
                                 </>
                             ) : (
                                 <div className="no-data">
-                                    <p>No data available. </p>
+                                    <p>No data</p>
                                 </div>
                             )}
                         </div>
