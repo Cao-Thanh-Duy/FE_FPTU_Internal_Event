@@ -14,6 +14,8 @@ const OrganizerEventPage = () => {
     const [loadingAttendees, setLoadingAttendees] = useState(false);
     const [showSpeakerModal, setShowSpeakerModal] = useState(false);
     const [selectedSpeaker, setSelectedSpeaker] = useState(null);
+    const [showDescriptionModal, setShowDescriptionModal] = useState(false);
+    const [selectedEventForDescription, setSelectedEventForDescription] = useState(null);
     const [myEvents, setMyEvents] = useState([]);
     const [loading, setLoading] = useState(true);
     const [filterStatus, setFilterStatus] = useState('all'); // all, pending, approved, rejected
@@ -115,6 +117,16 @@ const OrganizerEventPage = () => {
     const closeSpeakerModal = () => {
         setShowSpeakerModal(false);
         setSelectedSpeaker(null);
+    };
+
+    const handleViewDescription = (event) => {
+        setSelectedEventForDescription(event);
+        setShowDescriptionModal(true);
+    };
+
+    const closeDescriptionModal = () => {
+        setShowDescriptionModal(false);
+        setSelectedEventForDescription(null);
     };
 
     return (
@@ -235,7 +247,24 @@ const OrganizerEventPage = () => {
                                         </div>
                                     </div>
                                     <div className="event-card-body">
-                                        <p className="event-description">{event.eventDescription}</p>
+                                        <div className="event-description-wrapper">
+                                            <p className="event-description">
+                                                {event.eventDescription && event.eventDescription.length > 80
+                                                    ? event.eventDescription.substring(0, 80) + '...'
+                                                    : event.eventDescription}
+                                            </p>
+                                            {event.eventDescription && event.eventDescription.length > 80 && (
+                                                <button 
+                                                    className="btn-view-full-description"
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        handleViewDescription(event);
+                                                    }}
+                                                >
+                                                    <FaInfoCircle /> View Full
+                                                </button>
+                                            )}
+                                        </div>
                                         
                                         <div className="event-info">
                                             <div className="info-item">
@@ -447,6 +476,28 @@ const OrganizerEventPage = () => {
                         <div className="modal-body">
                             <h3>{selectedSpeaker.speakerName}</h3>
                             <p>{selectedSpeaker.speakerDescription || 'No description available.'}</p>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Event Description Modal */}
+            {showDescriptionModal && selectedEventForDescription && (
+                <div className="modal-overlay" onClick={closeDescriptionModal}>
+                    <div className="modal-content description-modal" onClick={(e) => e.stopPropagation()}>
+                        <div className="modal-header">
+                            <h2>
+                                <FaInfoCircle /> Event Description
+                            </h2>
+                            <button className="btn-close" onClick={closeDescriptionModal}>
+                                <FaTimes />
+                            </button>
+                        </div>
+                        <div className="modal-body">
+                            <h3>{selectedEventForDescription.eventName}</h3>
+                            <div className="full-description">
+                                <p>{selectedEventForDescription.eventDescription}</p>
+                            </div>
                         </div>
                     </div>
                 </div>
