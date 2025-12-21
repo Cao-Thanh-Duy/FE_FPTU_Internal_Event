@@ -271,16 +271,18 @@ const AdminEventPage = () => {
                                             </div>
 
                                             {event.speakerEvent && event.speakerEvent.length > 0 && (
-                                                <div className="event-speakers">
-                                                    <FaMicrophone className="detail-icon" />
-                                                    <span className="speakers-label">Speakers:</span>
-                                                    <div className="speaker-list">
+                                                <div className="info-section">
+                                                    <div className="section-header">
+                                                        <FaMicrophone className="info-icon" />
+                                                        <span className="section-title">Speakers:</span>
+                                                    </div>
+                                                    <div className="section-content">
                                                         {event.speakerEvent.map((speaker, idx) => (
                                                             <div key={idx} className="speaker-item">
+                                                                <FaMicrophone style={{ color: '#f59e0b', fontSize: '0.75rem' }} />
                                                                 <span 
                                                                     className="speaker-name clickable" 
                                                                     onClick={() => openSpeakerModal(speaker)}
-                                                                    style={{ cursor: 'pointer', textDecoration: 'underline', color: '#007bff' }}
                                                                 >
                                                                     {speaker.speakerName}
                                                                 </span>
