@@ -3,7 +3,7 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import "../assets/css/StaffEventPage.css";
 import SidebarStaff from "../components/SidebarStaff";
-import { FaCalendar, FaClock, FaMapMarkerAlt, FaUsers, FaSearch, FaTimes, FaUserFriends, FaSortAmountDown, FaSortAmountUp } from 'react-icons/fa';
+import { FaCalendar, FaClock, FaMapMarkerAlt, FaUsers, FaSearch, FaTimes, FaUserFriends, FaSortAmountDown, FaSortAmountUp, FaInfoCircle } from 'react-icons/fa';
 import { getUserInfo } from "../utils/auth";
 
 const StaffEventPage = () => {
@@ -17,6 +17,8 @@ const StaffEventPage = () => {
     const [loadingAttendees, setLoadingAttendees] = useState(false);
     const [sortOrder, setSortOrder] = useState('asc'); // 'asc' = gần nhất, 'desc' = xa nhất
     const [attendeesFilter, setAttendeesFilter] = useState('Not Used'); // 'Not Used', 'Checked', 'Cancelled'
+    const [showDescriptionModal, setShowDescriptionModal] = useState(false);
+    const [selectedEventForDescription, setSelectedEventForDescription] = useState(null);
     
     // Lấy events từ API
     useEffect(() => {
@@ -136,6 +138,16 @@ const StaffEventPage = () => {
         }
     };
 
+    const handleViewDescription = (event) => {
+        setSelectedEventForDescription(event);
+        setShowDescriptionModal(true);
+    };
+
+    const closeDescriptionModal = () => {
+        setShowDescriptionModal(false);
+        setSelectedEventForDescription(null);
+    };
+
     return (
         <div className="staff-event-page">
             <SidebarStaff />
@@ -207,7 +219,24 @@ const StaffEventPage = () => {
                                         </span>
                                     </div>
                                     
-                                    <p className="event-description">{event.description}</p>
+                                    <div className="event-description-wrapper">
+                                        <p className="event-description">
+                                            {event.description && event.description.length > 80
+                                                ? event.description.substring(0, 80) + '...'
+                                                : event.description}
+                                        </p>
+                                        {event.description && event.description.length > 80 && (
+                                            <button 
+                                                className="btn-view-full-description"
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleViewDescription(event);
+                                                }}
+                                            >
+                                                <FaInfoCircle /> View Full
+                                            </button>
+                                        )}
+                                    </div>
                                     
                                     <div className="event-details">
                                         <div className="detail-item">
@@ -244,6 +273,28 @@ const StaffEventPage = () => {
                     )}
                 </div>
             </div>
+
+            {/* Event Description Modal */}
+            {showDescriptionModal && selectedEventForDescription && (
+                <div className="modal-overlay" onClick={closeDescriptionModal}>
+                    <div className="modal-content description-modal" onClick={(e) => e.stopPropagation()}>
+                        <div className="modal-header">
+                            <h2>
+                                <FaInfoCircle /> Event Description
+                            </h2>
+                            <button className="modal-close" onClick={closeDescriptionModal}>
+                                <FaTimes />
+                            </button>
+                        </div>
+                        <div className="modal-body">
+                            <h3>{selectedEventForDescription.name}</h3>
+                            <div className="full-description">
+                                <p>{selectedEventForDescription.description}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* Attendees Modal */}
             {showAttendeesModal && (
