@@ -22,13 +22,13 @@ const HomePage = () => {
             {/* Hero Section */}
             <section className="hero-section">
                 <div className="hero-content">
-                    <h1>Chào mừng đến với FPTU Internal Event</h1>
-                    <p>Hệ thống đăng ký và quản lý sự kiện nội bộ FPT University</p>
+                    <h1>Welcome to FPTU Internal Event</h1>
+                    <p>Registration and management system for FPT University internal events</p>
                     <div className="hero-buttons">
                         {isLoggedIn && isStaff ? (
                             <>
                                 <button className="btn-qr-scanner" onClick={() => navigate('/staff/qr-scanner')}>
-                                    <FaQrcode className="qr-icon" /> Quét QR Check-in
+                                    <FaQrcode className="qr-icon" /> Scan QR Check-in
                                 </button>
                                 <button className="btn-primary" onClick={() => navigate('/staff/events')}>
                                     Events
@@ -37,23 +37,23 @@ const HomePage = () => {
                         ) : isLoggedIn && isStudent ? (
                             <>
                                 <button className="btn-primary" onClick={() => navigate('/student/events')}>
-                                    Xem sự kiện
+                                    View Events
                                 </button>
                                 <button className="btn-secondary" onClick={() => navigate('/student/my-tickets')}>
-                                    Vé của tôi
+                                    My Tickets
                                 </button>
                             </>
                         ) : isLoggedIn && isOrganizer ? (
                             <button className="btn-primary" onClick={() => navigate('/organizer/events')}>
-                                Quản lý sự kiện
+                                Manage Events
                             </button>
                         ) : isLoggedIn && isAdmin ? (
                             <button className="btn-primary" onClick={() => navigate('/admin/dashboard')}>
-                                Vào trang quản trị
+                                Go to Admin Dashboard
                             </button>
                         ) : (
                             <button className="btn-primary" onClick={() => navigate('/login')}>
-                                Đăng nhập ngay
+                                Login Now
                             </button>
                         )}
                     </div>

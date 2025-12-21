@@ -255,19 +255,20 @@ const AdminEventPage = () => {
                                                     <FaUsers className="detail-icon" />
                                                     <span>Max: {event.maxTickerCount || 0} tickets</span>
                                                 </div>
-                                            </div>
-
-                                            {event.slotEvent && event.slotEvent.length > 0 && (
-                                                <div className="event-slots">
-                                                    <FaClock className="detail-icon" />
-                                                    <span className="slots-label">Slots:</span>
-                                                    <div className="slot-tags">
-                                                        {event.slotEvent.map((slot, idx) => (
-                                                            <span key={idx} className="slot-tag">{slot.slotName} ({slot.startTime}-{slot.endTime})</span>
-                                                        ))}
+                                                {event.slotEvent && event.slotEvent.length > 0 && (
+                                                    <div className="detail-item">
+                                                        <FaClock className="detail-icon" />
+                                                        <span>
+                                                            {event.slotEvent.map((slot, idx) => (
+                                                                <span key={idx}>
+                                                                    {idx > 0 && ', '}
+                                                                    {slot.slotName} ({slot.startTime}-{slot.endTime})
+                                                                </span>
+                                                            ))}
+                                                        </span>
                                                     </div>
-                                                </div>
-                                            )}
+                                                )}
+                                            </div>
 
                                             {event.speakerEvent && event.speakerEvent.length > 0 && (
                                                 <div className="event-speakers">

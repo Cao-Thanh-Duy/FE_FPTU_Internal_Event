@@ -12,20 +12,20 @@ const Footer = () => {
             <h3>FPTU Internal Event</h3>
           </div>
           <p className="footer-description">
-            Hệ thống đăng ký và quản lý sự kiện nội bộ FPT University
+            Registration and management system for FPT University internal events
           </p>
         </div>
 
         <div className="footer-section">
-          <h4>Liên kết nhanh</h4>
+          <h4>Quick Links</h4>
           <ul className="footer-links">
-            <li><a href="#home">Trang chủ</a></li>
+            <li><a href="#home">Home</a></li>
            
           </ul>
         </div>
 
         <div className="footer-section">
-          <h4>Thông tin liên hệ</h4>
+          <h4>Contact Information</h4>
           <ul className="footer-info">
             <li>📧 Email: support@fptu.edu.vn</li>
            
@@ -33,7 +33,7 @@ const Footer = () => {
         </div>
 
         <div className="footer-section">
-          <h4>Theo dõi chúng tôi</h4>
+          <h4>Follow Us</h4>
           <div className="social-links">
             <a href="#" className="social-link">Facebook</a>
             <a href="#" className="social-link">LinkedIn</a>
