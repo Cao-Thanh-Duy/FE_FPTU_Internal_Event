@@ -14,6 +14,9 @@ const OrganizerEventPage = () => {
     const [loadingAttendees, setLoadingAttendees] = useState(false);
     const [showSpeakerModal, setShowSpeakerModal] = useState(false);
     const [selectedSpeaker, setSelectedSpeaker] = useState(null);
+    const [showStaffModal, setShowStaffModal] = useState(false);
+    const [staffData, setStaffData] = useState(null);
+    const [loadingStaff, setLoadingStaff] = useState(false);
     const [showDescriptionModal, setShowDescriptionModal] = useState(false);
     const [selectedEventForDescription, setSelectedEventForDescription] = useState(null);
     const [myEvents, setMyEvents] = useState([]);
@@ -117,6 +120,42 @@ const OrganizerEventPage = () => {
     const closeSpeakerModal = () => {
         setShowSpeakerModal(false);
         setSelectedSpeaker(null);
+    };
+
+    const handleViewStaff = async (event) => {
+        try {
+            setLoadingStaff(true);
+            setShowStaffModal(true);
+            
+            // Lấy danh sách staff từ event.staffEvent
+            const staffList = event.staffEvent || [];
+            
+            setStaffData({
+                eventName: event.eventName,
+                staffList: staffList
+            });
+            
+            if (staffList.length === 0) {
+                toast.info('No staff assigned to this event.', {
+                    position: 'top-right',
+                    autoClose: 2000
+                });
+            } else {
+                toast.success(`Loaded ${staffList.length} staff members`, {
+                    position: 'top-right',
+                    autoClose: 2000
+                });
+            }
+        } catch (error) {
+            console.error('Error loading staff:', error);
+            toast.error('Failed to load staff list.', {
+                position: 'top-right',
+                autoClose: 3000
+            });
+            setShowStaffModal(false);
+        } finally {
+            setLoadingStaff(false);
+        }
     };
 
     const handleViewDescription = (event) => {
@@ -329,6 +368,9 @@ const OrganizerEventPage = () => {
                                             <button className="btn-view-attendees" onClick={() => handleViewAttendees(event.eventId)}>
                                                 <FaUserFriends /> View Attendees ({event.maxTickerCount - (event.currentTickerCount || 0)})
                                             </button>
+                                            <button className="btn-view-staff" onClick={() => handleViewStaff(event)}>
+                                                <FaUsers /> View Staff ({event.staffEvent?.length || 0})
+                                            </button>
                                         </div>
                                     )}
                                 </div>
@@ -498,6 +540,69 @@ const OrganizerEventPage = () => {
                             <div className="full-description">
                                 <p>{selectedEventForDescription.eventDescription}</p>
                             </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Staff Modal */}
+            {showStaffModal && (
+                <div className="modal-overlay" onClick={() => {
+                    setShowStaffModal(false);
+                    setStaffData(null);
+                }}>
+                    <div className="modal-content staff-modal" onClick={(e) => e.stopPropagation()}>
+                        <div className="modal-header">
+                            <h2>
+                                <FaUsers /> Staff List
+                            </h2>
+                            <button className="btn-close" onClick={() => {
+                                setShowStaffModal(false);
+                                setStaffData(null);
+                            }}>
+                                <FaTimes />
+                            </button>
+                        </div>
+                        <div className="modal-body">
+                            {loadingStaff ? (
+                                <div className="loading-staff">
+                                    <p>Loading staff list...</p>
+                                </div>
+                            ) : staffData ? (
+                                <>
+                                    <div className="staff-summary">
+                                        <h3>{staffData.eventName}</h3>
+                                        <p className="total-count">
+                                            Total staff: <strong>{staffData.staffList?.length || 0}</strong>
+                                        </p>
+                                    </div>
+                                    {staffData.staffList && staffData.staffList.length > 0 ? (
+                                        <div className="staff-list">
+                                            {staffData.staffList.map((staff, index) => (
+                                                <div key={staff.userId || index} className="staff-item">
+                                                    <div className="staff-number">{index + 1}</div>
+                                                    <div className="staff-info">
+                                                        <div className="staff-name">{staff.userName}</div>
+                                                        <div className="staff-email">{staff.email || 'No email'}</div>
+                                                        <div className="staff-role">
+                                                            <span className="role-badge">{staff.roleName || 'Staff'}</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    ) : (
+                                        <div className="no-staff">
+                                            <FaInfoCircle style={{ fontSize: '48px', color: '#ccc', marginBottom: '16px' }} />
+                                            <p>No staff assigned to this event yet.</p>
+                                        </div>
+                                    )}
+                                </>
+                            ) : (
+                                <div className="no-data">
+                                    <p>No data available.</p>
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>

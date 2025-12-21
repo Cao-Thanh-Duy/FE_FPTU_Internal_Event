@@ -704,6 +704,7 @@
   padding: 8px 10px;
   border-top: 1px solid #e5e7eb;
   display: flex;
+  gap: 8px;
   justify-content: center;
 }
 
@@ -720,11 +721,33 @@
   font-size: 0.85rem;
   cursor: pointer;
   transition: all 0.3s;
-  width: 100%;
+  flex: 1;
   justify-content: center;
 }
 
 .btn-view-attendees:hover {
+  background-color: #0e7490;
+  transform: translateY(-1px);
+}
+
+.btn-view-staff {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background-color: #0891b2;
+  border: none;
+  border-radius: 6px;
+  color: white;
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.3s;
+  flex: 1;
+  justify-content: center;
+}
+
+.btn-view-staff:hover {
   background-color: #0e7490;
   transform: translateY(-1px);
 }
@@ -1238,4 +1261,137 @@
     width: 100%;
     justify-content: center;
   }
+  
+  .event-card-footer {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .btn-view-attendees,
+  .btn-view-staff {
+    width: 100%;
+  }
+}
+
+/* Staff Modal Styles */
+.staff-modal .modal-body {
+  max-height: 600px;
+  overflow-y: auto;
+}
+
+.staff-summary {
+  text-align: center;
+  margin-bottom: 20px;
+  padding-bottom: 15px;
+  border-bottom: 2px solid #e5e7eb;
+}
+
+.staff-summary h3 {
+  font-size: 1.3rem;
+  color: #1f2937;
+  margin-bottom: 8px;
+}
+
+.staff-summary .total-count {
+  font-size: 0.95rem;
+  color: #6b7280;
+}
+
+.staff-summary .total-count strong {
+  color: #8b5cf6;
+  font-size: 1.1rem;
+}
+
+.staff-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.staff-item {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 12px 15px;
+  background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
+  border-radius: 8px;
+  border-left: 3px solid #8b5cf6;
+  transition: all 0.2s;
+}
+
+.staff-item:hover {
+  background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+  transform: translateX(5px);
+  box-shadow: 0 2px 8px rgba(139, 92, 246, 0.15);
+}
+
+.staff-number {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+  color: white;
+  border-radius: 50%;
+  font-weight: 700;
+  font-size: 0.85rem;
+  flex-shrink: 0;
+}
+
+.staff-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.staff-name {
+  font-weight: 600;
+  color: #1f2937;
+  font-size: 0.95rem;
+}
+
+.staff-email {
+  font-size: 0.8rem;
+  color: #6b7280;
+}
+
+.staff-role {
+  margin-top: 4px;
+}
+
+.role-badge {
+  display: inline-block;
+  padding: 2px 10px;
+  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+  color: white;
+  border-radius: 12px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.no-staff {
+  text-align: center;
+  padding: 40px 20px;
+  color: #9ca3af;
+}
+
+.no-staff p {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.loading-staff {
+  text-align: center;
+  padding: 40px 20px;
+  color: #6b7280;
+}
+
+.loading-staff p {
+  margin: 0;
+  font-size: 1rem;
 }
