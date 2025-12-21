@@ -451,6 +451,11 @@ const OrganizerUpdateEventPage = () => {
         const today = new Date();
         today.setHours(0, 0, 0, 0);
 
+        // Tính ngày giới hạn: hôm nay + 2 ngày = 3 ngày bị disable (21, 22, 23)
+        const minAllowedDate = new Date(today);
+        minAllowedDate.setDate(today.getDate() + 3);
+        minAllowedDate.setHours(0, 0, 0, 0);
+
         for (let day = 1; day <= days; day++) {
             const date = new Date(currentDate.getFullYear(), currentDate.getMonth(), day, 12, 0, 0);
             
@@ -460,9 +465,9 @@ const OrganizerUpdateEventPage = () => {
                              date.getFullYear() === selectedDate.getFullYear();
             const isToday = date.toDateString() === today.toDateString();
             
-            const todayMidnight = new Date(today.getFullYear(), today.getMonth(), today.getDate());
             const dateMidnight = new Date(date.getFullYear(), date.getMonth(), date.getDate());
-            const isPast = dateMidnight < todayMidnight;
+            // Disable nếu ngày < ngày hiện tại + 3 ngày
+            const isPast = dateMidnight < minAllowedDate;
             
             let bookedSlots = [];
             let availableSlots = [];

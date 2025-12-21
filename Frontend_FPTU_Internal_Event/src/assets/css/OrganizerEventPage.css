@@ -877,11 +877,10 @@
 }
 
 .section-content {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
   gap: 8px;
   padding-left: 0;
-  justify-content: center;
 }
 
 .slot-item {
@@ -909,7 +908,7 @@
 }
 
 .speaker-item {
-  display: inline-flex;
+  display: flex;
   align-items: center;
   gap: 8px;
   font-size: 0.8rem;
@@ -919,6 +918,7 @@
   border: 1px solid #fcd34d;
   box-shadow: 0 2px 4px rgba(245, 158, 11, 0.1);
   transition: all 0.2s ease;
+  width: 100%;
 }
 
 .speaker-item:hover {
