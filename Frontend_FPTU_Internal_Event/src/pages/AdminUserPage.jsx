@@ -74,9 +74,20 @@ const AdminUserPage = () => {
             userName: user.userName,
             email: user.email,
             password: '',
-            roleId: user.roleId || ''
+            roleId: getRoleIdFromName(user.roleName)
         });
         setShowModal(true);
+    };
+
+    // Helper function to get roleId from roleName
+    const getRoleIdFromName = (roleName) => {
+        const roleMap = {
+            'Student': '3',
+            'Staff': '2',
+            'Organizer': '4',
+            'Admin': '1'
+        };
+        return roleMap[roleName] || '';
     };
 
     // Handle Delete User
@@ -112,6 +123,16 @@ const AdminUserPage = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         
+        // Validate UserName for special characters
+        const userNameRegex = /^[\p{L}0-9_ ]+$/u;
+        if (!userNameRegex.test(formData.userName)) {
+            toast.error('UserName cannot contain special characters (only letters, numbers, spaces, and underscore allowed)', {
+                position: 'top-right',
+                autoClose: 3000
+            });
+            return;
+        }
+        
         try {
             if (modalMode === 'add') {
                 // Create User API
@@ -136,11 +157,9 @@ const AdminUserPage = () => {
                     throw new Error(response.data.message || 'Failed to create user');
                 }
             } else {
-                // Update User API - all fields can be updated
+                // Update User API - Admin can ONLY update UserName and RoleId
                 const requestData = {
                     userName: formData.userName,
-                    email: formData.email,
-                    password: formData.password,
                     roleId: parseInt(formData.roleId)
                 };
 
@@ -305,7 +324,9 @@ const AdminUserPage = () => {
                                     value={formData.userName}
                                     onChange={(e) => setFormData({...formData, userName: e.target.value})}
                                     required
+                                    placeholder="Only letters, numbers, spaces and underscore"
                                 />
+                                <small style={{color: '#666', fontSize: '12px'}}>No special characters allowed</small>
                             </div>
                             <div className="form-group">
                                 <label>Email *</label>
@@ -314,18 +335,24 @@ const AdminUserPage = () => {
                                     value={formData.email}
                                     onChange={(e) => setFormData({...formData, email: e.target.value})}
                                     required
+                                    disabled={modalMode === 'edit'}
+                                    style={modalMode === 'edit' ? {backgroundColor: '#f5f5f5', cursor: 'not-allowed'} : {}}
                                 />
+                                {modalMode === 'edit' && (
+                                    <small style={{color: '#F36F21', fontSize: '12px'}}>Email cannot be changed</small>
+                                )}
                             </div>
-                            <div className="form-group">
-                                <label>Password *</label>
-                                <input
-                                    type="password"
-                                    value={formData.password}
-                                    onChange={(e) => setFormData({...formData, password: e.target.value})}
-                                    required
-                                    placeholder={modalMode === 'edit' ? 'Enter new password' : ''}
-                                />
-                            </div>
+                            {modalMode === 'add' && (
+                                <div className="form-group">
+                                    <label>Password *</label>
+                                    <input
+                                        type="password"
+                                        value={formData.password}
+                                        onChange={(e) => setFormData({...formData, password: e.target.value})}
+                                        required
+                                    />
+                                </div>
+                            )}
                             <div className="form-group">
                                 <label>Role *</label>
                                 <select
@@ -334,8 +361,8 @@ const AdminUserPage = () => {
                                     required
                                 >
                                     <option value="">Select Role</option>
-                                    <option value="2">Student</option>
-                                    <option value="3">Staff</option>
+                                    <option value="3">Student</option>
+                                    <option value="2">Staff</option>
                                     <option value="4">Organizer</option>
                                 </select>
                             </div>
