@@ -752,6 +752,28 @@
   transform: translateY(-1px);
 }
 
+.btn-view-feedback {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background-color: #10b981;
+  border: none;
+  border-radius: 6px;
+  color: white;
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.3s;
+  flex: 1;
+  justify-content: center;
+}
+
+.btn-view-feedback:hover {
+  background-color: #059669;
+  transform: translateY(-1px);
+}
+
 .event-description-wrapper {
   position: relative;
   margin-bottom: 12px;

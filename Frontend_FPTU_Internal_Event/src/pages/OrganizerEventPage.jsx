@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import SidebarOrganizer from '../components/SidebarOrganizer';
-import { FaPlus, FaTimes, FaCalendarAlt, FaMapMarkerAlt, FaTicketAlt, FaUsers, FaClock, FaMicrophone, FaInfoCircle, FaEdit, FaUserFriends, FaSortAmountDown, FaSortAmountUp, FaSearch } from 'react-icons/fa';
+import { FaPlus, FaTimes, FaCalendarAlt, FaMapMarkerAlt, FaTicketAlt, FaUsers, FaClock, FaMicrophone, FaInfoCircle, FaEdit, FaUserFriends, FaSortAmountDown, FaSortAmountUp, FaSearch, FaComment } from 'react-icons/fa';
 import { toast } from 'react-toastify';
 import { getUserInfo } from '../utils/auth';
 import '../assets/css/OrganizerEventPage.css';
@@ -166,6 +166,10 @@ const OrganizerEventPage = () => {
     const closeDescriptionModal = () => {
         setShowDescriptionModal(false);
         setSelectedEventForDescription(null);
+    };
+
+    const handleViewFeedback = (eventId) => {
+        navigate(`/organizer/event-feedback?eventId=${eventId}`);
     };
 
     return (
@@ -367,6 +371,9 @@ const OrganizerEventPage = () => {
                                         <div className="event-card-footer">
                                             <button className="btn-view-attendees" onClick={() => handleViewAttendees(event.eventId)}>
                                                 <FaUserFriends /> View Attendees ({event.maxTickerCount - (event.currentTickerCount || 0)})
+                                            </button>
+                                            <button className="btn-view-feedback" onClick={() => handleViewFeedback(event.eventId)}>
+                                                <FaComment /> View Feedback
                                             </button>
                                             <button className="btn-view-staff" onClick={() => handleViewStaff(event)}>
                                                 <FaUsers /> View Staff ({event.staffEvent?.length || 0})

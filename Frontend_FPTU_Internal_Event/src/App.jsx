@@ -14,6 +14,8 @@ import OrganizerEventPage from "./pages/OrganizerEventPage";
 import OrganizerCreateEventPage from "./pages/OrganizerCreateEventPage";
 import OrganizerSpeakerPage from "./pages/OrganizerSpeakerPage";
 import OrganizerProfilePage from "./pages/OrganizerProfilePage";
+import OrganizerUpdateEventPage from "./pages/OrganizerUpdateEventPage";
+import OrganizerEventFeedbackPage from "./pages/OrganizerEventFeedbackPage";
 import StaffDashboardPage from "./pages/StaffDashboardPage";
 import StaffEventPage from "./pages/StaffEventPage";
 import StaffProfilePage from "./pages/StaffProfilePage";
@@ -24,7 +26,6 @@ import StudentProfilePage from "./pages/StudentProfilePage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { setupAxiosInterceptors } from './utils/auth';
 import AdminVenuePage from "./pages/AdminVenuePage";
-import OrganizerUpdateEventPage from "./pages/OrganizerUpdateEventPage";
 
 function App() {
   useEffect(() => {
@@ -135,6 +136,15 @@ function App() {
           element={
             <ProtectedRoute allowedRoles={['Organizer']}>
               <OrganizerSpeakerPage />
+            </ProtectedRoute>
+          } 
+        />
+        
+        <Route 
+          path="/organizer/event-feedback" 
+          element={
+            <ProtectedRoute allowedRoles={['Organizer']}>
+              <OrganizerEventFeedbackPage />
             </ProtectedRoute>
           } 
         />
