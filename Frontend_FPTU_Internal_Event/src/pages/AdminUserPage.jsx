@@ -139,14 +139,16 @@ const AdminUserPage = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         
-        // Validate UserName for special characters
-        const userNameRegex = /^[\p{L}0-9_ ]+$/u;
-        if (!userNameRegex.test(formData.userName)) {
-            toast.error('UserName cannot contain special characters (only letters, numbers, spaces, and underscore allowed)', {
-                position: 'top-right',
-                autoClose: 3000
-            });
-            return;
+        // Validate UserName for special characters (only when adding new user)
+        if (modalMode === 'add') {
+            const userNameRegex = /^[\p{L}0-9_ ]+$/u;
+            if (!userNameRegex.test(formData.userName)) {
+                toast.error('UserName cannot contain special characters (only letters, numbers, spaces, and underscore allowed)', {
+                    position: 'top-right',
+                    autoClose: 3000
+                });
+                return;
+            }
         }
         
         try {

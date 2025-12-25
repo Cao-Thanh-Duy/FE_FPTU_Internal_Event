@@ -373,7 +373,7 @@ const StudentEventPage = () => {
                                                     }}
                                                     disabled={availableSeats <= 0}
                                                 >
-                                                    <FaTicketAlt /> {availableSeats > 0 ? 'Book Now' : 'Sold Out'}
+                                                    <FaTicketAlt /> {availableSeats > 0 ? 'Book Now' : 'Full Ticket'}
                                                 </button>
                                             )}
                                         </div>

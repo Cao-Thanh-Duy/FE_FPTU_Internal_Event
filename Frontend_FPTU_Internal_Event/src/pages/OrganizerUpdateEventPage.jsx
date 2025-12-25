@@ -142,9 +142,21 @@ const OrganizerUpdateEventPage = () => {
             console.log('📝 Loaded event data:', eventData);
             setOriginalEvent(eventData);
             
-            // Extract IDs from event relationships
-            const speakerIds = (eventData.speakerEvent?.map(s => Number(s.speakerId)) || []).filter(id => !isNaN(id) && id != null);
+            // Extract Speaker IDs by matching speakerName with speakers list
+            const speakerIds = (eventData.speakerEvent || [])
+                .map(eventSpeaker => {
+                    const matchedSpeaker = speakers.find(s => 
+                        s.speakerName === eventSpeaker.speakerName
+                    );
+                    return matchedSpeaker ? Number(matchedSpeaker.speakerId) : null;
+                })
+                .filter(id => id !== null);
+            
+            // Extract Staff IDs from userId
             const staffIds = (eventData.staffEvent?.map(s => Number(s.staffId || s.userId)) || []).filter(id => !isNaN(id) && id != null);
+            
+            console.log('🎤 Extracted Speaker IDs:', speakerIds);
+            console.log('👥 Extracted Staff IDs:', staffIds);
             
             // Extract slot IDs
             const slotIds = (eventData.slotEvent || []).map(eventSlot => {
@@ -628,6 +640,22 @@ const OrganizerUpdateEventPage = () => {
                     <div className="form-section">
                         <h3 className="section-title"><FaMapMarkerAlt /> Venue & Participants</h3>
                         
+                        {originalEvent && (
+                            <div style={{
+                                backgroundColor: '#e3f2fd',
+                                border: '1px solid #2196F3',
+                                borderRadius: '8px',
+                                padding: '12px 16px',
+                                marginBottom: '20px',
+                                fontSize: '13px',
+                                color: '#0d47a1'
+                            }}>
+                                <strong>Current data:</strong> {originalEvent.venueName} | 
+                                📅 {new Date(originalEvent.eventDay).toLocaleDateString('vi-VN')} | 
+                                🕐 {originalEvent.slotEvent?.map(s => s.slotName).join(', ') || 'No slots'}
+                            </div>
+                        )}
+                        
                         <div className="form-group">
                             <label>Venue *</label>
                             <select
@@ -639,7 +667,7 @@ const OrganizerUpdateEventPage = () => {
                             >
                                 <option value="">Select a Venue</option>
                                 {venues.map(venue => (
-                                    <option key={venue.venueId} value={venue.venueId}>
+                                    <option key={venue.venueId} value={venue.venueId.toString()}>
                                         {venue.venueName} (Capacity: {venue.maxSeat || 0})
                                     </option>
                                 ))}
@@ -661,25 +689,28 @@ const OrganizerUpdateEventPage = () => {
                             <div className="selection-grid">
                                 {speakers.filter(speaker => 
                                     speaker.speakerName.toLowerCase().includes(speakerSearch.toLowerCase())
-                                ).map(speaker => (
-                                    <div 
-                                        key={speaker.speakerId} 
-                                        className={`selection-card ${formData.speakerIds.includes(speaker.speakerId) ? 'selected' : ''}`}
-                                        onClick={() => toggleSelection('speakerIds', speaker.speakerId)}
-                                    >
-                                        <div className="card-content">
-                                            <span className="card-name">{speaker.speakerName}</span>
-                                            <button 
-                                                type="button"
-                                                className="info-btn" 
-                                                onClick={(e) => { e.stopPropagation(); handleShowSpeakerInfo(speaker); }}
-                                                title="View Details"
-                                            >
-                                                <FaInfoCircle />
-                                            </button>
+                                ).map(speaker => {
+                                    const isSelected = formData.speakerIds.includes(Number(speaker.speakerId));
+                                    return (
+                                        <div 
+                                            key={speaker.speakerId} 
+                                            className={`selection-card ${isSelected ? 'selected' : ''}`}
+                                            onClick={() => toggleSelection('speakerIds', speaker.speakerId)}
+                                        >
+                                            <div className="card-content">
+                                                <span className="card-name">{speaker.speakerName}</span>
+                                                <button 
+                                                    type="button"
+                                                    className="info-btn" 
+                                                    onClick={(e) => { e.stopPropagation(); handleShowSpeakerInfo(speaker); }}
+                                                    title="View Details"
+                                                >
+                                                    <FaInfoCircle />
+                                                </button>
+                                            </div>
                                         </div>
-                                    </div>
-                                ))}
+                                    );
+                                })}
                                 {speakers.filter(speaker => 
                                     speaker.speakerName.toLowerCase().includes(speakerSearch.toLowerCase())
                                 ).length === 0 && <div className="text-gray-500 text-sm">No speakers found</div>}
@@ -700,25 +731,28 @@ const OrganizerUpdateEventPage = () => {
                             <div className="selection-grid">
                                 {users.filter(u => u.roleName === 'Staff' && 
                                     u.userName.toLowerCase().includes(staffSearch.toLowerCase())
-                                ).map(user => (
-                                    <div 
-                                        key={user.userId} 
-                                        className={`selection-card ${formData.staffIds.includes(user.userId) ? 'selected' : ''}`}
-                                        onClick={() => toggleSelection('staffIds', user.userId)}
-                                    >
-                                        <div className="card-content">
-                                            <span className="card-name">{user.userName}</span>
-                                            <button 
-                                                type="button"
-                                                className="info-btn" 
-                                                onClick={(e) => { e.stopPropagation(); handleShowStaffInfo(user); }}
-                                                title="View Details"
-                                            >
-                                                <FaInfoCircle />
-                                            </button>
+                                ).map(user => {
+                                    const isSelected = formData.staffIds.includes(Number(user.userId));
+                                    return (
+                                        <div 
+                                            key={user.userId} 
+                                            className={`selection-card ${isSelected ? 'selected' : ''}`}
+                                            onClick={() => toggleSelection('staffIds', user.userId)}
+                                        >
+                                            <div className="card-content">
+                                                <span className="card-name">{user.userName}</span>
+                                                <button 
+                                                    type="button"
+                                                    className="info-btn" 
+                                                    onClick={(e) => { e.stopPropagation(); handleShowStaffInfo(user); }}
+                                                    title="View Details"
+                                                >
+                                                    <FaInfoCircle />
+                                                </button>
+                                            </div>
                                         </div>
-                                    </div>
-                                ))}
+                                    );
+                                })}
                                 {users.filter(u => u.roleName === 'Staff' && 
                                     u.userName.toLowerCase().includes(staffSearch.toLowerCase())
                                 ).length === 0 && <div className="text-gray-500 text-sm">No staff found</div>}
