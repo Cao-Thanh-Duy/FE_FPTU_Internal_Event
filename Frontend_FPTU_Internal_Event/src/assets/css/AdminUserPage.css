@@ -67,6 +67,26 @@
   background-color: #f3f4f6;
 }
 
+.btn-add-email-k19 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 20px;
+  height: 42px;
+  background-color: #F36F21;
+  border: none;
+  border-radius: 8px;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 14px;
+}
+
+.btn-add-email-k19:hover {
+  background-color: #d65a15;
+}
+
 .btn-add-user {
   display: flex;
   align-items: center;

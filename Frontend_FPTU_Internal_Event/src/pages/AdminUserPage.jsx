@@ -12,10 +12,16 @@ const AdminUserPage = () => {
     const [showModal, setShowModal] = useState(false);
     const [modalMode, setModalMode] = useState('add'); // 'add' or 'edit'
     const [selectedUser, setSelectedUser] = useState(null);
+    const [showK19Modal, setShowK19Modal] = useState(false);
     const [formData, setFormData] = useState({
         userName: '',
         email: '',
         password: '',
+        roleId: ''
+    });
+    const [k19FormData, setK19FormData] = useState({
+        userName: '',
+        email: '',
         roleId: ''
     });
 
@@ -64,6 +70,16 @@ const AdminUserPage = () => {
             roleId: ''
         });
         setShowModal(true);
+    };
+
+    // Handle Add Email (K19)
+    const handleAddEmailK19 = () => {
+        setK19FormData({
+            userName: '',
+            email: '',
+            roleId: ''
+        });
+        setShowK19Modal(true);
     };
 
     // Handle Edit User
@@ -206,6 +222,46 @@ const AdminUserPage = () => {
         });
     };
 
+    // Handle K19 Email Submit
+    const handleK19Submit = async (e) => {
+        e.preventDefault();
+        
+        try {
+            const requestData = {
+                userName: k19FormData.userName,
+                email: k19FormData.email,
+                roleId: parseInt(k19FormData.roleId)
+            };
+
+            const response = await axios.post('https://localhost:7047/api/User/add-email-for-k19', requestData);
+            
+            if (response.data.success) {
+                toast.success('Email added successfully! User can now login via Google', {
+                    position: 'top-right',
+                    autoClose: 3000
+                });
+                
+                // Refresh user list
+                await fetchUsers();
+                setShowK19Modal(false);
+                setK19FormData({
+                    userName: '',
+                    email: '',
+                    roleId: ''
+                });
+            } else {
+                throw new Error(response.data.message || 'Failed to add email');
+            }
+        } catch (error) {
+            console.error('Error adding K19 email:', error);
+            const errorMessage = error.response?.data?.message || error.message || 'Failed to add email. Please try again.';
+            toast.error(errorMessage, {
+                position: 'top-right',
+                autoClose: 3000
+            });
+        }
+    };
+
     return (
         <div className="admin-user-page">
             <SidebarAdmin />
@@ -229,6 +285,9 @@ const AdminUserPage = () => {
                         <div className="toolbar-actions">
                             <button className="btn-export" onClick={handleExport}>
                                 <FaFileExport /> Export
+                            </button>
+                            <button className="btn-add-email-k19" onClick={handleAddEmailK19}>
+                                <FaPlus /> Add Email(K19)
                             </button>
                             <button className="btn-add-user" onClick={handleAddUser}>
                                 <FaPlus /> Add user
@@ -306,6 +365,81 @@ const AdminUserPage = () => {
                 </div>
             </div>
 
+            {/* Add Email (K19) Modal */}
+            {showK19Modal && (
+                <div className="modal-overlay" onClick={() => setShowK19Modal(false)}>
+                    <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+                        <div className="modal-header">
+                            <h2>Add Email for K19 </h2>
+                            <button className="btn-close" onClick={() => setShowK19Modal(false)}>
+                                <FaTimes />
+                            </button>
+                        </div>
+                        <div style={{
+                            backgroundColor: '#fff3cd',
+                            border: '1px solid #ffc107',
+                            borderRadius: '8px',
+                            padding: '12px 16px',
+                            marginBottom: '20px',
+                            fontSize: '13px',
+                            color: '#856404'
+                        }}>
+                            <strong>Note: </strong>The username is temporary. When a user logs in via Google for the first time, 
+                            The system will automatically update their real name from their Google account.
+                        </div>
+                        <form onSubmit={handleK19Submit}>
+                            <div className="form-group">
+                                <label>User Name (Temporary) *</label>
+                                <input
+                                    type="text"
+                                    value={k19FormData.userName}
+                                    onChange={(e) => setK19FormData({...k19FormData, userName: e.target.value})}
+                                    required
+                                    placeholder="Enter a temporary name (this will be replaced when you log in)"
+                                />
+                                <small style={{color: '#F36F21', fontSize: '12px', fontWeight: '500'}}>
+                                    ⮕ This name will automatically change to the user's real name from Google when they log in for the first time.
+                                </small>
+                            </div>
+                            <div className="form-group">
+                                <label>Email (FPTU Student Email) *</label>
+                                <input
+                                    type="email"
+                                    value={k19FormData.email}
+                                    onChange={(e) => setK19FormData({...k19FormData, email: e.target.value})}
+                                    required
+                                    placeholder="student@fpt.edu.vn"
+                                />
+                                <small style={{color: '#666', fontSize: '12px'}}>
+                                    Users can only log in using Google OAuth with this email address (no password required).
+                                </small>
+                            </div>
+                            <div className="form-group">
+                                <label>Role *</label>
+                                <select
+                                    value={k19FormData.roleId}
+                                    onChange={(e) => setK19FormData({...k19FormData, roleId: e.target.value})}
+                                    required
+                                >
+                                    <option value="">Select Role</option>
+                                    <option value="2">Student</option>
+                                    <option value="3">Staff</option>
+                                    <option value="4">Organizer</option>
+                                </select>
+                            </div>
+                            <div className="modal-footer">
+                                <button type="button" className="btn-cancel" onClick={() => setShowK19Modal(false)}>
+                                    Cancel
+                                </button>
+                                <button type="submit" className="btn-submit">
+                                    Add Email
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
+
             {/* Add/Edit User Modal */}
             {showModal && (
                 <div className="modal-overlay" onClick={() => setShowModal(false)}>
@@ -324,9 +458,9 @@ const AdminUserPage = () => {
                                     value={formData.userName}
                                     onChange={(e) => setFormData({...formData, userName: e.target.value})}
                                     required
-                                    placeholder="Only letters, numbers, spaces and underscore"
+                                  
                                 />
-                                <small style={{color: '#666', fontSize: '12px'}}>No special characters allowed</small>
+                           
                             </div>
                             <div className="form-group">
                                 <label>Email *</label>
