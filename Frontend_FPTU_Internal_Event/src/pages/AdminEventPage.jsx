@@ -47,7 +47,10 @@ const AdminEventPage = () => {
     const handleApprove = async (eventId) => {
         if (window.confirm('Are you sure you want to approve this event?')) {
             try {
-                const response = await axios.put(`https://localhost:7047/Approve?eventId=${eventId}`);
+                const response = await axios.put(
+                    `https://localhost:7047/api/Event/change-status?eventId=${eventId}`,
+                    { status: 'Approve' }
+                );
                 
                 if (response.data?.success || response.status === 200) {
                     toast.success('Event approved successfully!', {
@@ -70,12 +73,15 @@ const AdminEventPage = () => {
     };
 
     const handleReject = async (eventId) => {
-        if (window.confirm('Are you sure you want to reject this event?')) {
+        if (window.confirm('Are you sure you want to reject this event? All related resources (speakers, slots, staff) will be freed.')) {
             try {
-                const response = await axios.put(`https://localhost:7047/Reject?eventId=${eventId}`);
+                const response = await axios.put(
+                    `https://localhost:7047/api/Event/change-status?eventId=${eventId}`,
+                    { status: 'Reject' }
+                );
                 
                 if (response.data?.success || response.status === 200) {
-                    toast.success('Event rejected successfully!', {
+                    toast.success('Event rejected successfully! All resources have been freed.', {
                         position: 'top-right',
                         autoClose: 2000
                     });
