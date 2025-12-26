@@ -23,6 +23,7 @@ import QRScannerPage from "./pages/QRScannerPage";
 import StudentEventPage from "./pages/StudentEventPage";
 import StudentTicketsPage from "./pages/StudentTicketsPage";
 import StudentProfilePage from "./pages/StudentProfilePage";
+import EventFeedbackPage from "./pages/EventFeedbackPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { setupAxiosInterceptors } from './utils/auth';
 import AdminVenuePage from "./pages/AdminVenuePage";
@@ -208,6 +209,15 @@ function App() {
           element={
             <ProtectedRoute allowedRoles={['Student']}>
               <StudentTicketsPage />
+            </ProtectedRoute>
+          } 
+        />
+        
+        <Route 
+          path="/student/event-feedback/:eventId" 
+          element={
+            <ProtectedRoute allowedRoles={['Student']}>
+              <EventFeedbackPage />
             </ProtectedRoute>
           } 
         />

@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import "../assets/css/StudentTicketsPage.css";
 import SidebarStudent from "../components/SidebarStudent";
-import { FaCalendar, FaClock, FaMapMarkerAlt, FaQrcode, FaDownload, FaTimes, FaTicketAlt, FaCheckCircle, FaStar, FaComment } from 'react-icons/fa';
+import { FaCalendar, FaClock, FaMapMarkerAlt, FaQrcode, FaDownload, FaTimes, FaTicketAlt, FaCheckCircle, FaComment } from 'react-icons/fa';
 import { toast } from 'react-toastify';
 import axios from 'axios';
 
 const StudentTicketsPage = () => {
+    const navigate = useNavigate();
     const [selectedTicket, setSelectedTicket] = useState(null);
     const [showQRModal, setShowQRModal] = useState(false);
     const [myTickets, setMyTickets] = useState([]);
@@ -13,17 +15,26 @@ const StudentTicketsPage = () => {
     const [qrCode, setQrCode] = useState("");
     const [showCheckedModal, setShowCheckedModal] = useState(false);
     const [showCancelledModal, setShowCancelledModal] = useState(false);
-    const [showFeedbackModal, setShowFeedbackModal] = useState(false);
-    const [feedbackTicket, setFeedbackTicket] = useState(null);
-    const [feedbackRating, setFeedbackRating] = useState(0);
-    const [feedbackComment, setFeedbackComment] = useState("");
-    const [hoverRating, setHoverRating] = useState(0);
-    const [submittingFeedback, setSubmittingFeedback] = useState(false);
+    const [events, setEvents] = useState([]);
 
     // Fetch tickets from API
     useEffect(() => {
         fetchTickets();
+        fetchEvents();
     }, []);
+
+    const fetchEvents = async () => {
+        try {
+            const response = await axios.get('https://localhost:7047/api/Event');
+            
+            if (response.data.success) {
+                setEvents(response.data.data);
+                console.log('Events:', response.data.data);
+            }
+        } catch (error) {
+            console.error('Error fetching events:', error);
+        }
+    };
 
     const fetchTickets = async () => {
         try {
@@ -114,50 +125,15 @@ const StudentTicketsPage = () => {
     };
 
     const handleOpenFeedback = (ticket) => {
-        setFeedbackTicket(ticket);
-        setFeedbackRating(0);
-        setFeedbackComment("");
-        setShowFeedbackModal(true);
-    };
-
-    const handleSubmitFeedback = async () => {
-        if (feedbackRating === 0) {
-            toast.error('Please select a rating');
-            return;
-        }
-
-        if (!feedbackComment.trim()) {
-            toast.error('Please write a comment');
-            return;
-        }
-
-        try {
-            setSubmittingFeedback(true);
-            const response = await axios.post('https://localhost:7047/api/Feedback', {
-                ticketId: feedbackTicket.ticketId,
-                rating: feedbackRating,
-                comment: feedbackComment.trim()
+        // Find event by eventName to get eventId
+        const event = events.find(e => e.eventName === ticket.eventName);
+        
+        if (event) {
+            navigate(`/student/event-feedback/${event.eventId}`, {
+                state: { ticketId: ticket.ticketId, ticketCode: ticket.ticketCode }
             });
-
-            if (response.data.success) {
-                toast.success('Feedback submitted successfully!', {
-                    position: "top-right",
-                    autoClose: 2000,
-                });
-                setShowFeedbackModal(false);
-                setFeedbackTicket(null);
-                setFeedbackRating(0);
-                setFeedbackComment("");
-                // Refresh tickets to update feedback status
-                fetchTickets();
-            } else {
-                toast.error(response.data.message || 'Unable to submit feedback');
-            }
-        } catch (error) {
-            console.error('Error submitting feedback:', error);
-            toast.error(error.response?.data?.message || 'An error occurred while submitting feedback');
-        } finally {
-            setSubmittingFeedback(false);
+        } else {
+            toast.error('Unable to find event information');
         }
     };
 
@@ -595,79 +571,6 @@ const StudentTicketsPage = () => {
                                 onClick={() => setShowCancelledModal(false)}
                             >
                                 Close
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
-
-            {/* Feedback Modal */}
-            {showFeedbackModal && feedbackTicket && (
-                <div className="modal-overlay" onClick={() => setShowFeedbackModal(false)}>
-                    <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-                        <div className="modal-header">
-                            <h2>
-                                <FaComment /> Event Feedback
-                            </h2>
-                        </div>
-                        
-                        <div className="modal-body">
-                            <div className="feedback-container">
-                                <div className="feedback-event-info">
-                                    <h3>{feedbackTicket.eventName}</h3>
-                                    <p className="feedback-ticket-code">Ticket: {feedbackTicket.ticketCode || feedbackTicket.ticketId}</p>
-                                </div>
-
-                                <div className="feedback-rating-section">
-                                    <label className="feedback-label">Rating *</label>
-                                    <div className="star-rating">
-                                        {[1, 2, 3, 4, 5].map((star) => (
-                                            <FaStar
-                                                key={star}
-                                                className={`star ${star <= (hoverRating || feedbackRating) ? 'star-filled' : 'star-empty'}`}
-                                                onClick={() => setFeedbackRating(star)}
-                                                onMouseEnter={() => setHoverRating(star)}
-                                                onMouseLeave={() => setHoverRating(0)}
-                                            />
-                                        ))}
-                                    </div>
-                                    <p className="rating-text">
-                                        {feedbackRating === 0 ? 'Select a rating' : 
-                                         feedbackRating === 1 ? 'Poor' :
-                                         feedbackRating === 2 ? 'Fair' :
-                                         feedbackRating === 3 ? 'Good' :
-                                         feedbackRating === 4 ? 'Very Good' : 'Excellent'}
-                                    </p>
-                                </div>
-
-                                <div className="feedback-comment-section">
-                                    <label className="feedback-label">Your Feedback *</label>
-                                    <textarea
-                                        className="feedback-textarea"
-                                        placeholder="Share your experience with this event..."
-                                        value={feedbackComment}
-                                        onChange={(e) => setFeedbackComment(e.target.value)}
-                                        rows={5}
-                                    />
-                                    <p className="char-count">{feedbackComment.length} characters</p>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div className="modal-footer">
-                            <button 
-                                className="btn-submit-feedback" 
-                                onClick={handleSubmitFeedback}
-                                disabled={submittingFeedback}
-                            >
-                                {submittingFeedback ? 'Submitting...' : 'Submit Feedback'}
-                            </button>
-                            <button 
-                                className="btn-close-modal" 
-                                onClick={() => setShowFeedbackModal(false)}
-                                disabled={submittingFeedback}
-                            >
-                                Cancel
                             </button>
                         </div>
                     </div>
