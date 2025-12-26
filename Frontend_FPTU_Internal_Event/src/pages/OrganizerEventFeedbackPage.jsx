@@ -157,12 +157,14 @@ const OrganizerEventFeedbackPage = () => {
                                                 <span className="count-label">{item.count}</span>
                                             </div>
                                             <div className="rating-bar-container">
-                                                <div 
-                                                    className={`rating-bar rating-bar-${item.stars}`}
-                                                    style={{ 
-                                                        width: `${getStarPercentage(item.count, feedbackData.totalFeedbacks)}%` 
-                                                    }}
-                                                />
+                                                <div className="rating-bar">
+                                                    <div 
+                                                        className={`rating-bar-fill rating-bar-${item.stars}`}
+                                                        style={{ 
+                                                            width: `${getStarPercentage(item.count, feedbackData.totalFeedbacks)}%` 
+                                                        }}
+                                                    />
+                                                </div>
                                             </div>
                                             <span className="percentage-label">
                                                 {getStarPercentage(item.count, feedbackData.totalFeedbacks)}%

@@ -77,7 +77,7 @@ const SidebarStudent = () => {
 
                 {/* User Info */}
                 <div className="user-info">
-                    <FaUser className="user-icon" />
+                    {/* <FaUser className="user-icon" /> */}
                     <div className="user-details">
                         <div className="user-name">{userInfo.userName || 'Student'}</div>
                         <div className="user-role">{userInfo.roleName || 'Student'}</div>

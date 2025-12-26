@@ -77,7 +77,7 @@ const SidebarOrganizer = () => {
 
                 {/* User Info */}
                 <div className="user-info">
-                    <FaUser className="user-icon" />
+                    {/* <FaUser className="user-icon" /> */}
                     <span className="user-name">{userInfo.userName}</span>
                     <span className="user-role">({userInfo.roleName})</span>
                 </div>

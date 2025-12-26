@@ -83,7 +83,7 @@ const SidebarStaff = () => {
 
                 {/* User Info */}
                 <div className="user-info">
-                    <FaUser className="user-icon" />
+                    {/* <FaUser className="user-icon" /> */}
                     <div>
                         <div className="user-name">{userInfo.userName}</div>
                         <div className="user-role">{userInfo.roleName}</div>
