@@ -98,8 +98,8 @@ const AdminUserPage = () => {
     // Helper function to get roleId from roleName
     const getRoleIdFromName = (roleName) => {
         const roleMap = {
-            'Student': '3',
-            'Staff': '2',
+            'Student': '2',
+            'Staff': '3',
             'Organizer': '4',
             'Admin': '1'
         };
@@ -497,8 +497,8 @@ const AdminUserPage = () => {
                                     required
                                 >
                                     <option value="">Select Role</option>
-                                    <option value="3">Student</option>
-                                    <option value="2">Staff</option>
+                                    <option value="2">Student</option>
+                                    <option value="3">Staff</option>
                                     <option value="4">Organizer</option>
                                 </select>
                             </div>
